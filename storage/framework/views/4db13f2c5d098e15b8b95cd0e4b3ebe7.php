@@ -19,7 +19,8 @@
                                         <img src="/images/vacayguider.png" height="50" alt="logo light">
                                     </a>
                                 </div>
-                                
+                                <h4 class="fw-bold text-dark mb-2">ADMIN PORTAL</h3>
+                                    
                             </div>
                             <form method="POST" action="<?php echo e(route('login.post')); ?>" class="mt-4">
                                 <?php echo csrf_field(); ?>

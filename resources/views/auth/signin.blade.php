@@ -21,8 +21,8 @@
                                         <img src="/images/vacayguider.png" height="50" alt="logo light">
                                     </a>
                                 </div>
-                                {{-- <h4 class="fw-bold text-dark mb-2">Welcome Back!</h3>
-                                    <p class="text-muted">Login in to your account to continue</p> --}}
+                                <h4 class="fw-bold text-dark mb-2">ADMIN PORTAL</h3>
+                                    {{-- <p class="text-muted">Login in to your account to continue</p> --}}
                             </div>
                             <form method="POST" action="{{ route('login.post') }}" class="mt-4">
                                 @csrf
