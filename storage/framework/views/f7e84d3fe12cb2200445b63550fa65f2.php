@@ -20,6 +20,7 @@
 
             
 
+            
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#sidebarAdmin" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarAdmin">
@@ -41,6 +42,8 @@
                     </ul>
                 </div>
             </li>
+
+            
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#sidebarCustomer" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarCustomer">
@@ -64,15 +67,42 @@
             </li>
 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="<?php echo e(route('admin.profile.edit')); ?>">
-                         <span class="nav-icon">
-                              <iconify-icon icon="solar:widget-2-outline"></iconify-icon>
-                         </span>
-                         <span class="nav-text"> Profile </span>
-                         
-                    </a>
-               </li>
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#sidebarAddDeatails" data-bs-toggle="collapse" role="button"
+                    aria-expanded="false" aria-controls="sidebarAddDeatails">
+                    <span class="nav-icon">
+                        <iconify-icon icon="solar:user-circle-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Add Details</span>
+                </a>
+                <div class="collapse" id="sidebarAddDeatails">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="<?php echo e(route('admin.destinations.create')); ?>">Tour Destination</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="<?php echo e(route('admin.destination-highlights.index')); ?>">Tour Hilights</a>
+                        </li>
+
+                         <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="<?php echo e(route('admin.hotels.index')); ?>">Hotels</a>
+                        </li>
+
+
+                    </ul>
+                </div>
+            </li>
+
+
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo e(route('admin.profile.edit')); ?>">
+                    <span class="nav-icon">
+                        <iconify-icon icon="solar:widget-2-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Profile </span>
+
+                </a>
+            </li>
 
             
         </ul>

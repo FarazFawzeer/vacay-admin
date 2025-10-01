@@ -6,6 +6,9 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DestinationController;
+use App\Http\Controllers\DestinationHighlightController;
+use App\Http\Controllers\HotelController;
 
 require __DIR__ . '/auth.php';
 
@@ -19,6 +22,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('customers/create', [CustomerController::class, 'create'])->name('customers.create');
     Route::post('customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy'); // Delete customer
+
+    //destination
+    Route::resource('destinations', DestinationController::class);
+
+    //destination highlights
+    Route::resource('destination-highlights', DestinationHighlightController::class)->only([
+        'index',
+        'store',
+        'update',
+        'destroy'
+    ]);
+
+    //hotels
+    Route::resource('hotels', HotelController::class);
 
     //profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
