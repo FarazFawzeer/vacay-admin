@@ -29,11 +29,20 @@ class DestinationController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'program_points' => 'nullable|array',
-            'program_points.*' => 'nullable|string|max:500',
-        ]);
+         $validated = $request->validate([
+        'heading' => 'required|string|max:255',
+        'tour_ref_no' => 'required|string|max:255',
+        'itineraries' => 'nullable|array',
+        'itineraries.*.day' => 'nullable|integer',
+        'itineraries.*.place_id' => 'nullable|integer',
+        'itineraries.*.description' => 'nullable|string',
+        'itineraries.*.pictures' => 'nullable|file|image',
+        'itineraries.*.program_points' => 'nullable|array',
+        'itineraries.*.highlights' => 'nullable|array',
+        'itineraries.*.highlights.*.highlight_places' => 'nullable|string|max:255',
+        'itineraries.*.highlights.*.description' => 'nullable|string|max:1000',
+        'itineraries.*.highlights.*.images' => 'nullable|file|image',
+    ]);
 
         // Convert ["aaa","bbb"] → [{"point":"aaa"},{"point":"bbb"}]
         $programPoints = collect($validated['program_points'] ?? [])
@@ -108,5 +117,16 @@ class DestinationController extends Controller
                 'message' => 'Failed to delete destination. ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+
+    public function getDetails($id)
+    {
+        $destination = Destination::findOrFail($id);
+
+        return response()->json([
+            'program_points' => $destination->program_points,
+            'highlights' => $destination->highlights()->get(['id', 'place_name', 'description', 'image']),
+        ]);
     }
 }

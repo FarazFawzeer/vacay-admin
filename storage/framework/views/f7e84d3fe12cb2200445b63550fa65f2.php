@@ -66,7 +66,7 @@
                 </div>
             </li>
 
-
+            
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#sidebarAddDeatails" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarAddDeatails">
@@ -81,10 +81,11 @@
                             <a class="sub-nav-link" href="<?php echo e(route('admin.destinations.create')); ?>">Tour Destination</a>
                         </li>
                         <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="<?php echo e(route('admin.destination-highlights.index')); ?>">Tour Hilights</a>
+                            <a class="sub-nav-link" href="<?php echo e(route('admin.destination-highlights.index')); ?>">Tour
+                                Hilights</a>
                         </li>
 
-                         <li class="sub-nav-item">
+                        <li class="sub-nav-item">
                             <a class="sub-nav-link" href="<?php echo e(route('admin.hotels.index')); ?>">Hotels</a>
                         </li>
 
@@ -93,6 +94,26 @@
                 </div>
             </li>
 
+            
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#sidebarTourPackage" data-bs-toggle="collapse" role="button"
+                    aria-expanded="false" aria-controls="sidebarTourPackage">
+                    <span class="nav-icon">
+                        <iconify-icon icon="solar:user-circle-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Tour Package</span>
+                </a>
+                <div class="collapse" id="sidebarTourPackage">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="<?php echo e(route('admin.packages.create')); ?>">Create Tour</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="<?php echo e(route('admin.packages.index')); ?>">View Tour</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
 
             <li class="nav-item">
                 <a class="nav-link" href="<?php echo e(route('admin.profile.edit')); ?>">

@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DestinationHighlightController;
 use App\Http\Controllers\HotelController;
+use App\Http\Controllers\PackageController;
 
 require __DIR__ . '/auth.php';
 
@@ -26,6 +27,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     //destination
     Route::resource('destinations', DestinationController::class);
 
+    //tour packages
+      Route::get('/packages/create', [PackageController::class, 'create'])->name('packages.create');
+    Route::post('packages/store', [PackageController::class, 'store'])
+    ->name('packages.store');
+     Route::get('packages', [PackageController::class, 'index'])->name('packages.index');
+    Route::get('packages/{package}/edit', [PackageController::class, 'edit'])->name('packages.edit');
+    Route::put('packages/{package}', [PackageController::class, 'update'])->name('packages.update');
+
     //destination highlights
     Route::resource('destination-highlights', DestinationHighlightController::class)->only([
         'index',
@@ -36,6 +45,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //hotels
     Route::resource('hotels', HotelController::class);
+
+    Route::get('/destinations/{id}/details', [DestinationController::class, 'getDetails']);
+
 
     //profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
