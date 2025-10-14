@@ -40,5 +40,15 @@ class Package extends Model
         return $this->hasMany(DetailItinerary::class);
     }
 
+    public function itineraries()
+{
+    return $this->detailItineraries();
+}
+
+public function summaries()
+{
+    return $this->tourSummaries();
+}
+
     
 }

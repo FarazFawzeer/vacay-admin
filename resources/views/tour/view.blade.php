@@ -3,6 +3,14 @@
 @section('content')
     @include('layouts.partials.page-title', ['title' => 'Tour Packages', 'subtitle' => 'View'])
 
+        <style>
+        .btn-equal {
+            width: 80px;
+            /* or any fixed width you want */
+            text-align: center;
+        }
+    </style>
+
     <div class="card">
         <div class="card-header">
             <h5 class="card-title">Tour Package List</h5>

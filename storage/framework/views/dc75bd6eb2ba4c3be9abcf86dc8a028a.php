@@ -26,8 +26,8 @@
                 <td><?php echo e($package->price ?? '-'); ?></td>
                 <td><?php echo e($package->status ?? '-'); ?></td>
                 <td>
-                    <a href="<?php echo e(route('admin.packages.edit', $package->id)); ?>" class="btn btn-sm btn-primary">Edit</a>
-                    <button type="button" data-id="<?php echo e($package->id); ?>" class="btn btn-sm btn-danger delete-package">Delete</button>
+                    <a href="<?php echo e(route('admin.packages.edit', $package->id)); ?>" class="btn btn-sm btn-equal btn-primary">Edit</a>
+                    <button type="button" data-id="<?php echo e($package->id); ?>" class="btn btn-sm btn-danger btn-equal delete-package">Delete</button>
                 </td>
             </tr>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>

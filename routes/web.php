@@ -28,12 +28,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('destinations', DestinationController::class);
 
     //tour packages
-      Route::get('/packages/create', [PackageController::class, 'create'])->name('packages.create');
+    Route::get('/packages/create', [PackageController::class, 'create'])->name('packages.create');
     Route::post('packages/store', [PackageController::class, 'store'])
-    ->name('packages.store');
-     Route::get('packages', [PackageController::class, 'index'])->name('packages.index');
-    Route::get('packages/{package}/edit', [PackageController::class, 'edit'])->name('packages.edit');
-    Route::put('packages/{package}', [PackageController::class, 'update'])->name('packages.update');
+        ->name('packages.store');
+    Route::get('packages', [PackageController::class, 'index'])->name('packages.index');
+    Route::get('packages/{id}/edit', [PackageController::class, 'edit'])->name('packages.edit');
+    Route::put('packages/{id}/update', [PackageController::class, 'update'])->name('packages.update');
 
     //destination highlights
     Route::resource('destination-highlights', DestinationHighlightController::class)->only([

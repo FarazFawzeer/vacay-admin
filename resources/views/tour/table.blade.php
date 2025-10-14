@@ -26,8 +26,8 @@
                 <td>{{ $package->price ?? '-' }}</td>
                 <td>{{ $package->status ?? '-' }}</td>
                 <td>
-                    <a href="{{ route('admin.packages.edit', $package->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                    <button type="button" data-id="{{ $package->id }}" class="btn btn-sm btn-danger delete-package">Delete</button>
+                    <a href="{{ route('admin.packages.edit', $package->id) }}" class="btn btn-sm btn-equal btn-primary">Edit</a>
+                    <button type="button" data-id="{{ $package->id }}" class="btn btn-sm btn-danger btn-equal delete-package">Delete</button>
                 </td>
             </tr>
         @empty
