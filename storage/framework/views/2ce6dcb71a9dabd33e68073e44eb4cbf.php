@@ -3,6 +3,14 @@
 <?php $__env->startSection('content'); ?>
     <?php echo $__env->make('layouts.partials.page-title', ['title' => 'Tour Packages', 'subtitle' => 'View'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
+        <style>
+        .btn-equal {
+            width: 80px;
+            /* or any fixed width you want */
+            text-align: center;
+        }
+    </style>
+
     <div class="card">
         <div class="card-header">
             <h5 class="card-title">Tour Package List</h5>

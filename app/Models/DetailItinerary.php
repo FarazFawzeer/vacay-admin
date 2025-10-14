@@ -22,6 +22,8 @@ class DetailItinerary extends Model
         'map_image'
     ];
 
+    
+
    
 
     public function package()

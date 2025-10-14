@@ -209,6 +209,9 @@
                     const highlightWrapper = document.getElementById("highlightWrapper" + index);
                     highlightWrapper.innerHTML = `<label><strong>Highlights</strong></label>`;
 
+                     const fetchedHighlightsCount = data.highlights ? data.highlights.length : 0;
+            highlightCounters[index] = fetchedHighlightsCount;
+
                     if (data.highlights && data.highlights.length > 0) {
                         data.highlights.forEach((h, i) => {
                             const hid = `highlight-${index}-${i}`;
@@ -224,7 +227,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                         <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                             <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>
@@ -258,8 +261,8 @@
                 <div class="row mb-2 align-items-center" id="${id}">
                     <div class="col-md-3">
                         <select name="tour_summaries[${summaryIndex}][city]" class="form-select">
+                               <option value="" disabled selected>Select Place</option>
                             @foreach ($destinations as $d)
-                             <option value="">-- Select Destination --</option>
                                 <option value="{{ $d->name }}">{{ $d->name }}</option>
                             @endforeach
                         </select>
