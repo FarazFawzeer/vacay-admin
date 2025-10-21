@@ -25,10 +25,42 @@
                 <td><?php echo e($package->days ?? 0); ?> / <?php echo e($package->nights ?? 0); ?></td>
                 <td><?php echo e($package->price ?? '-'); ?></td>
                 <td><?php echo e($package->status ?? '-'); ?></td>
-                <td>
-                    <a href="<?php echo e(route('admin.packages.edit', $package->id)); ?>" class="btn btn-sm btn-equal btn-primary">Edit</a>
-                    <button type="button" data-id="<?php echo e($package->id); ?>" class="btn btn-sm btn-danger btn-equal delete-package">Delete</button>
+                <td class="text-center">
+
+                    
+                    <a href="<?php echo e(route('admin.packages.show', $package->id)); ?>" class="icon-btn text-info"
+                        title="View Package">
+                        <i class="bi bi-eye-fill fs-5"></i>
+                    </a>
+
+                    
+                    <a href="<?php echo e(route('admin.packages.edit', $package->id)); ?>" class="icon-btn text-primary"
+                        title="Edit Package">
+                        <i class="bi bi-pencil-square fs-5"></i>
+                    </a>
+
+                    
+                    <button type="button" data-id="<?php echo e($package->id); ?>"
+                        class="icon-btn <?php echo e($package->status ? 'text-success' : 'text-warning'); ?> toggle-status"
+                        data-status="<?php echo e($package->status); ?>"
+                        title="<?php echo e($package->status ? 'Change to Not Published' : 'Change to Published'); ?>">
+                        <?php if($package->status): ?>
+                            <i class="bi bi-check-circle-fill fs-5"></i>
+                        <?php else: ?>
+                            <i class="bi bi-slash-circle fs-5"></i>
+                        <?php endif; ?>
+                    </button>
+
+                    
+                    <button type="button" data-id="<?php echo e($package->id); ?>" class="icon-btn text-danger delete-package"
+                        title="Delete Package">
+                        <i class="bi bi-trash-fill fs-5"></i>
+                    </button>
+
                 </td>
+
+
+
             </tr>
         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
             <tr>

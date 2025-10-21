@@ -35,5 +35,11 @@ class DetailItinerary extends Model
     {
         return $this->hasMany(Highlight::class, 'itinerary_id', 'id');
     }
+
+
+    public function destination()
+{
+    return $this->belongsTo(Destination::class, 'place_id');
+}
     
 }

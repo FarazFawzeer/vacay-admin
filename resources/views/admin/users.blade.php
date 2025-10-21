@@ -39,11 +39,13 @@
                                     <td>{{ ucfirst($user->type) }}</td>
                                     <td>{{ $user->updated_at->format('d M Y, h:i A') }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-danger btn-sm w-100 delete-user"
+                                        <button type="button"
+                                            class="btn btn-sm p-0 text-danger border-0 bg-transparent delete-user"
                                             data-id="{{ $user->id }}">
-                                            Delete
+                                            <i class="fas fa-trash-alt fa-lg"></i>
                                         </button>
                                     </td>
+
                                 </tr>
                             @empty
                                 <tr>

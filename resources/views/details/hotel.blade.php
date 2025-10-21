@@ -11,13 +11,28 @@
             width: 80px;
             text-align: center;
         }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            margin: 0 3px;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.2);
+            opacity: 0.85;
+            text-decoration: none;
+        }
     </style>
 
     <div class="card-t">
 
         {{-- Toggle Form --}}
         <div class="mb-4">
-            <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="card-body d-flex justify-content-end align-items-center">
                 <button type="button" id="toggleCreateForm" class="btn btn-primary">+ Add Hotel</button>
             </div>
         </div>
@@ -98,19 +113,24 @@
                                         @endif
                                     </td>
                                     <td>{{ $hotel->updated_at->format('d M Y, h:i A') }}</td>
-                                    <td>
-                                        <div class="d-flex gap-1">
-                                            <button type="button" class="btn btn-info btn-sm btn-equal edit-hotel"
-                                                data-id="{{ $hotel->id }}" data-name="{{ $hotel->hotel_name }}"
-                                                data-star="{{ $hotel->star }}" data-status="{{ $hotel->status }}">
-                                                Edit
-                                            </button>
-                                            <button type="button" class="btn btn-danger btn-sm btn-equal delete-hotel"
-                                                data-id="{{ $hotel->id }}">
-                                                Delete
-                                            </button>
-                                        </div>
+                                    <td >
+
+                                        {{-- Edit Hotel --}}
+                                        <button type="button" class="icon-btn text-primary edit-hotel"
+                                            data-id="{{ $hotel->id }}" data-name="{{ $hotel->hotel_name }}"
+                                            data-star="{{ $hotel->star }}" data-status="{{ $hotel->status }}"
+                                            title="Edit Hotel">
+                                            <i class="bi bi-pencil-square fs-5"></i>
+                                        </button>
+
+                                        {{-- Delete Hotel --}}
+                                        <button type="button" class="icon-btn text-danger delete-hotel"
+                                            data-id="{{ $hotel->id }}" title="Delete Hotel">
+                                            <i class="bi bi-trash-fill fs-5"></i>
+                                        </button>
+
                                     </td>
+
                                 </tr>
                             @empty
                                 <tr>
@@ -210,7 +230,7 @@
                         if (data.success) {
                             messageBox.innerHTML =
                                 `<div class="alert alert-success">${data.message}</div>`;
-                                form.reset();
+                            form.reset();
                             setTimeout(() => location.reload(), 1000);
                         } else {
                             let errors = data.errors ? Object.values(data.errors).flat().join('<br>') :

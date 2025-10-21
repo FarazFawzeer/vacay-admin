@@ -12,12 +12,28 @@
             /* or any fixed width you want */
             text-align: center;
         }
+
+        
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            margin: 0 3px;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.2);
+            opacity: 0.85;
+            text-decoration: none;
+        }
     </style>
 
     <div class="card-t">
 
         <div class="mb-4">
-            <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="card-body d-flex justify-content-end align-items-center">
                 <button type="button" id="toggleCreateForm" class="btn btn-primary">+ Add Highlight</button>
             </div>
         </div>
@@ -107,23 +123,29 @@
                                         <?php endif; ?>
                                     </td>
                                     <td><?php echo e($highlight->updated_at->format('d M Y, h:i A')); ?></td>
-                                    <td>
-                                        <div class="d-flex gap-1">
-                                            <button type="button" class="btn btn-info btn-sm btn-equal edit-highlight"
-                                                data-id="<?php echo e($highlight->id); ?>"
-                                                data-destination="<?php echo e($highlight->destination_id); ?>"
-                                                data-place="<?php echo e($highlight->place_name); ?>"
-                                                data-description="<?php echo e($highlight->description); ?>">
-                                                Edit
-                                            </button>
+                                   <td class="text-center">
 
-                                            <button type="button" class="btn btn-danger btn-sm btn-equal delete-highlight"
-                                                data-id="<?php echo e($highlight->id); ?>">
-                                                Delete
-                                            </button>
-                                        </div>
+    
+    <button type="button"
+        class="icon-btn text-primary edit-highlight"
+        data-id="<?php echo e($highlight->id); ?>"
+        data-destination="<?php echo e($highlight->destination_id); ?>"
+        data-place="<?php echo e($highlight->place_name); ?>"
+        data-description="<?php echo e($highlight->description); ?>"
+        title="Edit Highlight">
+        <i class="bi bi-pencil-square fs-5"></i>
+    </button>
 
-                                    </td>
+    
+    <button type="button"
+        class="icon-btn text-danger delete-highlight"
+        data-id="<?php echo e($highlight->id); ?>"
+        title="Delete Highlight">
+        <i class="bi bi-trash-fill fs-5"></i>
+    </button>
+
+</td>
+
                                 </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>

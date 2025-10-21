@@ -81,7 +81,7 @@
                 <a class="nav-link menu-arrow" href="#sidebarAddDeatails" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarAddDeatails">
                     <span class="nav-icon">
-                           <iconify-icon icon="solar:share-circle-outline"></iconify-icon>
+                        <iconify-icon icon="solar:share-circle-outline"></iconify-icon>
                     </span>
                     <span class="nav-text"> Add Details</span>
                 </a>
@@ -99,6 +99,10 @@
                             <a class="sub-nav-link" href="{{ route('admin.hotels.index') }}">Hotels</a>
                         </li>
 
+
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.vehicles.index') }}">Vehicles</a>
+                        </li>
 
                     </ul>
                 </div>

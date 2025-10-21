@@ -185,12 +185,16 @@
                                             <option value="">-- Select Destination --</option>
                                             @foreach ($destinations as $d)
                                                 <option value="{{ $d->id }}"
-                                                    {{ $itinerary->place_id == $d->id ? 'selected' : '' }}>
+                                                    {{ trim(strtolower($itinerary->place_name)) == trim(strtolower($d->name)) ? 'selected' : '' }}>
                                                     {{ $d->name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
+
+                                    <input type="hidden" name="itineraries[{{ $i }}][existing_image]"
+                                        value="{{ $itinerary->pictures }}">
+
 
                                     <div class="col-md-2">
                                         <label>Day</label>
@@ -304,6 +308,10 @@
                                                     <img src="{{ asset('storage/' . $highlight->images) }}"
                                                         width="80" class="mt-2 rounded">
                                                 @endif
+
+                                                <input type="hidden"
+                                                    name="itineraries[{{ $i }}][highlights][{{ $hIndex }}][existing_image]"
+                                                    value="{{ $highlight->images }}">
                                             </div>
                                             <div class="col-md-1 d-flex align-items-center">
                                                 <button type="button" class="btn btn-sm btn-danger"
@@ -320,6 +328,75 @@
                     </div>
                 </div>
 
+                <div class="card my-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Vehicle Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="vehicleSelect" class="form-label">Select Vehicle</label>
+                                <select id="vehicleSelect" name="vehicle_id" class="form-select"
+                                    onchange="populateVehicleDetails()">
+                                    <option value="">-- Select Vehicle --</option>
+                                    @foreach ($vehicles as $vehicle)
+                                        <option value="{{ $vehicle->id }}"
+                                            @if (isset($packageVehicle) && $packageVehicle->make === $vehicle->make && $packageVehicle->model === $vehicle->model) selected @endif>
+                                            {{ $vehicle->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- The vehicle details section will initially be hidden, but visible if a vehicle is pre-selected by JS --}}
+                        <div id="vehicleDetails" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Make</label>
+                                    <input type="text" id="vehicleMake" name="vehicle_make" class="form-control"
+                                        readonly>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Model</label>
+                                    <input type="text" id="vehicleModel" name="vehicle_model" class="form-control"
+                                        readonly>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Seats</label>
+                                    <input type="text" id="vehicleSeats" name="vehicle_seats" class="form-control"
+                                        readonly>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Air Conditioned</label>
+                                    <input type="text" id="vehicleAirConditioned" name="vehicle_air_conditioned"
+                                        class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Condition</label>
+                                    <input type="text" id="vehicleCondition" name="vehicle_condition"
+                                        class="form-control" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Vehicle Image</label>
+                                    <div>
+                                        <img id="vehicleImage" src="" alt="Vehicle Image"
+                                            class="img-fluid rounded border" style="max-height: 200px; display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-success">Update Package</button>
@@ -330,6 +407,56 @@
 
     {{-- Scripts --}}
     <script>
+        // 1. JSON-encode the list of all available vehicles
+        const vehicles = @json($vehicles);
+
+        function populateVehicleDetails() {
+            const select = document.getElementById('vehicleSelect');
+            const vehicleId = select.value;
+            // Find the selected vehicle object in the JSON array
+            const vehicle = vehicles.find(v => v.id == vehicleId);
+
+            const detailsDiv = document.getElementById('vehicleDetails');
+            const imageElement = document.getElementById('vehicleImage');
+
+            if (vehicle) {
+                // Populate all the read-only input fields
+                document.getElementById('vehicleMake').value = vehicle.make ?? '';
+                document.getElementById('vehicleModel').value = vehicle.model ?? '';
+                document.getElementById('vehicleSeats').value = vehicle.seats ?? '';
+
+                // Convert boolean/integer to 'Yes' or 'No'
+                document.getElementById('vehicleAirConditioned').value = vehicle.air_conditioned ? 'Yes' : 'No';
+
+                document.getElementById('vehicleCondition').value = vehicle.condition ?? '';
+
+                // Handle image display
+                if (vehicle.vehicle_image) {
+                    // IMPORTANT: Ensure the path `/storage/` is correct for your file system setup
+                    imageElement.src = `/storage/${vehicle.vehicle_image}`;
+                    imageElement.style.display = 'block';
+                } else {
+                    imageElement.src = '';
+                    imageElement.style.display = 'none';
+                }
+
+                // Show the details section
+                detailsDiv.style.display = 'block';
+            } else {
+                // Hide the details section if no vehicle is selected
+                detailsDiv.style.display = 'none';
+            }
+        }
+
+        // 2. Call the function on page load to display details of the pre-selected vehicle
+        document.addEventListener('DOMContentLoaded', function() {
+            const select = document.getElementById('vehicleSelect');
+            // If the select box has a value (meaning the Blade logic pre-selected one)
+            if (select.value) {
+                populateVehicleDetails();
+            }
+        });
+
         // ======= HOTEL LIST (from backend) =======
         const hotels = @json(
             $hotels->map(fn($h) => [
@@ -403,7 +530,7 @@
 
                         data.highlights.forEach((h) => {
                             const hid =
-                            `highlight-${index}-${highlightCounter}`; // Use the counter for a unique ID and correct array index
+                                `highlight-${index}-${highlightCounter}`; // Use the counter for a unique ID and correct array index
 
                             fetchedHighlightsHtml += `
                     <div class="row mb-2 border p-2 rounded align-items-center bg-light" id="${hid}">
@@ -417,9 +544,9 @@
                         </div>
                         <div class="col-md-3">
                             ${h.image ? `
-                                    <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
-                                    <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
-                                ` : ''}
+                                                                    <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
+                                                                    <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
+                                                                ` : ''}
                             <input type="file" 
                                 name="itineraries[${index}][highlights][${highlightCounter}][images]" 
                                 class="form-control">
