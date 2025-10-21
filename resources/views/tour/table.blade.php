@@ -25,10 +25,42 @@
                 <td>{{ $package->days ?? 0 }} / {{ $package->nights ?? 0 }}</td>
                 <td>{{ $package->price ?? '-' }}</td>
                 <td>{{ $package->status ?? '-' }}</td>
-                <td>
-                    <a href="{{ route('admin.packages.edit', $package->id) }}" class="btn btn-sm btn-equal btn-primary">Edit</a>
-                    <button type="button" data-id="{{ $package->id }}" class="btn btn-sm btn-danger btn-equal delete-package">Delete</button>
+                <td class="text-center">
+
+                    {{-- View Button --}}
+                    <a href="{{ route('admin.packages.show', $package->id) }}" class="icon-btn text-info"
+                        title="View Package">
+                        <i class="bi bi-eye-fill fs-5"></i>
+                    </a>
+
+                    {{-- Edit Button --}}
+                    <a href="{{ route('admin.packages.edit', $package->id) }}" class="icon-btn text-primary"
+                        title="Edit Package">
+                        <i class="bi bi-pencil-square fs-5"></i>
+                    </a>
+
+                    {{-- Toggle Status Button --}}
+                    <button type="button" data-id="{{ $package->id }}"
+                        class="icon-btn {{ $package->status ? 'text-success' : 'text-warning' }} toggle-status"
+                        data-status="{{ $package->status }}"
+                        title="{{ $package->status ? 'Change to Not Published' : 'Change to Published' }}">
+                        @if ($package->status)
+                            <i class="bi bi-check-circle-fill fs-5"></i>
+                        @else
+                            <i class="bi bi-slash-circle fs-5"></i>
+                        @endif
+                    </button>
+
+                    {{-- Delete Button --}}
+                    <button type="button" data-id="{{ $package->id }}" class="icon-btn text-danger delete-package"
+                        title="Delete Package">
+                        <i class="bi bi-trash-fill fs-5"></i>
+                    </button>
+
                 </td>
+
+
+
             </tr>
         @empty
             <tr>

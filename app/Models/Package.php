@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+
 class Package extends Model
 {
     use HasFactory;
@@ -18,7 +19,7 @@ class Package extends Model
         'picture',
         'summary_description',
         'country_name',
-        'place',    
+        'place',
         'type',
         'tour_category',
         'price',
@@ -41,14 +42,29 @@ class Package extends Model
     }
 
     public function itineraries()
+    {
+        return $this->detailItineraries();
+    }
+
+    public function summaries()
+    {
+        return $this->tourSummaries();
+    }
+
+
+// App/Models/Package.php
+
+public function packageVehicle()
 {
-    return $this->detailItineraries();
+    return $this->belongsTo(VehicleDetail::class, 'vehicle_id'); 
+    // Assuming 'vehicle_id' is stored in packages table
 }
 
-public function summaries()
+public function vehicles()
 {
-    return $this->tourSummaries();
+    return $this->belongsToMany(VehicleDetail::class, 'package_vehicles', 'package_id', 'id');
 }
 
-    
+
+
 }

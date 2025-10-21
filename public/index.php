@@ -4,6 +4,11 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+register_shutdown_function(function () {
+    $duration = microtime(true) - LARAVEL_START;
+    file_put_contents(storage_path('logs/load_time.log'), "Request took {$duration} seconds\n", FILE_APPEND);
+});
+
 // Determine if the application is in maintenance mode...
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
     require $maintenance;

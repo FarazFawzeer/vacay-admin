@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DestinationController;
 use App\Http\Controllers\DestinationHighlightController;
 use App\Http\Controllers\HotelController;
+use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\PackageController;
 
 require __DIR__ . '/auth.php';
@@ -35,6 +36,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('packages/{id}/edit', [PackageController::class, 'edit'])->name('packages.edit');
     Route::put('packages/{id}/update', [PackageController::class, 'update'])->name('packages.update');
 
+    Route::post('packages/status/{package}', [PackageController::class, 'toggleStatus'])->name('admin.packages.toggleStatus');
+    Route::get('packages/{id}', [PackageController::class, 'show'])->name('packages.show');
+Route::get('/package/{id}/pdf', [PackageController::class, 'downloadPackagePdf'])->name('package.pdf');
+
+
+
     //destination highlights
     Route::resource('destination-highlights', DestinationHighlightController::class)->only([
         'index',
@@ -45,6 +52,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //hotels
     Route::resource('hotels', HotelController::class);
+
+    Route::resource('vehicles', VehicleController::class);
+    Route::patch('vehicles/{vehicle}/toggle-status', [VehicleController::class, 'toggleStatus']);
+
 
     Route::get('/destinations/{id}/details', [DestinationController::class, 'getDetails']);
 

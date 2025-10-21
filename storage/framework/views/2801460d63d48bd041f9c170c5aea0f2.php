@@ -151,6 +151,70 @@
                     <div class="card-body" id="itineraryWrapper"></div>
                 </div>
 
+                <div class="card my-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Vehicle Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="vehicleSelect" class="form-label">Select Vehicle</label>
+                                <select id="vehicleSelect" name="vehicle_id" class="form-select"
+                                    onchange="populateVehicleDetails()">
+                                    <option value="">-- Select Vehicle --</option>
+                                    <?php $__currentLoopData = $vehicles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehicle): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($vehicle->id); ?>"><?php echo e($vehicle->name); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="vehicleDetails" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Make</label>
+                                    <input type="text" id="vehicleMake" name="vehicle_make" class="form-control"
+                                        readonly>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Model</label>
+                                    <input type="text" id="vehicleModel" name="vehicle_model" class="form-control"
+                                        readonly>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Seats</label>
+                                    <input type="text" id="vehicleSeats" name="vehicle_seats" class="form-control"
+                                        readonly>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Air Conditioned</label>
+                                    <input type="text" id="vehicleAirConditioned" name="vehicle_air_conditioned"
+                                        class="form-control" readonly>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Condition</label>
+                                    <input type="text" id="vehicleCondition" name="vehicle_condition"
+                                        class="form-control" readonly>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Vehicle Image</label>
+                                    <div>
+                                        <img id="vehicleImage" src="" alt="Vehicle Image"
+                                            class="img-fluid rounded border" style="max-height: 200px; display: none;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
                 
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-success">Create Package</button>
@@ -169,6 +233,37 @@
 
 
     <script>
+        const vehicles = <?php echo json_encode($vehicles, 15, 512) ?>;
+
+        function populateVehicleDetails() {
+            const select = document.getElementById('vehicleSelect');
+            const vehicleId = select.value;
+            const vehicle = vehicles.find(v => v.id == vehicleId);
+
+            const detailsDiv = document.getElementById('vehicleDetails');
+            const imageElement = document.getElementById('vehicleImage');
+
+            if (vehicle) {
+                document.getElementById('vehicleMake').value = vehicle.make ?? '';
+                document.getElementById('vehicleModel').value = vehicle.model ?? '';
+                document.getElementById('vehicleSeats').value = vehicle.seats ?? '';
+                document.getElementById('vehicleAirConditioned').value = vehicle.air_conditioned ? 'Yes' : 'No';
+                document.getElementById('vehicleCondition').value = vehicle.condition ?? '';
+
+                // Show image
+                if (vehicle.vehicle_image) {
+                    imageElement.src = `/storage/${vehicle.vehicle_image}`;
+                    imageElement.style.display = 'block';
+                } else {
+                    imageElement.style.display = 'none';
+                }
+
+                detailsDiv.style.display = 'block';
+            } else {
+                detailsDiv.style.display = 'none';
+            }
+        }
+
         function fetchProgramPoints(select, index) {
             const destinationId = select.value;
             if (!destinationId) return;
@@ -209,8 +304,8 @@
                     const highlightWrapper = document.getElementById("highlightWrapper" + index);
                     highlightWrapper.innerHTML = `<label><strong>Highlights</strong></label>`;
 
-                     const fetchedHighlightsCount = data.highlights ? data.highlights.length : 0;
-            highlightCounters[index] = fetchedHighlightsCount;
+                    const fetchedHighlightsCount = data.highlights ? data.highlights.length : 0;
+                    highlightCounters[index] = fetchedHighlightsCount;
 
                     if (data.highlights && data.highlights.length > 0) {
                         data.highlights.forEach((h, i) => {
@@ -227,7 +322,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                             <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                                     <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>

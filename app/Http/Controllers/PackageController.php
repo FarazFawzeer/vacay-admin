@@ -14,6 +14,14 @@ use App\Models\DetailItinerary;
 use App\Models\Highlight;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Models\VehicleDetail;
+use App\Models\PackageVehicle;
+use Spatie\LaravelPdf\Facades\Pdf; // 👈 Make sure to use the Spatie facade
+use Spatie\LaravelPdf\Enums\Format;
+use Spatie\Browsershot\Browsershot;
+use Illuminate\Support\Facades\View; // Need to import View
+use Illuminate\Support\Facades\File;
+
 
 class PackageController extends Controller
 {
@@ -29,8 +37,11 @@ class PackageController extends Controller
             $query->where('tour_category', $request->category);
         }
         if ($request->status) {
-            $query->where('status', $request->status);
+            // Map "active" => 1, "inactive" => 0
+            $status = $request->status === 'active' ? 1 : 0;
+            $query->where('status', $status);
         }
+
 
         $packages = $query->paginate(10)->appends($request->all()); // ✅ keep filters with pagination
 
@@ -50,8 +61,9 @@ class PackageController extends Controller
     {
         $destinations = Destination::all();  // for dropdowns
         $hotels = Hotel::all();
+        $vehicles = VehicleDetail::where('status', 1)->get(['id', 'name', 'make', 'model', 'seats', 'air_conditioned', 'condition', 'vehicle_image']);
 
-        return view('tour.create', compact('destinations', 'hotels'));
+        return view('tour.create', compact('destinations', 'hotels', 'vehicles'));
     }
 
     public function store(Request $request)
@@ -70,8 +82,8 @@ class PackageController extends Controller
             'ratings' => 'nullable|numeric|min:0|max:5',
             'price' => 'nullable|numeric',
             'status' => 'nullable',
-            'main_picture' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif|max:2048',
-            'map_image' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif|max:2048',
+            'main_picture' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
+            'map_image' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
         ]);
 
         // === Upload images if present ===
@@ -225,6 +237,29 @@ class PackageController extends Controller
             }
         }
 
+
+        // === Vehicle Details ===
+        if ($request->vehicle_id) {
+            $vehicle = VehicleDetail::find($request->vehicle_id);
+
+            if ($vehicle) {
+                PackageVehicle::create([
+                    'package_id'           => $package->id,
+                    'name'                 => $vehicle->name ?? null,
+                    'make'                 => $vehicle->make ?? null,
+                    'model'                => $vehicle->model ?? null,
+                    'condition'            => $vehicle->condition ?? null,
+                    'seats'                => $vehicle->seats ?? null,
+                    'max_seating_capacity' => $vehicle->max_seating_capacity ?? null,
+                    'luggage_space'        => $vehicle->luggage_space ?? null,
+                    'air_conditioned'      => $vehicle->air_conditioned ?? 0,
+                    'availability'         => $vehicle->availability ?? 1,
+                    'vehicle_image'        => $vehicle->vehicle_image ?? null,
+                ]);
+            }
+        }
+
+
         return redirect()->back()->with('success', 'Tour Package created successfully!');
     }
 
@@ -232,163 +267,317 @@ class PackageController extends Controller
     // For AJAX edit
     public function edit($id)
     {
-        $package = Package::with(['tourSummaries', 'detailItineraries.highlights'])->findOrFail($id);
+        $package = Package::with(['tourSummaries', 'itineraries.highlights', 'packageVehicle'])->findOrFail($id);
 
         $destinations = Destination::all();
         $hotels = Hotel::all();
 
-        return view('tour.edit', compact('package', 'destinations', 'hotels'));
+
+        $packageVehicle = PackageVehicle::where('package_id', $package->id)->first();
+
+        $vehicles = VehicleDetail::where('status', 1)
+            ->get(['id', 'name', 'make', 'model', 'seats', 'air_conditioned', 'condition', 'vehicle_image']);
+
+        $selectedVehicleId = $package->packageVehicle->vehicle_id ?? null;
+
+        return view('tour.edit', compact('package', 'destinations', 'hotels', 'vehicles', 'packageVehicle'));
     }
 
     // For update
- public function update(Request $request, $id)
-{
-    $request->validate([
-        'heading' => 'required|string|max:255',
-        'tour_ref_no' => 'required|string|max:100',
-        'description' => 'nullable|string',
-        'summary_description' => 'nullable|string',
-        'country' => 'nullable|string|max:255',
-        'place' => 'nullable|string|max:255',
-        'type' => 'nullable|string|max:50',
-        'category' => 'nullable|string|max:50',
-        'days' => 'nullable|integer',
-        'nights' => 'nullable|integer',
-        'ratings' => 'nullable|numeric|min:0|max:5',
-        'price' => 'nullable|numeric',
-        'status' => 'nullable',
-        'main_picture' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif|max:2048',
-        'map_image' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif|max:2048',
-    ]);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'heading' => 'required|string|max:255',
+            'tour_ref_no' => 'required|string|max:100',
+            'description' => 'nullable|string',
+            'summary_description' => 'nullable|string',
+            'country' => 'nullable|string|max:255',
+            'place' => 'nullable|string|max:255',
+            'type' => 'nullable|string|max:50',
+            'category' => 'nullable|string|max:50',
+            'days' => 'nullable|integer',
+            'nights' => 'nullable|integer',
+            'ratings' => 'nullable|numeric|min:0|max:5',
+            'price' => 'nullable|numeric',
+            'status' => 'nullable',
+            'main_picture' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
+            'map_image' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
+        ]);
 
-    $package = Package::findOrFail($id);
+        $package = Package::findOrFail($id);
 
-    // === Handle main_picture update ===
-    if ($request->hasFile('main_picture')) {
-        $file = $request->file('main_picture');
-        $typeFolder = $request->type ?? 'general';
-        $filename = Str::slug($request->place ?? 'image') . Str::random(5) . '.' . $file->getClientOriginalExtension();
-        $mainPicturePath = $file->storeAs($typeFolder, $filename, 'public');
-    } else {
-        $mainPicturePath = $package->picture; // keep old
-    }
-
-    // === Handle map_image update ===
-    if ($request->hasFile('map_image')) {
-        $file = $request->file('map_image');
-        $typeFolder = $request->type ?? 'general';
-        $placeFolder = $request->place ? Str::slug($request->place) : 'unknown';
-        $filename = $placeFolder . '-map.' . $file->getClientOriginalExtension();
-        $mapImagePath = $file->storeAs($typeFolder, $filename, 'public');
-    } else {
-        $mapImagePath = $package->map_image; // keep old
-    }
-
-    // === Update package ===
-    $package->update([
-        'heading' => $request->heading,
-        'tour_ref_no' => $request->tour_ref_no,
-        'description' => $request->description,
-        'summary_description' => $request->summary_description,
-        'country_name' => $request->country,
-        'place' => $request->place,
-        'type' => $request->type,
-        'tour_category' => $request->category,
-        'days' => $request->days,
-        'nights' => $request->nights,
-        'ratings' => $request->ratings,
-        'price' => $request->price,
-        'status' => $request->status,
-        'picture' => $mainPicturePath,
-        'map_image' => $mapImagePath,
-    ]);
-
-    // === Update Tour Summaries ===
-    if ($request->tour_summaries) {
-        // Optional: delete old summaries first if full replace
-        TourSummary::where('package_id', $package->id)->delete();
-
-        foreach ($request->tour_summaries as $summary) {
-            TourSummary::create([
-                'package_id' => $package->id,
-                'city' => $summary['city'] ?? null,
-                'theme' => $summary['theme'] ?? null,
-                'day' => $summary['day'] ?? null,
-                'key_attributes' => isset($summary['key_attributes']) ? json_encode($summary['key_attributes']) : null,
-                'images' => isset($summary['images']) ? json_encode($summary['images']) : null,
-            ]);
+        // === Handle main_picture update ===
+        if ($request->hasFile('main_picture')) {
+            $file = $request->file('main_picture');
+            $typeFolder = $request->type ?? 'general';
+            $filename = Str::slug($request->place ?? 'image') . Str::random(5) . '.' . $file->getClientOriginalExtension();
+            $mainPicturePath = $file->storeAs($typeFolder, $filename, 'public');
+        } else {
+            $mainPicturePath = $package->picture; // keep old
         }
-    }
 
-    // === Update Itineraries ===
-    if ($request->itineraries) {
-        // Optional: delete old itineraries and highlights before re-inserting
-        $oldItineraries = DetailItinerary::where('package_id', $package->id)->get();
-        foreach ($oldItineraries as $old) {
-            Highlight::where('itinerary_id', $old->id)->delete();
+        // === Handle map_image update ===
+        if ($request->hasFile('map_image')) {
+            $file = $request->file('map_image');
+            $typeFolder = $request->type ?? 'general';
+            $placeFolder = $request->place ? Str::slug($request->place) : 'unknown';
+            $filename = $placeFolder . '-map.' . $file->getClientOriginalExtension();
+            $mapImagePath = $file->storeAs($typeFolder, $filename, 'public');
+        } else {
+            $mapImagePath = $package->map_image; // keep old
         }
-        DetailItinerary::where('package_id', $package->id)->delete();
 
-        foreach ($request->itineraries as $itinerary) {
-            $destinationName = null;
-            if (!empty($itinerary['place_id'])) {
-                $destination = Destination::find($itinerary['place_id']);
-                $destinationName = $destination ? $destination->name : null;
+        // === Update package ===
+        $package->update([
+            'heading' => $request->heading,
+            'tour_ref_no' => $request->tour_ref_no,
+            'description' => $request->description,
+            'summary_description' => $request->summary_description,
+            'country_name' => $request->country,
+            'place' => $request->place,
+            'type' => $request->type,
+            'tour_category' => $request->category,
+            'days' => $request->days,
+            'nights' => $request->nights,
+            'ratings' => $request->ratings,
+            'price' => $request->price,
+            'status' => $request->status,
+            'picture' => $mainPicturePath,
+            'map_image' => $mapImagePath,
+        ]);
+
+        // === Update Tour Summaries ===
+        if ($request->tour_summaries) {
+            // Optional: delete old summaries first if full replace
+            TourSummary::where('package_id', $package->id)->delete();
+
+            foreach ($request->tour_summaries as $summary) {
+                TourSummary::create([
+                    'package_id' => $package->id,
+                    'city' => $summary['city'] ?? null,
+                    'theme' => $summary['theme'] ?? null,
+                    'day' => $summary['day'] ?? null,
+                    'key_attributes' => isset($summary['key_attributes']) ? json_encode($summary['key_attributes']) : null,
+                    'images' => isset($summary['images']) ? json_encode($summary['images']) : null,
+                ]);
             }
+        }
 
-            // Upload itinerary picture
-            $picturePath = null;
-            if (isset($itinerary['pictures']) && $itinerary['pictures'] instanceof \Illuminate\Http\UploadedFile) {
-                $file = $itinerary['pictures'];
-                $typeFolder = $request->type ?? 'general';
-                $placeFolder = $destinationName ? Str::slug($destinationName) : 'unknown';
-                $filename = $placeFolder . '-itinerary-' . Str::random(4) . '.' . $file->getClientOriginalExtension();
-                $picturePath = $file->storeAs("$typeFolder/detail-itineraries", $filename, 'public');
+        // === Update Itineraries ===
+        if ($request->itineraries) {
+            // Optional: delete old itineraries and highlights before re-inserting
+            $oldItineraries = DetailItinerary::where('package_id', $package->id)->get();
+            foreach ($oldItineraries as $old) {
+                Highlight::where('itinerary_id', $old->id)->delete();
             }
+            DetailItinerary::where('package_id', $package->id)->delete();
 
-            $programPoints = isset($itinerary['program_points'])
-                ? json_encode($itinerary['program_points'])
-                : json_encode([]);
+            foreach ($request->itineraries as $itinerary) {
+                $destinationName = null;
+                if (!empty($itinerary['place_id'])) {
+                    $destination = Destination::find($itinerary['place_id']);
+                    $destinationName = $destination ? $destination->name : null;
+                }
 
-            $detail = DetailItinerary::create([
-                'package_id' => $package->id,
-                'place_name' => $destinationName,
-                'day' => $itinerary['day'] ?? null,
-                'pictures' => $picturePath,
-                'description' => $itinerary['description'] ?? null,
-                'program_points' => $programPoints,
-                'overnight_stay' => $itinerary['overnight_stay'] ?? null,
-                'meal_plan' => $itinerary['meal_plan'] ?? null,
-                'approximate_travel_time' => $itinerary['approximate_travel_time'] ?? null,
-            ]);
+                // Upload itinerary picture
+                $picturePath = null;
+                $picturePath = $itinerary['existing_image'] ?? null;
+                if (isset($itinerary['pictures']) && $itinerary['pictures'] instanceof \Illuminate\Http\UploadedFile) {
+                    $file = $itinerary['pictures'];
+                    $typeFolder = $request->type ?? 'general';
+                    $placeFolder = $destinationName ? Str::slug($destinationName) : 'unknown';
+                    $filename = $placeFolder . '-itinerary-' . Str::random(4) . '.' . $file->getClientOriginalExtension();
+                    $picturePath = $file->storeAs("$typeFolder/detail-itineraries", $filename, 'public');
+                }
 
-            // === Update Highlights ===
-            if (!empty($itinerary['highlights'])) {
-                $basePath = "destination_highlights";
+                $programPoints = isset($itinerary['program_points'])
+                    ? json_encode($itinerary['program_points'])
+                    : json_encode([]);
 
-                foreach ($itinerary['highlights'] as $highlight) {
-                    $imagePath = null;
+                $detail = DetailItinerary::create([
+                    'package_id' => $package->id,
+                    'place_name' => $destinationName,
+                    'day' => $itinerary['day'] ?? null,
+                    'pictures' => $picturePath,
+                    'description' => $itinerary['description'] ?? null,
+                    'program_points' => $programPoints,
+                    'overnight_stay' => $itinerary['overnight_stay'] ?? null,
+                    'meal_plan' => $itinerary['meal_plan'] ?? null,
+                    'approximate_travel_time' => $itinerary['approximate_travel_time'] ?? null,
+                ]);
 
-                    if (isset($highlight['images']) && $highlight['images'] instanceof \Illuminate\Http\UploadedFile) {
-                        $file = $highlight['images'];
-                        $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
-                        $imagePath = $file->storeAs($basePath, $filename, 'public');
-                    } elseif (isset($highlight['images']) && is_string($highlight['images'])) {
-                        $imagePath = $highlight['images'];
+                // === Update Highlights ===
+                if (!empty($itinerary['highlights'])) {
+                    $basePath = "destination_highlights";
+
+                    foreach ($itinerary['highlights'] as $highlight) {
+                        $imagePath = $highlight['existing_image'] ?? null;
+
+                        if (isset($highlight['images']) && $highlight['images'] instanceof \Illuminate\Http\UploadedFile) {
+                            $file = $highlight['images'];
+                            $filename = Str::random(40) . '.' . $file->getClientOriginalExtension();
+                            $imagePath = $file->storeAs($basePath, $filename, 'public');
+                        }
+
+                        Highlight::create([
+                            'itinerary_id' => $detail->id,
+                            'highlight_places' => $highlight['highlight_places'] ?? null,
+                            'description' => $highlight['description'] ?? null,
+                            'images' => $imagePath,
+                        ]);
                     }
+                }
+            }
+        }
 
-                    Highlight::create([
-                        'itinerary_id' => $detail->id,
-                        'highlight_places' => $highlight['highlight_places'] ?? null,
-                        'description' => $highlight['description'] ?? null,
-                        'images' => $imagePath,
+        // === Update Vehicle Details ===
+        if ($request->vehicle_id) {
+            $vehicle = VehicleDetail::find($request->vehicle_id);
+
+            if ($vehicle) {
+                // Check if package already has a vehicle record
+                $packageVehicle = PackageVehicle::where('package_id', $package->id)->first();
+
+                if ($packageVehicle) {
+                    // Update existing record
+                    $packageVehicle->update([
+                        'name'                 => $vehicle->name ?? null,
+                        'make'                 => $vehicle->make ?? null,
+                        'model'                => $vehicle->model ?? null,
+                        'condition'            => $vehicle->condition ?? null,
+                        'seats'                => $vehicle->seats ?? null,
+                        'max_seating_capacity' => $vehicle->max_seating_capacity ?? null,
+                        'luggage_space'        => $vehicle->luggage_space ?? null,
+                        'air_conditioned'      => $vehicle->air_conditioned ?? 0,
+                        'availability'         => $vehicle->availability ?? 1,
+                        'vehicle_image'        => $vehicle->vehicle_image ?? null,
+                    ]);
+                } else {
+                    // No vehicle record yet, create a new one
+                    PackageVehicle::create([
+                        'package_id'           => $package->id,
+                        'name'                 => $vehicle->name ?? null,
+                        'make'                 => $vehicle->make ?? null,
+                        'model'                => $vehicle->model ?? null,
+                        'condition'            => $vehicle->condition ?? null,
+                        'seats'                => $vehicle->seats ?? null,
+                        'max_seating_capacity' => $vehicle->max_seating_capacity ?? null,
+                        'luggage_space'        => $vehicle->luggage_space ?? null,
+                        'air_conditioned'      => $vehicle->air_conditioned ?? 0,
+                        'availability'         => $vehicle->availability ?? 1,
+                        'vehicle_image'        => $vehicle->vehicle_image ?? null,
                     ]);
                 }
             }
         }
+
+
+        return redirect()->back()->with('success', 'Tour Package updated successfully!');
     }
 
-    return redirect()->back()->with('success', 'Tour Package updated successfully!');
+    public function toggleStatus(Request $request, Package $package)
+    {
+        $request->validate([
+            'status' => 'required|boolean',
+        ]);
+
+        $package->status = $request->status;
+        $package->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $request->status ? 'Package published' : 'Package unpublished'
+        ]);
+    }
+
+
+    public function show($id)
+    {
+        $package = Package::with([
+            'tourSummaries',
+            'detailItineraries.highlights'
+        ])->findOrFail($id);
+
+
+        $tourSummaries = $package->tourSummaries->map(function ($summary) {
+            if (is_string($summary->images)) {
+                $summary->images = json_decode($summary->images, true) ?? [];
+            }
+
+            if (is_string($summary->key_attributes)) {
+                $summary->key_attributes = json_decode($summary->key_attributes, true) ?? [];
+            }
+
+            return $summary;
+        });
+
+
+        // Decode program_points in itineraries
+        $package->detailItineraries->map(function ($itinerary) {
+            // Decode itinerary program points
+            if (is_string($itinerary->program_points) && str_starts_with($itinerary->program_points, '[')) {
+                $itinerary->program_points = json_decode($itinerary->program_points, true) ?? [];
+            }
+
+            // Decode highlight images
+            $itinerary->highlights->map(function ($highlight) {
+                if (is_string($highlight->images) && str_starts_with($highlight->images, '[')) {
+                    $highlight->images = json_decode($highlight->images, true) ?? [];
+                }
+                return $highlight;
+            });
+
+            return $itinerary;
+        });
+
+
+        return view('tour.show', compact('package', 'tourSummaries'));
+    }
+
+public function downloadPackagePdf($id)
+{
+    $package = Package::with(['detailItineraries.highlights'])->findOrFail($id);
+    $tourSummaries = TourSummary::where('package_id', $id)->get();
+
+    // 🔹 Decode itinerary program_points and highlight images
+    $package->detailItineraries->map(function ($itinerary) {
+        if (is_string($itinerary->program_points) && str_starts_with($itinerary->program_points, '[')) {
+            $itinerary->program_points = json_decode($itinerary->program_points, true) ?? [];
+        }
+
+        $itinerary->highlights->map(function ($highlight) {
+            if (is_string($highlight->images) && str_starts_with($highlight->images, '[')) {
+                $highlight->images = json_decode($highlight->images, true) ?? [];
+            }
+            return $highlight;
+        });
+
+        return $itinerary;
+    });
+
+    // 🔹 Render Blade to HTML
+    $htmlContent = View::make('tour.pdf.package', [
+        'package' => $package,
+        'tourSummaries' => $tourSummaries,
+        'slot' => '',
+    ])->render();
+
+    // 🔹 Generate PDF in-memory
+    $pdfBinary = Browsershot::html($htmlContent)
+        ->showBackground()
+        ->margins(2, 2, 2, 2, 'mm')
+        ->format('A4')
+        ->landscape(false)
+        ->delay(1000)
+        ->timeout(60000)
+        ->pdf(); // 👈 returns PDF binary (not a saved file)
+
+    $pdfFileName = $package->heading . '.pdf';
+
+    // 🔹 Return directly as download
+    return response($pdfBinary)
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', 'attachment; filename="' . $pdfFileName . '"');
 }
 
 }

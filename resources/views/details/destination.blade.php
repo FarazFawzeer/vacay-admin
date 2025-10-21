@@ -3,11 +3,26 @@
 @section('content')
     @include('layouts.partials.page-title', ['title' => 'Add Details', 'subtitle' => 'Destination'])
 
-        <style>
+    <style>
         .btn-equal {
             width: 80px;
             /* or any fixed width you want */
             text-align: center;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            margin: 0 3px;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.2);
+            opacity: 0.85;
+            text-decoration: none;
         }
     </style>
 
@@ -15,7 +30,7 @@
 
 
         <div class=" mb-4">
-            <div class="card-body d-flex justify-content-between align-items-center">
+            <div class="card-body d-flex justify-content-end  align-items-center">
 
                 <button type="button" id="toggleCreateForm" class="btn btn-primary">
                     + Add Destination
@@ -94,16 +109,23 @@
                                     </td>
                                     <td>{{ $destination->updated_at->format('d M Y, h:i A') }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-info btn-sm btn-equal edit-destination"
-                                            data-id="{{ $destination->id }}" data-name="{{ $destination->name }}"
-                                            data-points='@json($destination->program_points)'>
-                                            Edit
-                                        </button>
-                                        <button type="button" class="btn btn-danger btn-equal btn-sm delete-destination"
-                                            data-id="{{ $destination->id }}">
-                                            Delete
-                                        </button>
+                                        <div class="d-flex gap-2">
+                                            <button type="button"
+                                                class="btn btn-sm p-0 text-info border-0 bg-transparent edit-destination"
+                                                data-id="{{ $destination->id }}" data-name="{{ $destination->name }}"
+                                                data-points='@json($destination->program_points)'>
+                                                <i class="fas fa-edit fa-lg"></i>
+                                            </button>
+
+                                            <button type="button"
+                                                class="btn btn-sm p-0 text-danger border-0 bg-transparent delete-destination"
+                                                data-id="{{ $destination->id }}">
+                                                <i class="fas fa-trash-alt fa-lg"></i>
+                                            </button>
+                                        </div>
                                     </td>
+
+
                                 </tr>
                             @empty
                                 <tr>

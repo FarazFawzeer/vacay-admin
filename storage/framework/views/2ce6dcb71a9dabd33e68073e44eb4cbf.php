@@ -3,11 +3,26 @@
 <?php $__env->startSection('content'); ?>
     <?php echo $__env->make('layouts.partials.page-title', ['title' => 'Tour Packages', 'subtitle' => 'View'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-        <style>
+    <style>
         .btn-equal {
             width: 80px;
             /* or any fixed width you want */
             text-align: center;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 4px;
+            margin: 0 2px;
+            cursor: pointer;
+            transition: transform 0.2s, color 0.2s;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.2);
+            opacity: 0.8;
+            text-decoration: none;
         }
     </style>
 
@@ -44,8 +59,8 @@
                     <label for="filterStatus" class="form-label">Status</label>
                     <select id="filterStatus" class="form-select">
                         <option value="">All</option>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value="active">Published</option>
+                        <option value="inactive">Unpublished</option>
                     </select>
                 </div>
             </div>
@@ -64,41 +79,42 @@
             const categorySelect = document.getElementById('filterCategory');
             const statusSelect = document.getElementById('filterStatus');
 
-          function fetchFilteredData(url = null) {
-    let params = new URLSearchParams({
-        type: typeSelect.value,
-        category: categorySelect.value,
-        status: statusSelect.value
-    });
+            function fetchFilteredData(url = null) {
+                let params = new URLSearchParams({
+                    type: typeSelect.value,
+                    category: categorySelect.value,
+                    status: statusSelect.value
+                });
 
-    url = url || "<?php echo e(route('admin.packages.index')); ?>";
-    if (url.includes('?')) {
-        url += `&${params.toString()}`;
-    } else {
-        url += `?${params.toString()}`;
-    }
+                url = url || "<?php echo e(route('admin.packages.index')); ?>";
+                if (url.includes('?')) {
+                    url += `&${params.toString()}`;
+                } else {
+                    url += `?${params.toString()}`;
+                }
 
-    fetch(url, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        credentials: 'same-origin'
-    })
-    .then(res => res.text())
-    .then(data => {
-        document.getElementById('packageTable').innerHTML = data;
-        attachDeleteEvents();
-    });
-}
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(res => res.text())
+                    .then(data => {
+                        document.getElementById('packageTable').innerHTML = data;
+                        attachDeleteEvents();
+                        attachStatusToggleEvents();
+                    });
+            }
 
-// Pagination clicks
-document.addEventListener('click', function(e) {
-    if (e.target.closest('#packageTable .pagination a')) {
-        e.preventDefault();
-        let url = e.target.getAttribute('href');
-        fetchFilteredData(url);
-    }
-});
+            // Pagination clicks
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('#packageTable .pagination a')) {
+                    e.preventDefault();
+                    let url = e.target.getAttribute('href');
+                    fetchFilteredData(url);
+                }
+            });
 
 
             typeSelect.addEventListener('change', function() {
@@ -163,7 +179,62 @@ document.addEventListener('click', function(e) {
                 });
             }
 
+            function attachStatusToggleEvents() {
+                document.querySelectorAll('.toggle-status').forEach(button => {
+                    button.addEventListener('click', function() {
+                        let packageId = this.dataset.id;
+                        let currentStatus = this.dataset.status;
+
+                        let newStatus = currentStatus == 1 ? 0 : 1;
+
+                        fetch("<?php echo e(url('admin/packages/status')); ?>/" + packageId, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': "<?php echo e(csrf_token()); ?>",
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    status: newStatus
+                                }),
+                                credentials: 'same-origin'
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Update data attribute
+                                    button.dataset.status = newStatus;
+
+                                    // Update button classes
+                                    if (newStatus == 1) {
+                                        button.classList.remove('btn-warning');
+                                        button.classList.add('btn-success');
+                                        button.title = 'Change to Not Published';
+                                        // Update icon to eye
+                                        button.innerHTML =
+                                            '<i class="bi bi-check-circle-fill fs-5"></i>';
+                                    } else {
+                                        button.classList.remove('btn-success');
+                                        button.classList.add('btn-warning');
+                                        button.title = 'Change to Published';
+                                        // Update icon to eye-slash
+                                        button.innerHTML =
+                                            '<i class="bi bi-slash-circle fs-5"></i>';
+                                    }
+
+                                    Swal.fire('Success!', data.message, 'success');
+                                } else {
+                                    Swal.fire('Error!', data.message || 'Something went wrong!',
+                                        'error');
+                                }
+                            })
+                            .catch(() => Swal.fire('Error!', 'Something went wrong!', 'error'));
+                    });
+                });
+            }
+
             attachDeleteEvents();
+            attachStatusToggleEvents();
         });
     </script>
 <?php $__env->stopSection(); ?>
