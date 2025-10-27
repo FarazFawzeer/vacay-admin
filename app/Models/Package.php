@@ -28,7 +28,7 @@ class Package extends Model
         'ratings',
         'status',
         'map_image',
-
+        'hilight_show_hide',
     ];
 
     public function tourSummaries()
@@ -52,19 +52,22 @@ class Package extends Model
     }
 
 
-// App/Models/Package.php
+    // App/Models/Package.php
 
-public function packageVehicle()
-{
-    return $this->belongsTo(VehicleDetail::class, 'vehicle_id'); 
-    // Assuming 'vehicle_id' is stored in packages table
-}
+    public function packageVehicle()
+    {
+        return $this->belongsTo(VehicleDetail::class, 'vehicle_id');
+        // Assuming 'vehicle_id' is stored in packages table
+    }
 
-public function vehicles()
-{
-    return $this->belongsToMany(VehicleDetail::class, 'package_vehicles', 'package_id', 'id');
-}
+    public function vehicles()
+    {
+        return $this->belongsToMany(VehicleDetail::class, 'package_vehicles', 'package_id', 'id');
+    }
 
 
-
+    public function packageVehicles()
+    {
+        return $this->hasMany(PackageVehicle::class, 'package_id');
+    }
 }

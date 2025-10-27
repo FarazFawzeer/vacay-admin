@@ -61,7 +61,7 @@ class PackageController extends Controller
     {
         $destinations = Destination::all();  // for dropdowns
         $hotels = Hotel::all();
-        $vehicles = VehicleDetail::where('status', 1)->get(['id', 'name', 'make', 'model', 'seats', 'air_conditioned', 'condition', 'vehicle_image']);
+        $vehicles = VehicleDetail::where('status', 1)->get(['id', 'name', 'make', 'model', 'seats', 'air_conditioned', 'condition', 'vehicle_image', 'sub_image', 'type']);
 
         return view('tour.create', compact('destinations', 'hotels', 'vehicles'));
     }
@@ -84,6 +84,7 @@ class PackageController extends Controller
             'status' => 'nullable',
             'main_picture' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
             'map_image' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
+            'hilight_show_hide' => 'nullable|boolean',
         ]);
 
         // === Upload images if present ===
@@ -136,6 +137,7 @@ class PackageController extends Controller
             'status' => $request->status,
             'picture' => $mainPicturePath,
             'map_image' => $mapImagePath,
+            'hilight_show_hide' => $request->has('hilight_show_hide') ? 1 : 0, 
         ]);
 
         // === Tour Summaries ===
@@ -255,6 +257,7 @@ class PackageController extends Controller
                     'air_conditioned'      => $vehicle->air_conditioned ?? 0,
                     'availability'         => $vehicle->availability ?? 1,
                     'vehicle_image'        => $vehicle->vehicle_image ?? null,
+                    'sub_image'            => $vehicle->sub_image ? json_encode($vehicle->sub_image) : null,
                 ]);
             }
         }
@@ -276,7 +279,7 @@ class PackageController extends Controller
         $packageVehicle = PackageVehicle::where('package_id', $package->id)->first();
 
         $vehicles = VehicleDetail::where('status', 1)
-            ->get(['id', 'name', 'make', 'model', 'seats', 'air_conditioned', 'condition', 'vehicle_image']);
+            ->get(['id', 'name', 'make', 'model', 'seats', 'air_conditioned', 'condition', 'vehicle_image', 'sub_image', 'type']);
 
         $selectedVehicleId = $package->packageVehicle->vehicle_id ?? null;
 
@@ -302,6 +305,7 @@ class PackageController extends Controller
             'status' => 'nullable',
             'main_picture' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
             'map_image' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
+           'special_feature' => 'nullable|boolean',
         ]);
 
         $package = Package::findOrFail($id);
@@ -344,6 +348,7 @@ class PackageController extends Controller
             'status' => $request->status,
             'picture' => $mainPicturePath,
             'map_image' => $mapImagePath,
+            'hilight_show_hide' => $request->special_feature ?? 0,
         ]);
 
         // === Update Tour Summaries ===
@@ -451,6 +456,7 @@ class PackageController extends Controller
                         'air_conditioned'      => $vehicle->air_conditioned ?? 0,
                         'availability'         => $vehicle->availability ?? 1,
                         'vehicle_image'        => $vehicle->vehicle_image ?? null,
+                        'sub_image'            => $vehicle->sub_image ? json_encode($vehicle->sub_image) : null,
                     ]);
                 } else {
                     // No vehicle record yet, create a new one
@@ -466,6 +472,7 @@ class PackageController extends Controller
                         'air_conditioned'      => $vehicle->air_conditioned ?? 0,
                         'availability'         => $vehicle->availability ?? 1,
                         'vehicle_image'        => $vehicle->vehicle_image ?? null,
+                        'sub_image'            => $vehicle->sub_image ? json_encode($vehicle->sub_image) : null,
                     ]);
                 }
             }
@@ -495,7 +502,8 @@ class PackageController extends Controller
     {
         $package = Package::with([
             'tourSummaries',
-            'detailItineraries.highlights'
+            'detailItineraries.highlights',
+            'packageVehicles'
         ])->findOrFail($id);
 
 
@@ -534,50 +542,49 @@ class PackageController extends Controller
         return view('tour.show', compact('package', 'tourSummaries'));
     }
 
-public function downloadPackagePdf($id)
-{
-    $package = Package::with(['detailItineraries.highlights'])->findOrFail($id);
-    $tourSummaries = TourSummary::where('package_id', $id)->get();
+    public function downloadPackagePdf($id)
+    {
+        $package = Package::with(['detailItineraries.highlights', 'packageVehicles'])->findOrFail($id);
+        $tourSummaries = TourSummary::where('package_id', $id)->get();
 
-    // 🔹 Decode itinerary program_points and highlight images
-    $package->detailItineraries->map(function ($itinerary) {
-        if (is_string($itinerary->program_points) && str_starts_with($itinerary->program_points, '[')) {
-            $itinerary->program_points = json_decode($itinerary->program_points, true) ?? [];
-        }
-
-        $itinerary->highlights->map(function ($highlight) {
-            if (is_string($highlight->images) && str_starts_with($highlight->images, '[')) {
-                $highlight->images = json_decode($highlight->images, true) ?? [];
+        // 🔹 Decode itinerary program_points and highlight images
+        $package->detailItineraries->map(function ($itinerary) {
+            if (is_string($itinerary->program_points) && str_starts_with($itinerary->program_points, '[')) {
+                $itinerary->program_points = json_decode($itinerary->program_points, true) ?? [];
             }
-            return $highlight;
+
+            $itinerary->highlights->map(function ($highlight) {
+                if (is_string($highlight->images) && str_starts_with($highlight->images, '[')) {
+                    $highlight->images = json_decode($highlight->images, true) ?? [];
+                }
+                return $highlight;
+            });
+
+            return $itinerary;
         });
 
-        return $itinerary;
-    });
+        // 🔹 Render Blade to HTML
+        $htmlContent = View::make('tour.pdf.package', [
+            'package' => $package,
+            'tourSummaries' => $tourSummaries,
+            'slot' => '',
+        ])->render();
 
-    // 🔹 Render Blade to HTML
-    $htmlContent = View::make('tour.pdf.package', [
-        'package' => $package,
-        'tourSummaries' => $tourSummaries,
-        'slot' => '',
-    ])->render();
+        // 🔹 Generate PDF in-memory
+        $pdfBinary = Browsershot::html($htmlContent)
+            ->showBackground()
+            ->margins(2, 2, 2, 2, 'mm')
+            ->format('A4')
+            ->landscape(false)
+            ->delay(1000)
+            ->timeout(60000)
+            ->pdf(); // 👈 returns PDF binary (not a saved file)
 
-    // 🔹 Generate PDF in-memory
-    $pdfBinary = Browsershot::html($htmlContent)
-        ->showBackground()
-        ->margins(2, 2, 2, 2, 'mm')
-        ->format('A4')
-        ->landscape(false)
-        ->delay(1000)
-        ->timeout(60000)
-        ->pdf(); // 👈 returns PDF binary (not a saved file)
+        $pdfFileName = $package->heading . '.pdf';
 
-    $pdfFileName = $package->heading . '.pdf';
-
-    // 🔹 Return directly as download
-    return response($pdfBinary)
-        ->header('Content-Type', 'application/pdf')
-        ->header('Content-Disposition', 'attachment; filename="' . $pdfFileName . '"');
-}
-
+        // 🔹 Return directly as download
+        return response($pdfBinary)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . $pdfFileName . '"');
+    }
 }

@@ -7,6 +7,15 @@
     ])
 
     <style>
+        #existingSubImages img {
+            border-radius: 6px;
+            transition: transform 0.2s;
+        }
+
+        #existingSubImages img:hover {
+            transform: scale(1.05);
+        }
+
         .btn-equal {
             width: 80px;
             text-align: center;
@@ -127,11 +136,6 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Vehicle Image</label>
-                            <input type="file" name="vehicle_image" class="form-control">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
                             <label class="form-label">Type</label>
                             <select name="type" class="form-select" required>
                                 <option value="">Select Type</option>
@@ -145,6 +149,21 @@
                                 <option value="other">Other</option>
                             </select>
                         </div>
+
+
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Vehicle Image</label>
+                            <input type="file" name="vehicle_image" class="form-control">
+                        </div>
+
+
+                        <div class="col-md-6 mb-3 sub-image-field" style="display: none;">
+                            <label class="form-label">Sub Images (Multiple, Max 4)</label>
+                            <input type="file" name="sub_image[]" class="form-control" multiple>
+                            <small class="text-muted">You can upload up to 4 images.</small>
+                        </div>
+
 
 
                         <div class="col-md-6 mb-3">
@@ -236,7 +255,8 @@
                                             data-condition="{{ $vehicle->condition }}"
                                             data-transmission="{{ $vehicle->transmission }}"
                                             data-price="{{ $vehicle->price }}" data-type="{{ $vehicle->type }}"
-                                            data-status="{{ $vehicle->status }}" data-bs-toggle="modal"
+                                            data-status="{{ $vehicle->status }}"
+                                            data-subimages='@json($vehicle->sub_image)' data-bs-toggle="modal"
                                             data-bs-target="#editVehicleModal" title="Edit Vehicle">
                                             <i class="bi bi-pencil-square fs-5"></i>
                                         </button>
@@ -374,6 +394,18 @@
                                     <label class="form-label">Vehicle Image</label>
                                     <input type="file" name="vehicle_image" class="form-control">
                                 </div>
+
+                                <div class="col-md-6 mb-3 sub-image-field" style="display: none;">
+                                    <label class="form-label">Sub Images (Multiple, Max 4)</label>
+                                    <input type="file" name="sub_image[]" class="form-control" multiple>
+                                    <small class="text-muted">You can upload up to 4 images.</small>
+
+                                    <!-- Existing Sub Images Preview -->
+                                    <div id="existingSubImages" class="mt-2 d-flex flex-wrap gap-2">
+                                        <!-- Will be filled dynamically via JS -->
+                                    </div>
+                                </div>
+
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Status</label>
                                     <select name="status" id="edit_status" class="form-select">
@@ -401,6 +433,85 @@
     {{-- Scripts --}}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+
+            function showExistingSubImages(subImages) {
+                let container = document.getElementById('existingSubImages');
+                container.innerHTML = '';
+
+                if (subImages && subImages.length > 0) {
+                    subImages.forEach(img => {
+                        container.innerHTML += `
+                <div class="position-relative me-2 mb-2">
+                    <img src="/storage/${img}" 
+                         class="img-thumbnail" 
+                         style="width: 100px; height: 100px; object-fit: cover;">
+                </div>`;
+                    });
+                } else {
+                    container.innerHTML = '<p class="text-muted">No sub images uploaded yet.</p>';
+                }
+            }
+
+            // --- Show/Hide Sub Image field in Create Form ---
+            const typeSelect = document.querySelector('select[name="type"]');
+            const subImageField = document.querySelector('#createVehicleForm .sub-image-field');
+
+            if (typeSelect) {
+                typeSelect.addEventListener('change', function() {
+                    if (this.value === 'car' || this.value === 'van') {
+                        subImageField.style.display = 'block';
+                    } else {
+                        subImageField.style.display = 'none';
+                    }
+                });
+            }
+
+
+            document.querySelectorAll('input[name="sub_image[]"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    const maxFiles = 4;
+                    if (this.files.length > maxFiles) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Too Many Images!',
+                            text: `You can upload a maximum of ${maxFiles} images.`,
+                            timer: 2500,
+                            showConfirmButton: false
+                        });
+                        this.value = ""; // Clear selected files
+                    }
+                });
+            });
+
+            // --- Show/Hide Sub Image field in Edit Modal ---
+            const editTypeSelect = document.getElementById('edit_type');
+            const editSubImageField = document.querySelector('#editVehicleForm .sub-image-field');
+
+            if (editTypeSelect) {
+                editTypeSelect.addEventListener('change', function() {
+                    if (this.value === 'car' || this.value === 'van') {
+                        editSubImageField.style.display = 'block';
+                    } else {
+                        editSubImageField.style.display = 'none';
+                    }
+                });
+            }
+
+            // Ensure correct visibility when modal opens
+            document.querySelectorAll('.editVehicleBtn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setTimeout(() => {
+                        const currentType = document.getElementById('edit_type').value;
+                        if (currentType === 'car' || currentType === 'van') {
+                            editSubImageField.style.display = 'block';
+                        } else {
+                            editSubImageField.style.display = 'none';
+                        }
+                    }, 300);
+                });
+            });
+
+
             const toggleBtn = document.getElementById("toggleCreateForm");
             const formCard = document.getElementById("createVehicleCard");
 
@@ -483,8 +594,38 @@
                         .transmission || '').toLowerCase();
                     document.getElementById('edit_status').value = btn.dataset.status || '1';
 
+
+
                     // ✅ Populate type select
                     document.getElementById('edit_type').value = btn.dataset.type || '';
+
+                    const subImagesContainer = document.getElementById('existingSubImages');
+                    subImagesContainer.innerHTML = ''; // clear old previews
+                    const subImages = JSON.parse(btn.dataset.subimages || '[]');
+
+                    if (subImages.length > 0) {
+                        subImages.forEach(img => {
+                            subImagesContainer.innerHTML += `
+                    <div class="position-relative me-2 mb-2">
+                        <img src="/storage/${img}" 
+                            class="img-thumbnail" 
+                            style="width: 100px; height: 100px; object-fit: cover;">
+                    </div>`;
+                        });
+                    } else {
+                        subImagesContainer.innerHTML =
+                            `<p class="text-muted">No sub images uploaded yet.</p>`;
+                    }
+
+                    // --- Show/hide sub image field for car/van ---
+                    const editSubImageField = document.querySelector(
+                        '#editVehicleForm .sub-image-field');
+                    if (btn.dataset.type === 'car' || btn.dataset.type === 'van') {
+                        editSubImageField.style.display = 'block';
+                    } else {
+                        editSubImageField.style.display = 'none';
+                    }
+
                 });
             });
 

@@ -22,5 +22,10 @@ class PackageVehicle extends Model
         'air_conditioned',
         'availability',
         'vehicle_image',
+        'sub_image',
+    ];
+
+    protected $casts = [
+        'sub_image' => 'array',
     ];
 }

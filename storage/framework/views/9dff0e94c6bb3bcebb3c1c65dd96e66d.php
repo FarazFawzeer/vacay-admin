@@ -10,6 +10,101 @@
 
 
     <style>
+        /* Vehicle Section */
+        .vehicle-details-section {
+            margin: 30px 0;
+            page-break-inside: avoid;
+        }
+
+        .vehicle-details-section h2 {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #0d4e6b;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        /* Vehicle Card */
+        .vehicle-card {
+            width: 100%;
+
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+
+        }
+
+        .vehicle-image-container {
+            text-align: center;
+            margin-bottom: 15px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .vehicle-image {
+            max-width: 90%;
+            max-height: 400px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            border-radius: 6px;
+        }
+
+        /* Sub Images */
+        /* Sub Images */
+        .sub-images {
+            width: 100%;
+            margin: 15px auto;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .sub-images img {
+            display: inline-block;
+            width: 22%;
+            max-width: 150px;
+            height: auto;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin: 5px 1%;
+            vertical-align: top;
+            box-sizing: border-box;
+        }
+
+        /* Vehicle Info */
+        .vehicle-info-list {
+            width: 85%;
+            margin: 15px auto 0;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 25px;
+        }
+
+        .vehicle-info-list>div {
+            display: table;
+            width: 100%;
+            padding: 5px 0;
+            font-size: 11pt;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .vehicle-info-list>div strong {
+            display: table-cell;
+            width: 140px;
+            color: #0d4e6b;
+            font-weight: 600;
+            padding-right: 10px;
+        }
+
+        .vehicle-info-list>div span {
+            display: table-cell;
+            color: #333;
+        }
+
         .footer-logo {
             text-align: center;
         }
@@ -299,7 +394,7 @@
             }
 
             .sri-lanka-badge {
-                
+
                 padding: 8px 20px;
             }
         }
@@ -632,24 +727,29 @@
 
 
         /* Map Section */
-  .map-page {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;   /* vertical center */
-    align-items: center;       /* horizontal center */
-    min-height: 100vh;         /* fill page height */
-    margin: 0;
-    padding: 0 20px;
-}
+        .map-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            /* vertical center */
+            align-items: center;
+            /* horizontal center */
+            min-height: 100vh;
+            /* fill page height */
+            margin: 0;
+            padding: 0 20px;
+        }
 
-/* Map image styling */
-.map-page .map-image {
-    max-width: 90%;   /* fit page width */
-    max-height: 80vh; /* fit page height */
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    display: block;
-}
+        /* Map image styling */
+        .map-page .map-image {
+            max-width: 90%;
+            /* fit page width */
+            max-height: 80vh;
+            /* fit page height */
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            display: block;
+        }
 
         /* Inclusions/Exclusions Lists */
         .info-list-section {
@@ -1052,7 +1152,7 @@
 
 
                         <!-- Highlights -->
-                        <?php if($itinerary->highlights->isNotEmpty()): ?>
+                        <?php if($package->hilight_show_hide == 1 && $itinerary->highlights->isNotEmpty()): ?>
                             <!-- Force new page before highlights -->
                             <div style="page-break-before: always;"></div>
 
@@ -1105,9 +1205,13 @@
                             </div>
                         <?php endif; ?>
 
-
+                        <?php if($package->hilight_show_hide == 0): ?>
+                            <div style="page-break-before: always;"></div>
+                        <?php endif; ?>
                         <!-- Accommodation -->
                         <div class="accommodation-box">
+
+
                             <div class="accommodation-item">
                                 <div class="accommodation-icon">
                                     <i class="fas fa-hotel"></i><span>Accommodation</span>
@@ -1138,7 +1242,7 @@
 
                 <!-- Map Section -->
                 <?php if(!empty($package->map_image)): ?>
-                             <div style="page-break-before: always;"></div>
+                    <div style="page-break-before: always;"></div>
                     <?php
                         $defaultMapImage = public_path('assets/img/default-map.jpg');
                         $mapPath = $package->map_image
@@ -1156,6 +1260,85 @@
                     </div>
                 <?php endif; ?>
 
+
+                <?php if($package->packageVehicles && $package->packageVehicles->isNotEmpty()): ?>
+                    <div style="page-break-before: always;"></div>
+                    <div class="vehicle-details-section">
+                        <h2>Vehicle Details</h2>
+
+                        <?php $__currentLoopData = $package->packageVehicles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehicle): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                $defaultVehicleImage = public_path('images/no-vehicle.jpg');
+                                $vehicleImagePath = $vehicle->vehicle_image
+                                    ? public_path('storage/' . ltrim($vehicle->vehicle_image, '/'))
+                                    : $defaultVehicleImage;
+
+                                $vehicleImageUrl = '';
+                                if (file_exists($vehicleImagePath)) {
+                                    $vehicleImageData = base64_encode(file_get_contents($vehicleImagePath));
+                                    $vehicleImageMime = mime_content_type($vehicleImagePath);
+                                    $vehicleImageUrl = "data:$vehicleImageMime;base64,$vehicleImageData";
+                                }
+
+                                $subImages = [];
+                                if (!empty($vehicle->sub_image)) {
+                                    $subImagesArray = is_array($vehicle->sub_image)
+                                        ? $vehicle->sub_image
+                                        : json_decode($vehicle->sub_image, true);
+
+                                    foreach ($subImagesArray as $subImg) {
+                                        $subImgPath = public_path('storage/' . ltrim($subImg, '/'));
+                                        if (file_exists($subImgPath)) {
+                                            $subImgData = base64_encode(file_get_contents($subImgPath));
+                                            $subImgMime = mime_content_type($subImgPath);
+                                            $subImages[] = "data:$subImgMime;base64,$subImgData";
+                                        }
+                                    }
+                                }
+                            ?>
+
+                            <div class="vehicle-card">
+                                <!-- Main Image -->
+                                <div class="vehicle-image-container">
+                                    <img src="<?php echo e($vehicleImageUrl); ?>"
+                                        alt="<?php echo e($vehicle->make ?? 'Vehicle'); ?> <?php echo e($vehicle->model ?? ''); ?>"
+                                        class="vehicle-image">
+                                </div>
+
+                                <!-- Sub Images -->
+                                <?php if(!empty($subImages)): ?>
+                                    <div class="sub-images">
+                                        <?php $__currentLoopData = $subImages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $subImageUrl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <img src="<?php echo e($subImageUrl); ?>" alt="Vehicle image">
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <!-- Vehicle Info -->
+                                <div class="vehicle-info-list">
+                                    <?php
+                                        $info = [
+                                            'Name' => $vehicle->name ?? 'Not specified',
+                                            'Make' => $vehicle->make ?? 'Not specified',
+                                            'Model' => $vehicle->model ?? 'Not specified',
+                                            'Seats Available' => $vehicle->seats ?? 'Not specified',
+                                            'Max Capacity' =>
+                                                ($vehicle->max_seating_capacity ?? 'Not specified') . ' passengers',
+                                            'Condition' => ucfirst($vehicle->condition ?? 'Not specified'),
+                                        ];
+                                    ?>
+
+                                    <?php $__currentLoopData = $info; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $label => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <div>
+                                            <strong><?php echo e($label); ?>:</strong>
+                                            <span><?php echo e($value); ?></span>
+                                        </div>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </div>
+                            </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </div>
+                <?php endif; ?>
 
                 <!-- Inclusions -->
 

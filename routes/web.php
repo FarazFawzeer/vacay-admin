@@ -11,6 +11,8 @@ use App\Http\Controllers\DestinationHighlightController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\PackageController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\TestimonialController;
 
 require __DIR__ . '/auth.php';
 
@@ -38,7 +40,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::post('packages/status/{package}', [PackageController::class, 'toggleStatus'])->name('admin.packages.toggleStatus');
     Route::get('packages/{id}', [PackageController::class, 'show'])->name('packages.show');
-Route::get('/package/{id}/pdf', [PackageController::class, 'downloadPackagePdf'])->name('package.pdf');
+    Route::get('/package/{id}/pdf', [PackageController::class, 'downloadPackagePdf'])->name('package.pdf');
 
 
 
@@ -59,6 +61,23 @@ Route::get('/package/{id}/pdf', [PackageController::class, 'downloadPackagePdf']
 
     Route::get('/destinations/{id}/details', [DestinationController::class, 'getDetails']);
 
+
+    Route::get('blogs', [BlogController::class, 'index'])->name('blogs.index');
+    Route::get('blogs/create', [BlogController::class, 'create'])->name('blogs.create');
+    Route::post('blogs/store', [BlogController::class, 'store'])->name('blogs.store');
+
+    Route::get('blogs/{blog}', [BlogController::class, 'show'])->name('blogs.show');
+    Route::get('blogs/{blog}/edit', [BlogController::class, 'edit'])->name('blogs.edit');
+    Route::put('blogs/{blog}', [BlogController::class, 'update'])->name('blogs.update');
+    Route::delete('blogs/{blog}', [BlogController::class, 'destroy'])->name('blogs.destroy');
+
+    Route::post('blogs/status/{blog}', [BlogController::class, 'toggleStatus'])->name('blogs.status');
+
+
+    Route::resource('testimonials', TestimonialController::class);
+    Route::post('testimonials/{testimonial}/toggle-status', [TestimonialController::class, 'toggleStatus'])
+        ->name('testimonials.toggleStatus');
+    Route::post('testimonials/toggle-status/{blog}', [TestimonialController::class, 'toggleStatus'])->name('blogs.status');
 
     //profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

@@ -68,7 +68,7 @@
 
                 
                 <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="category" class="form-label">Category</label>
                         <select name="category" id="category" class="form-select">
                             <option value="special" <?php echo e($package->tour_category == 'special' ? 'selected' : ''); ?>>Special
@@ -79,16 +79,24 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="days" class="form-label">Days</label>
                         <input type="number" name="days" id="days" class="form-control"
                             value="<?php echo e(old('days', $package->days)); ?>">
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="nights" class="form-label">Nights</label>
                         <input type="number" name="nights" id="nights" class="form-control"
                             value="<?php echo e(old('nights', $package->nights)); ?>">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                         <div class="form-check mt-4">
+                            <input type="checkbox" name="special_feature" value="1" <?php echo e($package->hilight_show_hide ? 'checked' : ''); ?>>
+
+                            <label class="form-check-label" for="special_feature">Highlight Show </label>
+                        </div>
                     </div>
                 </div>
 
@@ -394,6 +402,16 @@
                                     </div>
                                 </div>
                             </div>
+
+
+                            <div class="row mt-3" id="subImagesSection" style="display: none;">
+                                <div class="col-md-12">
+                                    <label class="form-label">Sub Images</label>
+                                    <div id="vehicleSubImages" class="d-flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+
+
                         </div>
 
                     </div>
@@ -413,43 +431,55 @@
         // 1. JSON-encode the list of all available vehicles
         const vehicles = <?php echo json_encode($vehicles, 15, 512) ?>;
 
-        function populateVehicleDetails() {
+        function populateVehicleDetails(vehicleId = null) {
             const select = document.getElementById('vehicleSelect');
-            const vehicleId = select.value;
-            // Find the selected vehicle object in the JSON array
-            const vehicle = vehicles.find(v => v.id == vehicleId);
+            const id = vehicleId ?? select.value;
+            const vehicle = vehicles.find(v => v.id == id);
 
             const detailsDiv = document.getElementById('vehicleDetails');
             const imageElement = document.getElementById('vehicleImage');
+            const subImagesSection = document.getElementById('subImagesSection');
+            const subImagesContainer = document.getElementById('vehicleSubImages');
 
             if (vehicle) {
-                // Populate all the read-only input fields
                 document.getElementById('vehicleMake').value = vehicle.make ?? '';
                 document.getElementById('vehicleModel').value = vehicle.model ?? '';
                 document.getElementById('vehicleSeats').value = vehicle.seats ?? '';
-
-                // Convert boolean/integer to 'Yes' or 'No'
                 document.getElementById('vehicleAirConditioned').value = vehicle.air_conditioned ? 'Yes' : 'No';
-
                 document.getElementById('vehicleCondition').value = vehicle.condition ?? '';
 
-                // Handle image display
+                // Main image
                 if (vehicle.vehicle_image) {
-                    // IMPORTANT: Ensure the path `/storage/` is correct for your file system setup
                     imageElement.src = `/storage/${vehicle.vehicle_image}`;
                     imageElement.style.display = 'block';
                 } else {
-                    imageElement.src = '';
                     imageElement.style.display = 'none';
                 }
 
-                // Show the details section
+                // Sub images for car/van
+                if ((vehicle.type === 'car' || vehicle.type === 'van') && vehicle.sub_image && Array.isArray(vehicle
+                        .sub_image)) {
+                    subImagesContainer.innerHTML = '';
+                    vehicle.sub_image.forEach(img => {
+                        subImagesContainer.insertAdjacentHTML('beforeend', `
+                    <img src="/storage/${img}" class="rounded border" style="width:100px;height:100px;object-fit:cover;">
+                `);
+                    });
+                    subImagesSection.style.display = 'block';
+                } else {
+                    subImagesSection.style.display = 'none';
+                    subImagesContainer.innerHTML = '';
+                }
+
                 detailsDiv.style.display = 'block';
             } else {
-                // Hide the details section if no vehicle is selected
                 detailsDiv.style.display = 'none';
+                subImagesSection.style.display = 'none';
+                subImagesContainer.innerHTML = '';
             }
         }
+
+
 
         // 2. Call the function on page load to display details of the pre-selected vehicle
         document.addEventListener('DOMContentLoaded', function() {
@@ -545,9 +575,9 @@
                         </div>
                         <div class="col-md-3">
                             ${h.image ? `
-                                                                    <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
-                                                                    <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
-                                                                ` : ''}
+                                                                                    <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
+                                                                                    <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
+                                                                                ` : ''}
                             <input type="file" 
                                 name="itineraries[${index}][highlights][${highlightCounter}][images]" 
                                 class="form-control">

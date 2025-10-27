@@ -79,7 +79,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="category" class="form-label">Category</label>
                         <select name="category" id="category" class="form-select">
                             <option value="">-- Select Category --</option>
@@ -88,13 +88,23 @@
                             <option value="tailor">Tailor Made</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="days" class="form-label">Days</label>
                         <input type="number" name="days" id="days" class="form-control" placeholder="e.g., 7">
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label for="nights" class="form-label">Nights</label>
                         <input type="number" name="nights" id="nights" class="form-control" placeholder="e.g., 6">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" name="hilight_show_hide"
+                                id="hilight_show_hide" value="1">
+                            <label class="form-check-label" for="hilight_show_hide">
+                                Highlight Show
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -210,6 +220,13 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="row mt-3" id="subImagesSection" style="display: none;">
+                                <div class="col-md-12">
+                                    <label class="form-label">Sub Images</label>
+                                    <div id="vehicleSubImages" class="d-flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -242,6 +259,8 @@
 
             const detailsDiv = document.getElementById('vehicleDetails');
             const imageElement = document.getElementById('vehicleImage');
+            const subImagesSection = document.getElementById('subImagesSection');
+            const subImagesContainer = document.getElementById('vehicleSubImages');
 
             if (vehicle) {
                 document.getElementById('vehicleMake').value = vehicle.make ?? '';
@@ -250,7 +269,7 @@
                 document.getElementById('vehicleAirConditioned').value = vehicle.air_conditioned ? 'Yes' : 'No';
                 document.getElementById('vehicleCondition').value = vehicle.condition ?? '';
 
-                // Show image
+                // Show main image
                 if (vehicle.vehicle_image) {
                     imageElement.src = `/storage/${vehicle.vehicle_image}`;
                     imageElement.style.display = 'block';
@@ -258,11 +277,33 @@
                     imageElement.style.display = 'none';
                 }
 
+                // ✅ Show sub images only if type = car or van
+                if (vehicle.type === 'car' || vehicle.type === 'van') {
+                    if (vehicle.sub_image && Array.isArray(vehicle.sub_image) && vehicle.sub_image.length > 0) {
+                        subImagesContainer.innerHTML = '';
+                        vehicle.sub_image.forEach(img => {
+                            subImagesContainer.insertAdjacentHTML('beforeend', `
+                        <img src="/storage/${img}" 
+                             class="rounded border" 
+                             style="width:100px;height:100px;object-fit:cover;">
+                    `);
+                        });
+                        subImagesSection.style.display = 'block';
+                    } else {
+                        subImagesContainer.innerHTML = '<p class="text-muted">No sub images available</p>';
+                        subImagesSection.style.display = 'block';
+                    }
+                } else {
+                    subImagesSection.style.display = 'none';
+                }
+
                 detailsDiv.style.display = 'block';
             } else {
                 detailsDiv.style.display = 'none';
+                subImagesSection.style.display = 'none';
             }
         }
+
 
         function fetchProgramPoints(select, index) {
             const destinationId = select.value;
@@ -322,7 +363,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                                     <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                                                 <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>

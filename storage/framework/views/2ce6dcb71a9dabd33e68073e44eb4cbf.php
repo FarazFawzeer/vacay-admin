@@ -33,6 +33,23 @@
         </div>
 
         <div class="card-body">
+            
+            <?php if(session('success')): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <?php echo e(session('success')); ?>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+
+            <?php if(session('error')): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <?php echo e(session('error')); ?>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
+            <!-- Filters -->
             <!-- Filters -->
             <div class="row mb-3 justify-content-end">
                 <div class="col-md-3">
@@ -41,16 +58,6 @@
                         <option value="">All</option>
                         <?php $__currentLoopData = $types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <option value="<?php echo e($type); ?>"><?php echo e(ucfirst($type)); ?></option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label for="filterCategory" class="form-label">Category</label>
-                    <select id="filterCategory" class="form-select">
-                        <option value="">All</option>
-                        <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($category); ?>"><?php echo e(ucfirst($category)); ?></option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </div>
@@ -65,6 +72,8 @@
                 </div>
             </div>
 
+
+
             <!-- Table -->
             <div class="table-responsive" id="packageTable">
                 <?php echo $__env->make('tour.table', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
@@ -74,168 +83,58 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const typeSelect = document.getElementById('filterType');
-            const categorySelect = document.getElementById('filterCategory');
-            const statusSelect = document.getElementById('filterStatus');
-
-            function fetchFilteredData(url = null) {
-                let params = new URLSearchParams({
-                    type: typeSelect.value,
-                    category: categorySelect.value,
-                    status: statusSelect.value
-                });
-
-                url = url || "<?php echo e(route('admin.packages.index')); ?>";
-                if (url.includes('?')) {
-                    url += `&${params.toString()}`;
-                } else {
-                    url += `?${params.toString()}`;
-                }
-
-                fetch(url, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        credentials: 'same-origin'
-                    })
-                    .then(res => res.text())
-                    .then(data => {
-                        document.getElementById('packageTable').innerHTML = data;
-                        attachDeleteEvents();
-                        attachStatusToggleEvents();
-                    });
-            }
-
-            // Pagination clicks
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('#packageTable .pagination a')) {
-                    e.preventDefault();
-                    let url = e.target.getAttribute('href');
-                    fetchFilteredData(url);
-                }
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.classList.remove('show');
+                alert.classList.add('hide');
+                setTimeout(() => alert.remove(), 500);
             });
+        }, 3000);
 
+      document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('filterType');
+    const statusSelect = document.getElementById('filterStatus');
+    const tableContainer = document.getElementById('packageTable');
 
-            typeSelect.addEventListener('change', function() {
-                fetchFilteredData();
-            });
-            categorySelect.addEventListener('change', function() {
-                fetchFilteredData();
-            });
-            statusSelect.addEventListener('change', function() {
-                fetchFilteredData();
-            });
-            // AJAX Pagination
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('#packageTable .pagination a')) {
-                    e.preventDefault();
-                    let url = e.target.getAttribute('href');
-                    fetchFilteredData(url);
-                }
-            });
+    function fetchFilteredData(url = null) {
+        url = url || "<?php echo e(route('admin.blogs.index')); ?>";
 
-            // Delete Package
-            function attachDeleteEvents() {
-                document.querySelectorAll('.delete-package').forEach(button => {
-                    button.addEventListener('click', function() {
-                        let packageId = this.dataset.id;
-
-                        Swal.fire({
-                            title: 'Are you sure?',
-                            text: "You won't be able to revert this!",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonColor: '#d33',
-                            cancelButtonColor: '#3085d6',
-                            confirmButtonText: 'Yes, delete it!'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                fetch("<?php echo e(url('admin/packages')); ?>/" + packageId, {
-                                        method: 'DELETE',
-                                        headers: {
-                                            'X-CSRF-TOKEN': "<?php echo e(csrf_token()); ?>",
-                                            'Accept': 'application/json'
-                                        },
-                                        credentials: 'same-origin'
-                                    })
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            document.getElementById('package-' +
-                                                packageId).remove();
-                                            Swal.fire('Deleted!', data.message,
-                                                'success');
-                                        } else {
-                                            Swal.fire('Error!', data.message ||
-                                                'Something went wrong!', 'error');
-                                        }
-                                    })
-                                    .catch(() => Swal.fire('Error!',
-                                        'Something went wrong!', 'error'));
-                            }
-                        });
-                    });
-                });
-            }
-
-            function attachStatusToggleEvents() {
-                document.querySelectorAll('.toggle-status').forEach(button => {
-                    button.addEventListener('click', function() {
-                        let packageId = this.dataset.id;
-                        let currentStatus = this.dataset.status;
-
-                        let newStatus = currentStatus == 1 ? 0 : 1;
-
-                        fetch("<?php echo e(url('admin/packages/status')); ?>/" + packageId, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': "<?php echo e(csrf_token()); ?>",
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    status: newStatus
-                                }),
-                                credentials: 'same-origin'
-                            })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) {
-                                    // Update data attribute
-                                    button.dataset.status = newStatus;
-
-                                    // Update button classes
-                                    if (newStatus == 1) {
-                                        button.classList.remove('btn-warning');
-                                        button.classList.add('btn-success');
-                                        button.title = 'Change to Not Published';
-                                        // Update icon to eye
-                                        button.innerHTML =
-                                            '<i class="bi bi-check-circle-fill fs-5"></i>';
-                                    } else {
-                                        button.classList.remove('btn-success');
-                                        button.classList.add('btn-warning');
-                                        button.title = 'Change to Published';
-                                        // Update icon to eye-slash
-                                        button.innerHTML =
-                                            '<i class="bi bi-slash-circle fs-5"></i>';
-                                    }
-
-                                    Swal.fire('Success!', data.message, 'success');
-                                } else {
-                                    Swal.fire('Error!', data.message || 'Something went wrong!',
-                                        'error');
-                                }
-                            })
-                            .catch(() => Swal.fire('Error!', 'Something went wrong!', 'error'));
-                    });
-                });
-            }
-
-            attachDeleteEvents();
-            attachStatusToggleEvents();
+        const params = new URLSearchParams({
+            type: typeSelect.value || '',
+            status: statusSelect.value || ''
         });
+
+        // Append params to URL safely
+        url = url.split('?')[0] + '?' + params.toString();
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin'
+        })
+        .then(res => res.text())
+        .then(data => {
+            tableContainer.innerHTML = data;
+        })
+        .catch(err => console.error('AJAX fetch error:', err));
+    }
+
+    // Listen for filter changes
+    [typeSelect, statusSelect].forEach(el => {
+        if (el) el.addEventListener('change', fetchFilteredData);
+    });
+
+    // Pagination links inside table
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#packageTable .pagination a')) {
+            e.preventDefault();
+            const url = e.target.getAttribute('href');
+            fetchFilteredData(url);
+        }
+    });
+});
+
+
     </script>
 <?php $__env->stopSection(); ?>
 
