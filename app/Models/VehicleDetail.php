@@ -38,9 +38,14 @@ class VehicleDetail extends Model
         'name',
         'availability',
         'vehicle_image',
+        'sub_image',
         'type',
         'status',
     ];
 
+
+   protected $casts = [
+        'sub_image' => 'array', 
+    ];
 
 }

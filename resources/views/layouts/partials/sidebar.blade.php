@@ -129,6 +129,52 @@
                 </div>
             </li>
 
+            {{-- Blog Post --}}
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#blogpost" data-bs-toggle="collapse" role="button"
+                    aria-expanded="false" aria-controls="blogpost">
+                    <span class="nav-icon">
+                        <iconify-icon icon="solar:share-circle-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Blog Post</span>
+                </a>
+                <div class="collapse" id="blogpost">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.blogs.create') }}">Create</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.blogs.index') }}">View</a>
+                        </li>
+
+
+                    </ul>
+                </div>
+            </li>
+
+
+            {{-- Customer --}}
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#testimonial" data-bs-toggle="collapse" role="button"
+                    aria-expanded="false" aria-controls="testimonial">
+                    <span class="nav-icon">
+                        <iconify-icon icon="solar:user-circle-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Testimonilal</span>
+                </a>
+                <div class="collapse" id="testimonial">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.testimonials.create') }}">Create</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.testimonials.index') }}">View </a>
+                        </li>
+
+
+                    </ul>
+                </div>
+            </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.profile.edit') }}">
                     <span class="nav-icon">

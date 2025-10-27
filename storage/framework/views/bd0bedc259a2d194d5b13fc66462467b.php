@@ -26,6 +26,270 @@
     }
 
 
+    /* Vehicle Details Section - Professional & Clean */
+    .vehicle-details-section {
+        margin: 50px 0;
+        page-break-inside: avoid;
+    }
+
+    .vehicle-details-section h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #0d4e6b;
+        margin-bottom: 40px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+
+
+
+    /* Vehicle Cards Container */
+    .vehicle-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    /* Individual Vehicle Card */
+    .vehicle-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        overflow: hidden;
+        page-break-inside: avoid;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 0 !important;
+    }
+
+    /* Left Side - Images Section */
+    .vehicle-image-container {
+        flex-shrink: 0;
+        width: 45%;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .vehicle-main-image-wrapper {
+        position: relative;
+        width: 100%;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .vehicle-image {
+        width: 100%;
+        max-height: 300px;
+        /* limit height but keep aspect ratio */
+        height: auto;
+        /* ensures images scale naturally */
+        object-fit: cover;
+        /* crops slightly if needed */
+        display: block;
+        margin-bottom: 10px;
+        /* space between main and sub-images */
+        border-radius: 6px;
+    }
+
+
+    /* Sub Images Grid */
+    .sub-images {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        /* responsive columns */
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .sub-images img {
+        width: 100%;
+        /* take full column width */
+        height: auto;
+        /* keep natural aspect ratio */
+        max-height: 150px;
+        /* limit max height */
+        object-fit: cover;
+        /* crop if needed, but less aggressive */
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Right Side - Vehicle Info Section */
+    .vehicle-info {
+        flex: 1;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .vehicle-info-header {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .vehicle-name {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin: 0 0 8px 0;
+        line-height: 1.3;
+    }
+
+    .vehicle-subtitle {
+        font-size: 1rem;
+        color: #64748b;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Single Column Info Items */
+    .vehicle-info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .vehicle-info-item {
+        display: flex;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .vehicle-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .vehicle-info-item strong {
+        min-width: 150px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: capitalize;
+    }
+
+    .vehicle-info-item span {
+        flex: 1;
+        font-size: 1rem;
+        color: #1a202c;
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .vehicle-card {
+            flex-direction: column !important;
+        }
+
+        .vehicle-image-container {
+            width: 100%;
+            padding: 25px;
+        }
+
+        .vehicle-image {
+            height: 280px !important;
+        }
+
+        .vehicle-info {
+            padding: 30px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .vehicle-details-section h3 {
+            font-size: 1.5rem;
+        }
+
+        .vehicle-image-container {
+            padding: 20px;
+        }
+
+        .vehicle-image {
+            height: 240px !important;
+        }
+
+        .sub-images {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+        }
+
+        .sub-images img {
+            height: 100px !important;
+        }
+
+        .vehicle-info {
+            padding: 25px;
+        }
+
+        .vehicle-name {
+            font-size: 1.4rem;
+        }
+
+        .vehicle-info-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 12px 0;
+        }
+
+        .vehicle-info-item strong {
+            min-width: auto;
+            font-size: 0.85rem;
+        }
+
+        .vehicle-info-item span {
+            font-size: 0.95rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .vehicle-image-container {
+            padding: 15px;
+        }
+
+        .vehicle-image {
+            height: 220px !important;
+        }
+
+        .sub-images img {
+            height: 85px !important;
+        }
+
+        .vehicle-info {
+            padding: 20px;
+        }
+    }
+
+    /* Print Optimization */
+    @media print {
+        .vehicle-details-section {
+            margin: 30px 0;
+        }
+
+        .vehicle-card {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            margin-bottom: 30px;
+            border: 1px solid #cbd5e0 !important;
+        }
+    }
+
+    /* Empty State */
+    .vehicle-cards:empty::before {
+        content: 'No vehicles available';
+        display: block;
+        text-align: center;
+        padding: 40px 20px;
+        color: #94a3b8;
+        font-size: 1rem;
+        font-style: italic;
+    }
+
     .theme-grid {
         font-size: 1rem;
         /* same as text-base */
@@ -971,7 +1235,7 @@
 
 
                             <!-- Highlights -->
-                            <?php if($itinerary->highlights->isNotEmpty()): ?>
+                            <?php if($package->hilight_show_hide == 1 && $itinerary->highlights->isNotEmpty()): ?>
                                 <div class="highlights-section">
                                     <h3 class="section-title"><?php echo e($itinerary->place_name); ?> Highlights</h3>
                                     <div class="highlights-grid">
@@ -1057,6 +1321,89 @@
                         </div>
                     <?php endif; ?>
 
+
+                    <?php if($package->packageVehicles && $package->packageVehicles->isNotEmpty()): ?>
+                        <div class="vehicle-details-section">
+                            <h2>Vehicle Details</h2>
+
+                            <div class="vehicle-cards">
+                                <?php $__currentLoopData = $package->packageVehicles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vehicle): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
+                                        $defaultVehicleImage = asset('images/no-vehicle.jpg');
+                                        $vehicleImage = $vehicle->vehicle_image
+                                            ? asset('storage/' . ltrim($vehicle->vehicle_image, '/'))
+                                            : $defaultVehicleImage;
+
+                                        $subImages = [];
+                                        if (!empty($vehicle->sub_image)) {
+                                            $subImages = is_array($vehicle->sub_image)
+                                                ? $vehicle->sub_image
+                                                : json_decode($vehicle->sub_image, true);
+                                        }
+                                    ?>
+
+                                    <div class="vehicle-card">
+                                        <!-- Images -->
+                                        <div class="vehicle-image-container">
+                                            <div class="vehicle-main-image-wrapper">
+                                                <img src="<?php echo e($vehicleImage); ?>"
+                                                    alt="<?php echo e($vehicle->make ?? 'Vehicle'); ?> <?php echo e($vehicle->model ?? ''); ?>"
+                                                    class="vehicle-image" loading="lazy">
+                                            </div>
+
+                                            <?php if(!empty($subImages) && is_array($subImages)): ?>
+                                                <div class="sub-images">
+                                                    <?php $__currentLoopData = array_slice($subImages, 0, 4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $subImg): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <img src="<?php echo e(asset('storage/' . ltrim($subImg, '/'))); ?>"
+                                                            alt="Vehicle view <?php echo e($index + 1); ?>" loading="lazy">
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+
+                                        <!-- Vehicle Info -->
+                                        <div class="vehicle-info">
+                                            <div class="vehicle-info-header">
+                                                <h4 class="vehicle-name"><?php echo e($vehicle->name ?? 'Vehicle Name'); ?></h4>
+                                                <p class="vehicle-subtitle"><?php echo e($vehicle->make ?? ''); ?>
+
+                                                    <?php echo e($vehicle->model ?? ''); ?></p>
+                                            </div>
+
+                                            <div class="vehicle-info-list">
+                                                <div class="vehicle-info-item">
+                                                    <strong>Make</strong>
+                                                    <span><?php echo e($vehicle->make ?? 'Not specified'); ?></span>
+                                                </div>
+
+                                                <div class="vehicle-info-item">
+                                                    <strong>Model</strong>
+                                                    <span><?php echo e($vehicle->model ?? 'Not specified'); ?></span>
+                                                </div>
+
+                                                <div class="vehicle-info-item">
+                                                    <strong>Seats Available</strong>
+                                                    <span><?php echo e($vehicle->seats ?? 'Not specified'); ?></span>
+                                                </div>
+
+                                                <div class="vehicle-info-item">
+                                                    <strong>Max Capacity</strong>
+                                                    <span><?php echo e($vehicle->max_seating_capacity ?? 'Not specified'); ?>
+
+                                                        passengers</span>
+                                                </div>
+
+                                                <div class="vehicle-info-item">
+                                                    <strong>Condition</strong>
+                                                    <span><?php echo e(ucfirst($vehicle->condition ?? 'Not specified')); ?></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
 
                     <!-- Inclusions -->
 

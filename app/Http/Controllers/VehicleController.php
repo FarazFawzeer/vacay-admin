@@ -35,17 +35,29 @@ class VehicleController extends Controller
             'label'                 => 'nullable|string|max:255',
             'name'                  => 'required|string|max:255',
             'availability'          => 'nullable|boolean',
-            'vehicle_image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'vehicle_image'         => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'sub_image'             => 'nullable|array|max:4',
+            'sub_image.*'           => 'image|mimes:jpg,jpeg,png,webp',
             'type'                  => 'nullable|string|max:100',
             'status'                => 'required',
         ]);
 
-        $data = $request->except('vehicle_image');
+        $data = $request->except(['vehicle_image', 'sub_image']);
 
-        // Handle image upload
+        // ✅ Handle main vehicle image upload
         if ($request->hasFile('vehicle_image')) {
             $path = $request->file('vehicle_image')->store('vehicles', 'public');
             $data['vehicle_image'] = $path;
+        }
+
+        // ✅ Handle multiple sub images upload
+        if ($request->hasFile('sub_image')) {
+            $subImages = [];
+            foreach ($request->file('sub_image') as $file) {
+                $path = $file->store('vehicles/sub_images', 'public');
+                $subImages[] = $path;
+            }
+            $data['sub_image'] = $subImages; // JSON encoded automatically
         }
 
         $vehicle = VehicleDetail::create($data);
@@ -78,17 +90,45 @@ class VehicleController extends Controller
             'label'                 => 'nullable|string|max:255',
             'name'                  => 'required|string|max:255',
             'availability'          => 'nullable|boolean',
-            'vehicle_image'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'vehicle_image'         => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'sub_image'             => 'nullable|array|max:4',
+            'sub_image.*'           => 'image|mimes:jpg,jpeg,png,webp',
             'type'                  => 'nullable|string|max:100',
             'status'                => 'required',
         ]);
 
-        $data = $request->except('vehicle_image');
+        $data = $request->except(['vehicle_image', 'sub_image']);
 
-        // Update image if uploaded
+        // ✅ Update main image if uploaded
         if ($request->hasFile('vehicle_image')) {
+            // delete old image if exists
+            if ($vehicle->vehicle_image && \Storage::disk('public')->exists($vehicle->vehicle_image)) {
+                \Storage::disk('public')->delete($vehicle->vehicle_image);
+            }
+
             $path = $request->file('vehicle_image')->store('vehicles', 'public');
             $data['vehicle_image'] = $path;
+        }
+
+        // ✅ Replace sub images if new ones uploaded
+        if ($request->hasFile('sub_image')) {
+            // delete old sub images
+            if (!empty($vehicle->sub_image)) {
+                foreach ($vehicle->sub_image as $oldImg) {
+                    if (\Storage::disk('public')->exists($oldImg)) {
+                        \Storage::disk('public')->delete($oldImg);
+                    }
+                }
+            }
+
+            // upload new sub images
+            $newImages = [];
+            foreach ($request->file('sub_image') as $file) {
+                $path = $file->store('vehicles/sub_images', 'public');
+                $newImages[] = $path;
+            }
+
+            $data['sub_image'] = $newImages;
         }
 
         $vehicle->update($data);
@@ -99,6 +139,7 @@ class VehicleController extends Controller
             'vehicle' => $vehicle,
         ]);
     }
+
 
     // Delete vehicle (AJAX)
     public function destroy($id)
