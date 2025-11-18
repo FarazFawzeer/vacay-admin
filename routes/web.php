@@ -64,7 +64,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     //Vehicle INV bookings
 
     Route::get('vehicle-bookings', [VehicleInvBookingController::class, 'index'])->name('vehicle-bookings.index');
-    Route::get('vehicle-bookings/{booking}', [VehicleInvBookingController::class, 'show'])->name('vehicle-bookings.show');
+    Route::get('vehicle-bookings/show/{booking}', [VehicleInvBookingController::class, 'show'])->name('vehicle-bookings.show');
     Route::get('vehicle-bookings/{booking}/edit', [VehicleInvBookingController::class, 'edit'])->name('vehicle-bookings.edit');
     Route::put('vehicle-bookings/{booking}', [VehicleInvBookingController::class, 'update'])->name('vehicle-bookings.update');
     Route::delete('vehicle-bookings/{booking}', [VehicleInvBookingController::class, 'destroy'])->name('vehicle-bookings.destroy');

@@ -1,14 +1,14 @@
-@extends('layouts.vertical', ['subtitle' => 'Tour Bookings'])
 
-@section('content')
-    @include('layouts.partials.page-title', ['title' => 'Tour Bookings', 'subtitle' => 'View'])
+
+<?php $__env->startSection('content'); ?>
+    <?php echo $__env->make('layouts.partials.page-title', ['title' => 'Tour Bookings', 'subtitle' => 'View'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <style>
-        .status-dropdown-btn {
-            min-width: 110px;
-            /* adjust width as needed */
-            text-align: center;
-        }
+
+            .status-dropdown-btn {
+        min-width: 110px;  /* adjust width as needed */
+        text-align: center;
+    }
 
         .btn-equal {
             width: 80px;
@@ -39,26 +39,28 @@
                 <p class="card-subtitle mb-0">All tour bookings in your system.</p>
             </div>
             <div>
-                <a href="{{ route('admin.tour-quotations.create') }}" class="btn btn-primary">
+                <a href="<?php echo e(route('admin.tour-quotations.create')); ?>" class="btn btn-primary">
                     </i> Add Booking
                 </a>
             </div>
         </div>
 
         <div class="card-body">
-            {{-- Success / Error Alerts --}}
-            @if (session('success'))
+            
+            <?php if(session('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
+                    <?php echo e(session('success')); ?>
+
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
-            @if (session('error'))
+            <?php endif; ?>
+            <?php if(session('error')): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
+                    <?php echo e(session('error')); ?>
+
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Filters -->
             <!-- Filters -->
@@ -82,7 +84,7 @@
 
             <!-- Table -->
             <div class="table-responsive" id="bookingTable">
-                @include('bookings.tour_table')
+                <?php echo $__env->make('bookings.tour_table', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
             </div>
         </div>
     </div>
@@ -94,7 +96,7 @@
 
             function fetchFilteredData(url = null) {
                 // Ensure url is a string
-                url = url || "{{ route('admin.tour-bookings.index') }}";
+                url = url || "<?php echo e(route('admin.tour-bookings.index')); ?>";
 
                 let params = new URLSearchParams({
                     status: statusSelect.value,
@@ -131,51 +133,50 @@
                 }
             });
         });
+
+        
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.change-status').forEach(function(el) {
-                el.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const bookingId = this.dataset.id;
-                    const newStatus = this.dataset.status;
+    document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.change-status').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            e.preventDefault();
+            const bookingId = this.dataset.id;
+            const newStatus = this.dataset.status;
 
-                    fetch(`/admin/tour-bookings/${bookingId}/status`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                status: newStatus
-                            })
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.success) {
-                                const btn = document.getElementById(
-                                    `statusDropdown${bookingId}`);
-                                btn.textContent = newStatus.charAt(0).toUpperCase() + newStatus
-                                    .slice(1);
-                                btn.className =
-                                    'btn btn-sm status-dropdown-btn dropdown-toggle ' + (
-                                        newStatus === 'quotation' ? 'btn-secondary' :
-                                        newStatus === 'invoiced' ? 'btn-info' :
-                                        newStatus === 'confirmed' ? 'btn-primary' :
-                                        newStatus === 'completed' ? 'btn-success' :
-                                        newStatus === 'cancelled' ? 'btn-danger' :
-                                        'btn-secondary'
-                                    );
+            fetch(`/admin/tour-bookings/${bookingId}/status`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                   const btn = document.getElementById(`statusDropdown${bookingId}`);
+btn.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+btn.className = 'btn btn-sm status-dropdown-btn dropdown-toggle ' + (
+    newStatus === 'quotation' ? 'btn-secondary' :
+    newStatus === 'invoiced' ? 'btn-info' :
+    newStatus === 'confirmed' ? 'btn-primary' :
+    newStatus === 'completed' ? 'btn-success' :
+    newStatus === 'cancelled' ? 'btn-danger' : 'btn-secondary'
+);
 
-                                // Optional: small toast/alert
-                                // alert('Status updated successfully!');
-                            } else {
-                                alert('Failed to update status.');
-                            }
-                        });
-                });
+                    // Optional: small toast/alert
+                    // alert('Status updated successfully!');
+                } else {
+                    alert('Failed to update status.');
+                }
             });
         });
-    </script>
-@endsection
+    });
+});
+
+</script>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.vertical', ['subtitle' => 'Tour Bookings'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH F:\Personal Projects\Vacay Guider\vacay-admin\resources\views/bookings/tour_view.blade.php ENDPATH**/ ?>
