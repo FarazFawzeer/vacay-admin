@@ -1,0 +1,42 @@
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Vehicle</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Message</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @forelse($bookings as $item)
+            <tr>
+                <td>{{ $item->full_name }}</td>
+                <td>{{ $item->email }}</td>
+                <td>{{ $item->phone }}</td>
+                <td>{{ optional($item->vehicle)->title ?? 'N/A' }}</td>
+                <td>{{ $item->start_date?->format('Y-m-d') }}</td>
+                <td>{{ $item->end_date?->format('Y-m-d') }}</td>
+                <td>{{ $item->message }}</td>
+
+                <td>
+                    <select class="form-select form-select-sm changeStatus" data-id="{{ $item->id }}">
+                        <option value="pending" {{ $item->status=='pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="viewed" {{ $item->status=='viewed' ? 'selected' : '' }}>Viewed</option>
+                        <option value="completed" {{ $item->status=='completed' ? 'selected' : '' }}>Completed</option>
+                    </select>
+                </td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="8" class="text-center">No vehicle bookings found.</td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+
+{{ $bookings->links() }}

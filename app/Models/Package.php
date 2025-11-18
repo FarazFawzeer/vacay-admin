@@ -70,4 +70,15 @@ class Package extends Model
     {
         return $this->hasMany(PackageVehicle::class, 'package_id');
     }
+
+    public function inclusions()
+    {
+        return $this->belongsToMany(Inclusion::class, 'package_inclusions', 'package_id', 'inclusion_id');
+    }
+
+
+    public function packageInclusions()
+{
+    return $this->hasMany(PackageInclusion::class, 'package_id');
+}
 }

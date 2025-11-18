@@ -21,7 +21,8 @@ use Spatie\LaravelPdf\Enums\Format;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Facades\View; // Need to import View
 use Illuminate\Support\Facades\File;
-
+use App\Models\Inclusion;
+use App\Models\PackageInclusion;
 
 class PackageController extends Controller
 {
@@ -42,7 +43,6 @@ class PackageController extends Controller
             $query->where('status', $status);
         }
 
-
         $packages = $query->paginate(10)->appends($request->all()); // ✅ keep filters with pagination
 
         if ($request->ajax()) {
@@ -52,9 +52,16 @@ class PackageController extends Controller
         $types = Package::select('type')->distinct()->pluck('type');
         $categories = Package::select('tour_category')->distinct()->pluck('tour_category');
 
-        return view('tour.view', compact('packages', 'types', 'categories'));
-    }
+        // Pass current filter values for setting default selection in the view
+        $currentFilters = [
+            'type' => $request->type,
+            'category' => $request->category,
+            'status' => $request->status,
+        ];
 
+        return view('tour.view', compact('packages', 'types', 'categories', 'currentFilters'));
+        // Make sure to pass 'currentFilters'
+    }
 
 
     public function create()
@@ -63,7 +70,9 @@ class PackageController extends Controller
         $hotels = Hotel::all();
         $vehicles = VehicleDetail::where('status', 1)->get(['id', 'name', 'make', 'model', 'seats', 'air_conditioned', 'condition', 'vehicle_image', 'sub_image', 'type']);
 
-        return view('tour.create', compact('destinations', 'hotels', 'vehicles'));
+        $inclusions = Inclusion::whereIn('type', ['inclusion', 'exclusion', 'cancellation'])->get();
+
+        return view('tour.create', compact('destinations', 'hotels', 'vehicles', 'inclusions'));
     }
 
     public function store(Request $request)
@@ -137,7 +146,7 @@ class PackageController extends Controller
             'status' => $request->status,
             'picture' => $mainPicturePath,
             'map_image' => $mapImagePath,
-            'hilight_show_hide' => $request->has('hilight_show_hide') ? 1 : 0, 
+            'hilight_show_hide' => $request->has('hilight_show_hide') ? 1 : 0,
         ]);
 
         // === Tour Summaries ===
@@ -263,6 +272,19 @@ class PackageController extends Controller
         }
 
 
+        if ($request->has('package_inclusions')) {
+            foreach ($request->package_inclusions as $incluData) {
+                PackageInclusion::create([
+                    'package_id'   => $package->id,
+                    'heading'      => $incluData['heading'] ?? null,
+                    'points'       => isset($incluData['points']) ? json_encode(array_values($incluData['points'])) : json_encode([]),
+                    'note'         => $incluData['note'] ?? null,
+                    'type'         => $incluData['type'] ?? null,
+                    'inclusion_id' => Inclusion::where('type', $incluData['type'])->value('id'), // link to master
+                ]);
+            }
+        }
+
         return redirect()->back()->with('success', 'Tour Package created successfully!');
     }
 
@@ -283,7 +305,13 @@ class PackageController extends Controller
 
         $selectedVehicleId = $package->packageVehicle->vehicle_id ?? null;
 
-        return view('tour.edit', compact('package', 'destinations', 'hotels', 'vehicles', 'packageVehicle'));
+        $inclusions = $package->packageInclusions->map(function ($item) {
+            $item->points = json_decode($item->points, true) ?? [];
+            return $item;
+        });
+
+
+        return view('tour.edit', compact('package', 'destinations', 'hotels', 'vehicles', 'packageVehicle', 'inclusions'));
     }
 
     // For update
@@ -305,7 +333,7 @@ class PackageController extends Controller
             'status' => 'nullable',
             'main_picture' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
             'map_image' => 'nullable|image|mimes:jpg,jpeg,png,svg,gif',
-           'special_feature' => 'nullable|boolean',
+            'special_feature' => 'nullable|boolean',
         ]);
 
         $package = Package::findOrFail($id);
@@ -479,6 +507,25 @@ class PackageController extends Controller
         }
 
 
+        // === Update Package Inclusions ===
+        if ($request->has('package_inclusions')) {
+            // Delete existing inclusions for this package first
+            PackageInclusion::where('package_id', $package->id)->delete();
+
+            // Re-insert updated inclusions
+            foreach ($request->package_inclusions as $incluData) {
+                PackageInclusion::create([
+                    'package_id'   => $package->id,
+                    'heading'      => $incluData['heading'] ?? null,
+                    'points'       => isset($incluData['points']) ? json_encode(array_values($incluData['points'])) : json_encode([]),
+                    'note'         => $incluData['note'] ?? null,
+                    'type'         => $incluData['type'] ?? null,
+                    'inclusion_id' => Inclusion::where('type', $incluData['type'])->value('id'), // link to master table
+                ]);
+            }
+        }
+
+
         return redirect()->back()->with('success', 'Tour Package updated successfully!');
     }
 
@@ -503,7 +550,8 @@ class PackageController extends Controller
         $package = Package::with([
             'tourSummaries',
             'detailItineraries.highlights',
-            'packageVehicles'
+            'packageVehicles',
+            'packageInclusions'
         ])->findOrFail($id);
 
 
@@ -538,13 +586,17 @@ class PackageController extends Controller
             return $itinerary;
         });
 
+        $packageInclusions = $package->packageInclusions->map(function ($item) {
+            $item->points = json_decode($item->points, true) ?? [];
+            return $item;
+        });
 
-        return view('tour.show', compact('package', 'tourSummaries'));
+        return view('tour.show', compact('package', 'tourSummaries','packageInclusions'));
     }
 
     public function downloadPackagePdf($id)
     {
-        $package = Package::with(['detailItineraries.highlights', 'packageVehicles'])->findOrFail($id);
+        $package = Package::with(['detailItineraries.highlights', 'packageVehicles','packageInclusions'])->findOrFail($id);
         $tourSummaries = TourSummary::where('package_id', $id)->get();
 
         // 🔹 Decode itinerary program_points and highlight images
@@ -563,10 +615,13 @@ class PackageController extends Controller
             return $itinerary;
         });
 
+        
+
         // 🔹 Render Blade to HTML
         $htmlContent = View::make('tour.pdf.package', [
             'package' => $package,
             'tourSummaries' => $tourSummaries,
+            'packageInclusions' => $package->packageInclusions,
             'slot' => '',
         ])->render();
 

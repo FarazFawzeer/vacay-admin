@@ -230,6 +230,55 @@
                     </div>
                 </div>
 
+                {{-- Inclusion / Exclusion / Cancellation Section --}}
+                {{-- Inclusion / Exclusion / Cancellation Section --}}
+                <div class="card mt-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Inclusions / Exclusions / Cancellation</h5>
+                    </div>
+
+                    <div class="card-body">
+                        @foreach ($inclusions as $index => $item)
+                            <div class="mb-4 border-bottom pb-3">
+                                <h6 class="fw-bold text-capitalize text-primary">{{ ucfirst($item->type) }}</h6>
+
+                                {{-- Heading --}}
+                                <div class="mb-2">
+                                    <label><strong>Heading:</strong></label>
+                                    <input type="text" name="package_inclusions[{{ $index }}][heading]"
+                                        class="form-control"
+                                        value="{{ old('package_inclusions.' . $index . '.heading', $item->heading) }}">
+                                </div>
+
+                                {{-- Points --}}
+                                <label><strong>Points:</strong></label>
+                                <div class="points-wrapper mb-2">
+                                    @foreach ($item->points as $pIndex => $point)
+                                        <div class="d-flex mb-2">
+                                            <input type="text"
+                                                name="package_inclusions[{{ $index }}][points][{{ $pIndex }}]"
+                                                value="{{ $point }}" class="form-control me-2">
+                                            <button type="button" class="btn btn-danger btn-sm remove-point">X</button>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <button type="button" class="btn btn-outline-primary btn-sm add-point">+ Add
+                                    Point</button>
+
+                                {{-- Note --}}
+                                <div class="mt-3">
+                                    <label><strong>Note:</strong></label>
+                                    <textarea name="package_inclusions[{{ $index }}][note]" class="form-control" rows="2">{{ $item->note }}</textarea>
+                                </div>
+
+                                <input type="hidden" name="package_inclusions[{{ $index }}][type]"
+                                    value="{{ $item->type }}">
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">
                     <button type="submit" class="btn btn-success">Create Package</button>
@@ -363,7 +412,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                                                 <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                                                             <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>
@@ -546,5 +595,27 @@
                 setTimeout(() => alert.remove(), 500); // remove from DOM after fade
             });
         }, 3000);
+
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('add-point')) {
+                const wrapper = e.target.closest('.mb-4').querySelector('.points-wrapper');
+                const index = wrapper.querySelectorAll('input').length;
+                const groupIndex = e.target.closest('.mb-4').querySelectorAll('input[name^="package_inclusions"]')
+                    .item(0)
+                    ?.name.match(/\d+/)[0];
+                const input = document.createElement('div');
+                input.classList.add('d-flex', 'mb-2');
+                input.innerHTML = `
+            <input type="text" name="package_inclusions[${groupIndex}][points][${index}]" class="form-control me-2">
+            <button type="button" class="btn btn-danger btn-sm remove-point">X</button>
+        `;
+                wrapper.appendChild(input);
+            }
+
+            if (e.target.classList.contains('remove-point')) {
+                e.target.closest('.d-flex').remove();
+            }
+        });
     </script>
 @endsection

@@ -53,6 +53,7 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+    'fe_domain' => env('FE_DOMAIN', 'https://vacayguider.com'),
 
     /*
     |--------------------------------------------------------------------------

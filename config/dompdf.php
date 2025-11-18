@@ -20,6 +20,10 @@ return [
      */
     'convert_entities' => true,
 
+    'remote_enabled' => true,
+
+    'chroot' => base_path(),
+    
     'options' => [
         /**
          * The location of the DOMPDF font directory

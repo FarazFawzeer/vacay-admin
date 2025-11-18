@@ -30,12 +30,12 @@
                     </a>
                </li> --}}
 
-            {{-- admin --}}
+            {{-- Admin --}}
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#sidebarAdmin" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarAdmin">
                     <span class="nav-icon">
-                        <iconify-icon icon="solar:user-circle-outline"></iconify-icon>
+                        <iconify-icon icon="mdi:account-cog-outline"></iconify-icon>
                     </span>
                     <span class="nav-text"> Admin</span>
                 </a>
@@ -47,8 +47,6 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.users.index') }}">View </a>
                         </li>
-
-
                     </ul>
                 </div>
             </li>
@@ -58,7 +56,7 @@
                 <a class="nav-link menu-arrow" href="#sidebarCustomer" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarCustomer">
                     <span class="nav-icon">
-                        <iconify-icon icon="solar:user-circle-outline"></iconify-icon>
+                        <iconify-icon icon="mdi:account-multiple-outline"></iconify-icon>
                     </span>
                     <span class="nav-text"> Customer</span>
                 </a>
@@ -70,9 +68,65 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.customers.index') }}">View </a>
                         </li>
-
-
                     </ul>
+                </div>
+            </li>
+
+            {{-- Enquiry --}}
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#sidebarEnquiry" data-bs-toggle="collapse" role="button"
+                    aria-expanded="false" aria-controls="sidebarEnquiry">
+                    <span class="nav-icon">
+                        <iconify-icon icon="solar:question-circle-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Enquiry</span>
+                </a>
+                <div class="collapse" id="sidebarEnquiry">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.enquiry.tours') }}">
+                                <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
+                                Tours
+                            </a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.enquiry.customTour') }}">
+                                <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
+                                Custom Tour
+                            </a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.enquiry.rentVehicle') }}">
+                                <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
+                                Rent Vehicle
+                            </a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.enquiry.transport') }}">
+                                <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
+                                Transport
+                            </a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.enquiry.airTicket') }}">
+                                <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
+                                Air Ticket Inquiries
+                            </a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.enquiry.drivingPermit') }}">
+                                <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
+                                Driving Permit Request
+                            </a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.enquiry.contactUs') }}">
+                                <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
+                                Contact Us
+                            </a>
+                        </li>
+                    </ul>
+
                 </div>
             </li>
 
@@ -81,29 +135,32 @@
                 <a class="nav-link menu-arrow" href="#sidebarAddDeatails" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarAddDeatails">
                     <span class="nav-icon">
-                        <iconify-icon icon="solar:share-circle-outline"></iconify-icon>
+                        <iconify-icon icon="mdi:folder-plus-outline"></iconify-icon>
                     </span>
                     <span class="nav-text"> Add Details</span>
                 </a>
                 <div class="collapse" id="sidebarAddDeatails">
                     <ul class="nav sub-navbar-nav">
                         <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="{{ route('admin.destinations.create') }}">Tour Destination</a>
+                            <a class="sub-nav-link" href="{{ route('admin.destinations.create') }}">Tour
+                                Destination</a>
                         </li>
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.destination-highlights.index') }}">Tour
-                                Hilights</a>
+                                Highlights</a>
                         </li>
-
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.hotels.index') }}">Hotels</a>
                         </li>
-
-
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.vehicles.index') }}">Vehicles</a>
                         </li>
-
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.visa.index') }}">Visa</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.inclusions.index') }}">Inclusions</a>
+                        </li>
                     </ul>
                 </div>
             </li>
@@ -113,7 +170,7 @@
                 <a class="nav-link menu-arrow" href="#sidebarTourPackage" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarTourPackage">
                     <span class="nav-icon">
-                        <iconify-icon icon="solar:window-frame-outline"></iconify-icon>
+                        <iconify-icon icon="mdi:package-variant-closed"></iconify-icon>
                     </span>
                     <span class="nav-text"> Tour Package</span>
                 </a>
@@ -129,12 +186,41 @@
                 </div>
             </li>
 
+            {{-- Bookings --}}
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#sidebarbookings" data-bs-toggle="collapse" role="button"
+                    aria-expanded="false" aria-controls="sidebarbookings">
+                    <span class="nav-icon">
+                        <iconify-icon icon="mdi:calendar-check-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text">Bookings</span>
+                </a>
+                <div class="collapse" id="sidebarbookings">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.tour-bookings.index') }}">Tours</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.rent-vehicle-bookings.index') }}">Rent
+                                Vehicles</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.vehicle-bookings.index') }}">Transport
+                                Solutions</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.visa-bookings.index') }}">Visa</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             {{-- Blog Post --}}
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#blogpost" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="blogpost">
                     <span class="nav-icon">
-                        <iconify-icon icon="solar:share-circle-outline"></iconify-icon>
+                        <iconify-icon icon="mdi:file-document-outline"></iconify-icon>
                     </span>
                     <span class="nav-text"> Blog Post</span>
                 </a>
@@ -146,21 +232,18 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.blogs.index') }}">View</a>
                         </li>
-
-
                     </ul>
                 </div>
             </li>
 
-
-            {{-- Customer --}}
+            {{-- Testimonial --}}
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#testimonial" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="testimonial">
                     <span class="nav-icon">
-                        <iconify-icon icon="solar:user-circle-outline"></iconify-icon>
+                        <iconify-icon icon="mdi:comment-account-outline"></iconify-icon>
                     </span>
-                    <span class="nav-text"> Testimonilal</span>
+                    <span class="nav-text"> Testimonial</span>
                 </a>
                 <div class="collapse" id="testimonial">
                     <ul class="nav sub-navbar-nav">
@@ -168,22 +251,22 @@
                             <a class="sub-nav-link" href="{{ route('admin.testimonials.create') }}">Create</a>
                         </li>
                         <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="{{ route('admin.testimonials.index') }}">View </a>
+                            <a class="sub-nav-link" href="{{ route('admin.testimonials.index') }}">View</a>
                         </li>
-
-
                     </ul>
                 </div>
             </li>
+
+            {{-- Profile --}}
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.profile.edit') }}">
                     <span class="nav-icon">
-                        <iconify-icon icon="solar:widget-2-outline"></iconify-icon>
+                        <iconify-icon icon="mdi:account-circle-outline"></iconify-icon>
                     </span>
                     <span class="nav-text"> Profile </span>
-
                 </a>
             </li>
+
 
             {{-- <li class="nav-item">
                     <a class="nav-link menu-arrow" href="#sidebarAuthentication" data-bs-toggle="collapse" role="button"

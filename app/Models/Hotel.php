@@ -13,5 +13,15 @@ class Hotel extends Model
         'hotel_name',
         'star',
         'status',
+        'room_type',
+        'meal_plan',
+        'description',
+        'facilities',
+        'entertainment',
+        'pictures',
+    ];
+
+    protected $casts = [
+        'pictures' => 'array', // so you can store/retrieve multiple images easily
     ];
 }

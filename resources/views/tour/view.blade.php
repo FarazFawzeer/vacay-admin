@@ -50,24 +50,37 @@
             <!-- Filters -->
             <!-- Filters -->
             <div class="row mb-3 justify-content-end">
-                <div class="col-md-3">
-                    <label for="filterType" class="form-label">Type</label>
-                    <select id="filterType" class="form-select">
-                        <option value="">All</option>
-                        @foreach ($types as $type)
-                            <option value="{{ $type }}">{{ ucfirst($type) }}</option>
-                        @endforeach
-                    </select>
-                </div>
+        <div class="col-md-3">
+        <label for="filterType" class="form-label">Type</label>
+        <select id="filterType" class="form-select">
+            <option value="">All</option>
+            @foreach ($types as $type)
+                <option value="{{ $type }}" {{ ($currentFilters['type'] ?? '') === $type ? 'selected' : '' }}>
+                    {{ ucfirst($type) }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-                <div class="col-md-3">
-                    <label for="filterStatus" class="form-label">Status</label>
-                    <select id="filterStatus" class="form-select">
-                        <option value="">All</option>
-                        <option value="active">Published</option>
-                        <option value="inactive">Unpublished</option>
-                    </select>
-                </div>
+    <div class="col-md-3">
+        <label for="filterCategory" class="form-label">Category</label>
+        <select id="filterCategory" class="form-select">
+            <option value="">All</option>
+            @foreach ($categories as $category)
+                <option value="{{ $category }}" {{ ($currentFilters['category'] ?? '') === $category ? 'selected' : '' }}>
+                    {{ ucfirst($category) }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="filterStatus" class="form-label">Status</label>
+        <select id="filterStatus" class="form-select">
+            <option value="">All</option>
+            <option value="active" {{ ($currentFilters['status'] ?? '') === 'active' ? 'selected' : '' }}>Published</option>
+            <option value="inactive" {{ ($currentFilters['status'] ?? '') === 'inactive' ? 'selected' : '' }}>Unpublished</option>
+        </select>
+    </div>
             </div>
 
 
@@ -81,57 +94,111 @@
     </div>
 
     <script>
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.classList.remove('show');
-                alert.classList.add('hide');
-                setTimeout(() => alert.remove(), 500);
+        document.addEventListener('DOMContentLoaded', function() {
+            const typeSelect = document.getElementById('filterType');
+            const categorySelect = document.getElementById('filterCategory');
+            const statusSelect = document.getElementById('filterStatus');
+
+            function fetchFilteredData(url = null) {
+                let params = new URLSearchParams({
+                    type: typeSelect.value,
+                    category: categorySelect.value,
+                    status: statusSelect.value
+                });
+
+                url = url || "{{ route('admin.packages.index') }}";
+                if (url.includes('?')) {
+                    url += `&${params.toString()}`;
+                } else {
+                    url += `?${params.toString()}`;
+                }
+
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(res => res.text())
+                    .then(data => {
+                        document.getElementById('packageTable').innerHTML = data;
+                        attachDeleteEvents();
+                    });
+            }
+
+            // Pagination clicks
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('#packageTable .pagination a')) {
+                    e.preventDefault();
+                    let url = e.target.getAttribute('href');
+                    fetchFilteredData(url);
+                }
             });
-        }, 3000);
 
-      document.addEventListener('DOMContentLoaded', function() {
-    const typeSelect = document.getElementById('filterType');
-    const statusSelect = document.getElementById('filterStatus');
-    const tableContainer = document.getElementById('packageTable');
 
-    function fetchFilteredData(url = null) {
-        url = url || "{{ route('admin.blogs.index') }}";
+            typeSelect.addEventListener('change', function() {
+                fetchFilteredData();
+            });
+            categorySelect.addEventListener('change', function() {
+                fetchFilteredData();
+            });
+            statusSelect.addEventListener('change', function() {
+                fetchFilteredData();
+            });
+            // AJAX Pagination
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('#packageTable .pagination a')) {
+                    e.preventDefault();
+                    let url = e.target.getAttribute('href');
+                    fetchFilteredData(url);
+                }
+            });
 
-        const params = new URLSearchParams({
-            type: typeSelect.value || '',
-            status: statusSelect.value || ''
+            // Delete Package
+            function attachDeleteEvents() {
+                document.querySelectorAll('.delete-package').forEach(button => {
+                    button.addEventListener('click', function() {
+                        let packageId = this.dataset.id;
+
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "You won't be able to revert this!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Yes, delete it!'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch("{{ url('admin/packages') }}/" + packageId, {
+                                        method: 'DELETE',
+                                        headers: {
+                                            'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                                            'Accept': 'application/json'
+                                        },
+                                        credentials: 'same-origin'
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            document.getElementById('package-' +
+                                                packageId).remove();
+                                            Swal.fire('Deleted!', data.message,
+                                                'success');
+                                        } else {
+                                            Swal.fire('Error!', data.message ||
+                                                'Something went wrong!', 'error');
+                                        }
+                                    })
+                                    .catch(() => Swal.fire('Error!',
+                                        'Something went wrong!', 'error'));
+                            }
+                        });
+                    });
+                });
+            }
+
+            attachDeleteEvents();
         });
-
-        // Append params to URL safely
-        url = url.split('?')[0] + '?' + params.toString();
-
-        fetch(url, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' },
-            credentials: 'same-origin'
-        })
-        .then(res => res.text())
-        .then(data => {
-            tableContainer.innerHTML = data;
-        })
-        .catch(err => console.error('AJAX fetch error:', err));
-    }
-
-    // Listen for filter changes
-    [typeSelect, statusSelect].forEach(el => {
-        if (el) el.addEventListener('change', fetchFilteredData);
-    });
-
-    // Pagination links inside table
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('#packageTable .pagination a')) {
-            e.preventDefault();
-            const url = e.target.getAttribute('href');
-            fetchFilteredData(url);
-        }
-    });
-});
-
-
     </script>
 @endsection

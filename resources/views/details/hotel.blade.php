@@ -67,6 +67,50 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="room_type" class="form-label">Room Type</label>
+                            <input type="text" name="room_type" id="room_type" class="form-control"
+                                placeholder="Ex: Deluxe, Suite">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="meal_plan" class="form-label">Meal Plan</label>
+                            <input type="text" name="meal_plan" id="meal_plan" class="form-control"
+                                placeholder="Ex: Bed & Breakfast">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea name="description" id="description" rows="3" class="form-control"
+                                placeholder="Short description about the hotel"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="facilities" class="form-label">Facilities</label>
+                            <textarea name="facilities" id="facilities" rows="2" class="form-control" placeholder="List of facilities"></textarea>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="entertainment" class="form-label">Entertainment</label>
+                            <textarea name="entertainment" id="entertainment" rows="2" class="form-control"
+                                placeholder="List of entertainment options"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="pictures" class="form-label">Hotel Pictures</label>
+                            <input type="file" name="pictures[]" id="pictures" class="form-control" multiple
+                                accept="image/*">
+                            <small class="text-muted">You can upload multiple images.</small>
+                        </div>
+                    </div>
+
                     {{-- Status --}}
                     <div class="row">
                         <div class="col-md-12 mb-3">
@@ -95,6 +139,11 @@
                             <tr>
                                 <th>Hotel Name</th>
                                 <th>Star</th>
+                                <th>Room Type</th>
+                                <th>Meal Plan</th>
+                                <th>Facilities</th>
+                                <th>Entertainment</th>
+                                <th>Pictures</th>
                                 <th>Status</th>
                                 <th>Updated At</th>
                                 <th>Action</th>
@@ -105,6 +154,20 @@
                                 <tr id="hotel-{{ $hotel->id }}">
                                     <td>{{ $hotel->hotel_name }}</td>
                                     <td>{{ $hotel->star ? $hotel->star . ' ★' : '-' }}</td>
+                                    <td>{{ $hotel->room_type ?? '-' }}</td>
+                                    <td>{{ $hotel->meal_plan ?? '-' }}</td>
+                                    <td>{{ Str::limit($hotel->facilities, 30) ?? '-' }}</td>
+                                    <td>{{ Str::limit($hotel->entertainment, 30) ?? '-' }}</td>
+                                    <td>
+                                        @if ($hotel->pictures)
+                                            @foreach ($hotel->pictures as $pic)
+                                                <img src="{{ asset('storage/' . $pic) }}" width="40" height="40"
+                                                    class="rounded me-1">
+                                            @endforeach
+                                        @else
+                                            <span class="text-muted">No images</span>
+                                        @endif
+                                    </td>
                                     <td>
                                         @if ($hotel->status)
                                             <span class="badge bg-success">Active</span>
@@ -113,15 +176,21 @@
                                         @endif
                                     </td>
                                     <td>{{ $hotel->updated_at->format('d M Y, h:i A') }}</td>
-                                    <td >
+                                    <td>
 
                                         {{-- Edit Hotel --}}
                                         <button type="button" class="icon-btn text-primary edit-hotel"
                                             data-id="{{ $hotel->id }}" data-name="{{ $hotel->hotel_name }}"
                                             data-star="{{ $hotel->star }}" data-status="{{ $hotel->status }}"
-                                            title="Edit Hotel">
+                                            data-room_type="{{ $hotel->room_type }}"
+                                            data-meal_plan="{{ $hotel->meal_plan }}"
+                                            data-description="{{ $hotel->description }}"
+                                            data-facilities="{{ $hotel->facilities }}"
+                                            data-entertainment="{{ $hotel->entertainment }}"  data-pictures='@json($hotel->pictures)'
+                                             title="Edit Hotel">
                                             <i class="bi bi-pencil-square fs-5"></i>
                                         </button>
+
 
                                         {{-- Delete Hotel --}}
                                         <button type="button" class="icon-btn text-danger delete-hotel"
@@ -178,6 +247,55 @@
                                         @endfor
                                     </select>
                                 </div>
+
+
+                                {{-- Room Type --}}
+                                <div class="mb-3">
+                                    <label for="edit_room_type" class="form-label">Room Type</label>
+                                    <input type="text" name="room_type" id="edit_room_type" class="form-control">
+                                </div>
+
+                                {{-- Meal Plan --}}
+                                <div class="mb-3">
+                                    <label for="edit_meal_plan" class="form-label">Meal Plan</label>
+                                    <input type="text" name="meal_plan" id="edit_meal_plan" class="form-control">
+                                </div>
+
+                                {{-- Description --}}
+                                <div class="mb-3">
+                                    <label for="edit_description" class="form-label">Description</label>
+                                    <textarea name="description" id="edit_description" class="form-control" rows="3"></textarea>
+                                </div>
+
+                                {{-- Facilities --}}
+                                <div class="mb-3">
+                                    <label for="edit_facilities" class="form-label">Facilities</label>
+                                    <textarea name="facilities" id="edit_facilities" class="form-control" rows="2"></textarea>
+                                </div>
+
+                                {{-- Entertainment --}}
+                                <div class="mb-3">
+                                    <label for="edit_entertainment" class="form-label">Entertainment</label>
+                                    <textarea name="entertainment" id="edit_entertainment" class="form-control" rows="2"></textarea>
+                                </div>
+
+                                {{-- Pictures --}}
+                                <div class="mb-3">
+                                    <label for="edit_pictures" class="form-label">Hotel Pictures</label>
+
+                                    <!-- Existing Images Preview -->
+                                    <div id="existingPictures" class="d-flex flex-wrap mb-2 gap-2">
+                                        <!-- existing images will be loaded here via JS -->
+                                    </div>
+
+                                    <input type="file" name="pictures[]" id="edit_pictures" class="form-control"
+                                        multiple accept="image/*">
+
+                                    <small class="text-muted d-block mt-1">
+                                        Uploading new images will replace all existing ones.
+                                    </small>
+                                </div>
+
 
                                 {{-- Status --}}
                                 <div class="mb-3">
@@ -250,7 +368,29 @@
                 document.getElementById("editHotelForm").action = `/admin/hotels/${id}`;
                 document.getElementById("edit_hotel_name").value = btn.dataset.name;
                 document.getElementById("edit_star").value = btn.dataset.star;
+                document.getElementById("edit_room_type").value = btn.dataset.room_type || '';
+                document.getElementById("edit_meal_plan").value = btn.dataset.meal_plan || '';
+                document.getElementById("edit_description").value = btn.dataset.description || '';
+                document.getElementById("edit_facilities").value = btn.dataset.facilities || '';
+                document.getElementById("edit_entertainment").value = btn.dataset.entertainment || '';
                 document.getElementById("edit_status").value = btn.dataset.status;
+
+                const pictureContainer = document.getElementById("existingPictures");
+                pictureContainer.innerHTML = "";
+
+                let pictures = btn.dataset.pictures ? JSON.parse(btn.dataset.pictures) : [];
+
+                if (pictures.length > 0) {
+                    pictures.forEach(pic => {
+                        pictureContainer.innerHTML += `
+                    <div class="position-relative d-inline-block m-1">
+                        <img src="/storage/${pic}" class="rounded" width="80" height="80">
+                    </div>
+                `;
+                    });
+                } else {
+                    pictureContainer.innerHTML = `<span class="text-muted">No existing images</span>`;
+                }
 
                 new bootstrap.Modal(document.getElementById("editHotelModal")).show();
             });

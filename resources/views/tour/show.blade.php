@@ -1406,66 +1406,83 @@
                     @endif
 
                     <!-- Inclusions -->
+                    @if ($packageInclusions->isNotEmpty())
+                        @foreach ($packageInclusions as $inclusion)
+                            <div class="info-list-section page-break">
+                                <h3>{{ ucfirst($inclusion->heading) }}</h3>
+                                <ul class="info-list">
+                                    @foreach ($inclusion->points as $point)
+                                        <li>{{ $point }}</li>
+                                    @endforeach
+                                </ul>
 
-                    <div class="info-list-section page-break">
-                        <h3>Tour Inclusions</h3>
-                        <ul class="info-list">
-                            <li>Airport pick up and drop off</li>
-                            <li>Assistance at the Airport</li>
-                            <li>Accommodation with breakfast and dinner basis on mentioned hotels
-                                below</li>
-                            <li>Private luxury car (air-conditioned)</li>
-                            <li>Private English-Speaking driver for the entire journey</li>
-                            <li>Fuel & local insurance for the vehicle</li>
-                            <p style="margin-bottom: 10px;">
-                                <strong style="color: #000;">Note :</strong> Please note that all journey
-                                durations are estimates and may vary due to traffic, road conditions, and
-                                weather. These times are calculated for direct travel without stops and are
-                                provided as a guideline only.
+                                @if (!empty($inclusion->note))
+                                    <p style="margin-bottom: 10px;">
+                                        <strong style="color: #000;">Note :</strong> {!! $inclusion->note !!}
+                                    </p>
+                                @endif
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="info-list-section page-break">
+                            <h3>Tour Inclusions</h3>
+                            <ul class="info-list">
+                                <li>Airport pick up and drop off</li>
+                                <li>Assistance at the Airport</li>
+                                <li>Accommodation with breakfast and dinner basis on mentioned hotels
+                                    below</li>
+                                <li>Private luxury car (air-conditioned)</li>
+                                <li>Private English-Speaking driver for the entire journey</li>
+                                <li>Fuel & local insurance for the vehicle</li>
+                                <p style="margin-bottom: 10px;">
+                                    <strong style="color: #000;">Note :</strong> Please note that all journey
+                                    durations are estimates and may vary due to traffic, road conditions, and
+                                    weather. These times are calculated for direct travel without stops and are
+                                    provided as a guideline only.
+                                </p>
+
+                            </ul>
+                        </div>
+
+
+                        <div class="info-list-section">
+                            <h3>Tour Exclusions</h3>
+                            <ul class="info-list">
+
+                                <li>Air tickets NOT included</li>
+                                <li>Sightseeing entrance charges</li>
+                                <li>Meals not mentioned in the itinerary< /li>
+                                <li>Camera & video permits</li>
+                                <li>Insurances</li>
+                                <li>Guide/Driver tips</li>
+                                <li>Personal expenses and shopping expense</li>
+                                <li>Late check-outs & early check-in charges</li>
+                                <li>Visa cost</li>
+                                <p style="margin-bottom: 10px;">
+                                    <strong style="color: #000;">Note :</strong> Please note that if the
+                                    information mentioned
+                                    above varies according to the customer's preference, the corresponding
+                                    charges will also be included.
+                                </p>
+                            </ul>
+                        </div>
+
+
+
+                        <div class="info-list-section">
+                            <h3>Cancellation Policy</h3>
+                            <p class="mb-3">
+                                <strong>In case of cancellation:</strong> The following cancellation charges will be
+                                applicable.
                             </p>
 
-                        </ul>
-                    </div>
-
-
-                    <div class="info-list-section">
-                        <h3>Tour Exclusions</h3>
-                        <ul class="info-list">
-
-                            <li>Air tickets NOT included</li>
-                            <li>Sightseeing entrance charges</li>
-                            <li>Meals not mentioned in the itinerary< /li>
-                            <li>Camera & video permits</li>
-                            <li>Insurances</li>
-                            <li>Guide/Driver tips</li>
-                            <li>Personal expenses and shopping expense</li>
-                            <li>Late check-outs & early check-in charges</li>
-                            <li>Visa cost</li>
-                            <p style="margin-bottom: 10px;">
-                                <strong style="color: #000;">Note :</strong> Please note that if the
-                                information mentioned
-                                above varies according to the customer's preference, the corresponding
-                                charges will also be included.
-                            </p>
-                        </ul>
-                    </div>
-
-
-
-                    <div class="info-list-section">
-                        <h3>Cancellation Policy</h3>
-                        <p class="mb-3">
-                            <strong>In case of cancellation:</strong> The following cancellation charges will be
-                            applicable.
-                        </p>
-
-                        <ul class="list-disc pl-6 space-y-2">
-                            <li>No Show: Zero refund.</li>
-                            <li>Cancellations made prior to 30 days from the scheduled start of a tour: 80% of
-                                total tour fee will be refunded.</li>
-                        </ul>
-                    </div>
-
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li>No Show: Zero refund.</li>
+                                <li>Cancellations made prior to 30 days from the scheduled start of a tour: 80% of
+                                    total tour fee will be refunded.</li>
+                            </ul>
+                        </div>
+                    @endif
                     <!-- Footer -->
                     <div class="footer-message">
                         <p>
