@@ -65,6 +65,77 @@ class UserController extends Controller
         ]);
     }
 
+
+     public function edit($id)
+    {
+        $user = User::findOrFail($id);
+        return response()->json($user);
+    }
+
+    // -----------------------
+    // UPDATE
+    // Only Super Admin can update others
+    // -----------------------
+
+    public function update(Request $request, $id)
+    {
+        $authUser = auth()->user();
+        $user = User::findOrFail($id);
+
+        // Only Super Admin can update other users
+        if ($authUser->type !== 'Super Admin' && $authUser->id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to update other users.'
+            ], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name'  => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'type'  => 'required|string',
+            'password'   => 'nullable|string|min:6|confirmed',
+            'image_path' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        $data = $request->only(['name', 'email', 'type']);
+
+        // Update password if provided
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        // Update image if uploaded
+        if ($request->hasFile('image_path')) {
+
+            // delete old image
+            if ($user->image_path && file_exists(public_path($user->image_path))) {
+                unlink(public_path($user->image_path));
+            }
+
+            $file = $request->file('image_path');
+            $filename = time() . '_' . Str::slug($data['name']) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/users'), $filename);
+
+            $data['image_path'] = 'uploads/users/' . $filename;
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User updated successfully!',
+            'user'    => $user,
+        ]);
+    }
+
     public function destroy(User $user)
     {
         if ($user->type === 'superadmin') {

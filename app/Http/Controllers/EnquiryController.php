@@ -11,6 +11,7 @@ use App\Models\AirlineBooking;
 use App\Models\DrivingPermitRequest;
 use Illuminate\Http\Request;
 use App\Models\ContactInfor;
+use App\Models\ChatbotLead;
 
 class EnquiryController extends Controller
 {
@@ -202,29 +203,63 @@ class EnquiryController extends Controller
         return response()->json(['success' => true]);
     }
 
-public function contactInfor(Request $request)
-{
-    $query = ContactInfor::query();
+    public function contactInfor(Request $request)
+    {
+        $query = ContactInfor::query();
 
-    if($request->name) {
-        $query->where('name', 'like', '%' . $request->name . '%');
+        if ($request->name) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        $contacts = $query->orderBy('id', 'desc')->paginate(10);
+
+        if ($request->ajax()) {
+            return view('enquiry.contact-infor-table', compact('contacts'))->render();
+        }
+
+        return view('enquiry.contact-infor', compact('contacts'));
     }
 
-    $contacts = $query->orderBy('id','desc')->paginate(10);
+    public function contactInforUpdateStatus(Request $request)
+    {
+        $contact = ContactInfor::findOrFail($request->id);
+        $contact->status = $request->status;
+        $contact->save();
 
-    if($request->ajax()){
-        return view('enquiry.contact-infor-table', compact('contacts'))->render();
+        return response()->json(['success' => true]);
     }
 
-    return view('enquiry.contact-infor', compact('contacts'));
-}
 
-public function contactInforUpdateStatus(Request $request)
-{
-    $contact = ContactInfor::findOrFail($request->id);
-    $contact->status = $request->status;
-    $contact->save();
 
-    return response()->json(['success' => true]);
-}
+    public function chatbot(Request $request)
+    {
+        $query = ChatbotLead::query();
+
+        if ($request->name) {
+            $query->where('name', 'like', '%'.$request->name.'%');
+        }
+
+        $leads = $query->orderBy('id', 'DESC')->paginate(10);
+
+        if ($request->ajax()) {
+            return view('chatbot.leads-table', compact('leads'))->render();
+        }
+
+        return view('enquiry.chatbot', compact('leads'));
+    }
+
+    public function chatbotUpdateStatus(Request $request)
+    {
+        
+        $lead = ChatbotLead::find($request->id);
+
+        if (!$lead) {
+            return response()->json(['success' => false]);
+        }
+
+        $lead->status = $request->status;
+        $lead->save();
+
+        return response()->json(['success' => true]);
+    }
 }

@@ -113,6 +113,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::post('driving-permits/update-status', [EnquiryController::class, 'drivingPermitupdateStatus'])->name('drivingPermits.updateStatus');
         Route::get('contact-us', [EnquiryController::class, 'contactInfor'])->name('contactUs');
         Route::post('contact-us/update-status', [EnquiryController::class, 'contactInforUpdateStatus'])->name('contactUs.updateStatus');
+        Route::get('chatbot', [EnquiryController::class, 'chatbot'])->name('chatbot');
+        Route::post('chatbot/update-status', [EnquiryController::class, 'chatbotUpdateStatus'])->name('chatbot.updateStatus');
     });
     //destination highlights
     Route::resource('destination-highlights', DestinationHighlightController::class)->only([

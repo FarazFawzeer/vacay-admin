@@ -1,7 +1,7 @@
-@extends('layouts.vertical', ['subtitle' => 'Package Bookings'])
 
-@section('content')
-@include('layouts.partials.page-title', ['title' => 'Package Bookings', 'subtitle' => 'View'])
+
+<?php $__env->startSection('content'); ?>
+<?php echo $__env->make('layouts.partials.page-title', ['title' => 'Package Bookings', 'subtitle' => 'View'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
 <style>
     .status-dropdown-btn {
@@ -40,18 +40,20 @@
 
     <div class="card-body">
 
-        {{-- Alerts --}}
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
+        
+        <?php if(session('success')): ?>
+            <div class="alert alert-success alert-dismissible fade show"><?php echo e(session('success')); ?>
 
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show">{{ session('error') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-        @endif
+        <?php endif; ?>
+
+        <?php if(session('error')): ?>
+            <div class="alert alert-danger alert-dismissible fade show"><?php echo e(session('error')); ?>
+
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
 
         <!-- Filters -->
 <div class="row mb-3 justify-content-end">
@@ -91,89 +93,94 @@
                 </thead>
 
                 <tbody>
-                    @forelse($bookings as $booking)
-                        <tr id="booking-{{ $booking->id }}">
+                    <?php $__empty_1 = true; $__currentLoopData = $bookings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $booking): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <tr id="booking-<?php echo e($booking->id); ?>">
 
-                            <td>{{ $booking->full_name }}</td>
-                            <td>{{ $booking->street }}</td>
-                            <td>{{ $booking->city }}</td>
-                            <td>{{ $booking->country }}</td>
-                            <td>{{ $booking->email }}</td>
-                            <td>{{ $booking->phone }}</td>
-                            <td>{{ $booking->whatsapp }}</td>
-                            <td>{{ $booking->adults }}</td>
-                            <td>{{ $booking->children }}</td>
-                            <td>{{ $booking->infants }}</td>
-                            <td>{{ $booking->package->heading ?? 'N/A' }}</td>
+                            <td><?php echo e($booking->full_name); ?></td>
+                            <td><?php echo e($booking->street); ?></td>
+                            <td><?php echo e($booking->city); ?></td>
+                            <td><?php echo e($booking->country); ?></td>
+                            <td><?php echo e($booking->email); ?></td>
+                            <td><?php echo e($booking->phone); ?></td>
+                            <td><?php echo e($booking->whatsapp); ?></td>
+                            <td><?php echo e($booking->adults); ?></td>
+                            <td><?php echo e($booking->children); ?></td>
+                            <td><?php echo e($booking->infants); ?></td>
+                            <td><?php echo e($booking->package->heading ?? 'N/A'); ?></td>
 
-                            <td>{{ $booking->start_date?->format('d M Y') }}</td>
-                            <td>{{ $booking->end_date?->format('d M Y') }}</td>
+                            <td><?php echo e($booking->start_date?->format('d M Y')); ?></td>
+                            <td><?php echo e($booking->end_date?->format('d M Y')); ?></td>
 
-                            <td>{{ $booking->pickup }}</td>
-                            <td>{{ $booking->hotel_type }}</td>
-                            <td>{{ $booking->travelling_from }}</td>
-                            <td>{{ $booking->travel_reason }}</td>
+                            <td><?php echo e($booking->pickup); ?></td>
+                            <td><?php echo e($booking->hotel_type); ?></td>
+                            <td><?php echo e($booking->travelling_from); ?></td>
+                            <td><?php echo e($booking->travel_reason); ?></td>
 
                             <td>
-                                @if (is_array($booking->theme))
-                                    {{ implode(', ', $booking->theme) }}
-                                @else
-                                    {{ $booking->theme }}
-                                @endif
+                                <?php if(is_array($booking->theme)): ?>
+                                    <?php echo e(implode(', ', $booking->theme)); ?>
+
+                                <?php else: ?>
+                                    <?php echo e($booking->theme); ?>
+
+                                <?php endif; ?>
                             </td>
 
-                            <td>{{ $booking->message }}</td>
+                            <td><?php echo e($booking->message); ?></td>
 
-                            {{-- Status Dropdown --}}
+                            
                             <td>
                                 <div class="dropdown">
                                     <button class="btn btn-sm status-dropdown-btn dropdown-toggle
-                                        @switch($booking->status)
-                                            @case('pending') btn-warning @break
-                                            @case('confirmed') btn-primary @break
-                                            @case('completed') btn-success @break
-                                            @case('cancelled') btn-danger @break
-                                            @default btn-secondary
-                                        @endswitch"
+                                        <?php switch($booking->status):
+                                            case ('pending'): ?> btn-warning <?php break; ?>
+                                            <?php case ('confirmed'): ?> btn-primary <?php break; ?>
+                                            <?php case ('completed'): ?> btn-success <?php break; ?>
+                                            <?php case ('cancelled'): ?> btn-danger <?php break; ?>
+                                            <?php default: ?> btn-secondary
+                                        <?php endswitch; ?>"
                                         type="button"
-                                        id="statusDropdown{{ $booking->id }}"
+                                        id="statusDropdown<?php echo e($booking->id); ?>"
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false">
-                                        {{ ucfirst($booking->status) }}
+                                        <?php echo e(ucfirst($booking->status)); ?>
+
                                     </button>
 
-                                    <ul class="dropdown-menu" aria-labelledby="statusDropdown{{ $booking->id }}">
-                                        @foreach(['pending','confirmed','completed','cancelled'] as $statusOption)
+                                    <ul class="dropdown-menu" aria-labelledby="statusDropdown<?php echo e($booking->id); ?>">
+                                        <?php $__currentLoopData = ['pending','confirmed','completed','cancelled']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $statusOption): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <li>
                                                 <a class="dropdown-item change-status"
                                                    href="#"
-                                                   data-id="{{ $booking->id }}"
-                                                   data-status="{{ $statusOption }}">
-                                                    {{ ucfirst($statusOption) }}
+                                                   data-id="<?php echo e($booking->id); ?>"
+                                                   data-status="<?php echo e($statusOption); ?>">
+                                                    <?php echo e(ucfirst($statusOption)); ?>
+
                                                 </a>
                                             </li>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </ul>
                                 </div>
                             </td>
 
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="20" class="text-center">No bookings found.</td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
 
-            {{ $bookings->links() }}
+            <?php echo e($bookings->links()); ?>
+
 
         </div>
 
     </div>
 </div>
 
-{{-- AJAX Status Update --}}
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.change-status').forEach(function (el) {
@@ -185,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fetch(`/admin/enquiry/${bookingId}/status`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ status: newStatus })
@@ -213,4 +220,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.vertical', ['subtitle' => 'Package Bookings'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH F:\Personal Projects\Vacay Guider\vacay-admin\resources\views/enquiry/tours.blade.php ENDPATH**/ ?>

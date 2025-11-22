@@ -100,13 +100,19 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="<?php echo e(route('admin.enquiry.airTicket')); ?>">
                                 <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
-                                Air Ticket Inquiries
+                                Air Ticket 
                             </a>
                         </li>
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="<?php echo e(route('admin.enquiry.drivingPermit')); ?>">
                                 <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
                                 Driving Permit Request
+                            </a>
+                        </li>
+                          <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="<?php echo e(route('admin.enquiry.chatbot')); ?>">
+                                <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
+                                Chatbot
                             </a>
                         </li>
                         <li class="sub-nav-item">

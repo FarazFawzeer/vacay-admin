@@ -14,67 +14,68 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($requests as $request)
+            <?php $__empty_1 = true; $__currentLoopData = $requests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $request): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr>
-                    <td>{{ $request->guest_name }}</td>
-                    <td>{{ $request->email }}</td>
-                    <td>{{ $request->license_no }}</td>
-                    <td>{{ $request->whatsapp }}</td>
-                    <td>{{ ucfirst($request->collection_method) }}</td>
+                    <td><?php echo e($request->guest_name); ?></td>
+                    <td><?php echo e($request->email); ?></td>
+                    <td><?php echo e($request->license_no); ?></td>
+                    <td><?php echo e($request->whatsapp); ?></td>
+                    <td><?php echo e(ucfirst($request->collection_method)); ?></td>
                     <td>
-                        @if ($request->license_front)
+                        <?php if($request->license_front): ?>
                             <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal"
-                                data-src="{{ config('app.fe_domain') }}/storage/{{ ltrim($request->license_front, '/') }}">
+                                data-src="<?php echo e(config('app.fe_domain')); ?>/storage/<?php echo e(ltrim($request->license_front, '/')); ?>">
                                 View
                             </a>
-                        @else
+                        <?php else: ?>
                             N/A
-                        @endif
+                        <?php endif; ?>
                     </td>
 
                     <td>
-                        @if ($request->license_back)
+                        <?php if($request->license_back): ?>
                             <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal"
-                                data-src="{{ rtrim(config('app.fe_domain'), '/') }}/storage/{{ ltrim($request->license_back, '/') }}"
+                                data-src="<?php echo e(rtrim(config('app.fe_domain'), '/')); ?>/storage/<?php echo e(ltrim($request->license_back, '/')); ?>"
 >
                                 View
                             </a>
-                        @else
+                        <?php else: ?>
                             N/A
-                        @endif
+                        <?php endif; ?>
                     </td>
 
                     <td>
-                        @if ($request->selfie)
+                        <?php if($request->selfie): ?>
                             <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal"
-                                data-src="{{ config('app.fe_domain') }}/storage/{{ ltrim($request->selfie, '/') }}">
+                                data-src="<?php echo e(config('app.fe_domain')); ?>/storage/<?php echo e(ltrim($request->selfie, '/')); ?>">
                                 View
                             </a>
-                        @else
+                        <?php else: ?>
                             N/A
-                        @endif
+                        <?php endif; ?>
                     </td>
 
                     <td>
-                        <select class="form-select form-select-sm changeStatus" data-id="{{ $request->id }}">
-                            <option value="pending" {{ $request->status == 'pending' ? 'selected' : '' }}>Pending
+                        <select class="form-select form-select-sm changeStatus" data-id="<?php echo e($request->id); ?>">
+                            <option value="pending" <?php echo e($request->status == 'pending' ? 'selected' : ''); ?>>Pending
                             </option>
-                            <option value="viewed" {{ $request->status == 'viewed' ? 'selected' : '' }}>Viewed</option>
-                            <option value="completed" {{ $request->status == 'completed' ? 'selected' : '' }}>Completed
+                            <option value="viewed" <?php echo e($request->status == 'viewed' ? 'selected' : ''); ?>>Viewed</option>
+                            <option value="completed" <?php echo e($request->status == 'completed' ? 'selected' : ''); ?>>Completed
                             </option>
                         </select>
                     </td>
                 </tr>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <tr>
                     <td colspan="9" class="text-center">No driving permit requests found.</td>
                 </tr>
-            @endforelse
+            <?php endif; ?>
         </tbody>
     </table>
 </div>
 
-{{ $requests->links() }}
+<?php echo e($requests->links()); ?>
+
 
 <!-- Modal -->
 <div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
@@ -98,3 +99,4 @@
         });
     });
 </script>
+<?php /**PATH F:\Personal Projects\Vacay Guider\vacay-admin\resources\views/enquiry/driving-permit-table.blade.php ENDPATH**/ ?>

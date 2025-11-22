@@ -4,11 +4,11 @@
     <?php echo $__env->make('layouts.partials.page-title', ['title' => 'Tour Bookings', 'subtitle' => 'View'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <style>
-
-            .status-dropdown-btn {
-        min-width: 110px;  /* adjust width as needed */
-        text-align: center;
-    }
+        .status-dropdown-btn {
+            min-width: 110px;
+            /* adjust width as needed */
+            text-align: center;
+        }
 
         .btn-equal {
             width: 80px;
@@ -133,50 +133,53 @@
                 }
             });
         });
-
-        
     </script>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.change-status').forEach(function(el) {
-        el.addEventListener('click', function(e) {
-            e.preventDefault();
-            const bookingId = this.dataset.id;
-            const newStatus = this.dataset.status;
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.change-status').forEach(function(el) {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const bookingId = this.dataset.id;
+                    const newStatus = this.dataset.status;
 
-            fetch(`/admin/tour-bookings/${bookingId}/status`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                   const btn = document.getElementById(`statusDropdown${bookingId}`);
-btn.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
-btn.className = 'btn btn-sm status-dropdown-btn dropdown-toggle ' + (
-    newStatus === 'quotation' ? 'btn-secondary' :
-    newStatus === 'invoiced' ? 'btn-info' :
-    newStatus === 'confirmed' ? 'btn-primary' :
-    newStatus === 'completed' ? 'btn-success' :
-    newStatus === 'cancelled' ? 'btn-danger' : 'btn-secondary'
-);
+                    fetch(`/admin/tour-bookings/${bookingId}/status`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                status: newStatus
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                const btn = document.getElementById(
+                                    `statusDropdown${bookingId}`);
+                                btn.textContent = newStatus.charAt(0).toUpperCase() + newStatus
+                                    .slice(1);
+                                btn.className =
+                                    'btn btn-sm status-dropdown-btn dropdown-toggle ' + (
+                                        newStatus === 'quotation' ? 'btn-secondary' :
+                                        newStatus === 'invoiced' ? 'btn-info' :
+                                        newStatus === 'confirmed' ? 'btn-primary' :
+                                        newStatus === 'completed' ? 'btn-success' :
+                                        newStatus === 'cancelled' ? 'btn-danger' :
+                                        'btn-secondary'
+                                    );
 
-                    // Optional: small toast/alert
-                    // alert('Status updated successfully!');
-                } else {
-                    alert('Failed to update status.');
-                }
+                                // Optional: small toast/alert
+                                // alert('Status updated successfully!');
+                            } else {
+                                alert('Failed to update status.');
+                            }
+                        });
+                });
             });
         });
-    });
-});
-
-</script>
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.vertical', ['subtitle' => 'Tour Bookings'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH F:\Personal Projects\Vacay Guider\vacay-admin\resources\views/bookings/tour_view.blade.php ENDPATH**/ ?>

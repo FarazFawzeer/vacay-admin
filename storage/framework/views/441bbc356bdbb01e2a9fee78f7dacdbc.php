@@ -1,7 +1,7 @@
-@extends('layouts.vertical', ['subtitle' => 'Admin View'])
 
-@section('content')
-    @include('layouts.partials.page-title', ['title' => 'Admin', 'subtitle' => 'View'])
+
+<?php $__env->startSection('content'); ?>
+    <?php echo $__env->make('layouts.partials.page-title', ['title' => 'Admin', 'subtitle' => 'View'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
 
     <div class="card">
@@ -24,42 +24,42 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($users as $user)
-                                <tr id="user-{{ $user->id }}">
+                            <?php $__empty_1 = true; $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <tr id="user-<?php echo e($user->id); ?>">
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <img src="{{ $user->image_path ? asset($user->image_path) : asset('/images/users/avatar-6.jpg') }}"
-                                                alt="{{ $user->name }}" class="avatar-sm rounded-circle">
+                                            <img src="<?php echo e($user->image_path ? asset($user->image_path) : asset('/images/users/avatar-6.jpg')); ?>"
+                                                alt="<?php echo e($user->name); ?>" class="avatar-sm rounded-circle">
                                             <div>
-                                                <h6 class="mb-0">{{ $user->name }}</h6>
+                                                <h6 class="mb-0"><?php echo e($user->name); ?></h6>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ ucfirst($user->type) }}</td>
-                                    <td>{{ $user->updated_at->format('d M Y, h:i A') }}</td>
+                                    <td><?php echo e($user->email); ?></td>
+                                    <td><?php echo e(ucfirst($user->type)); ?></td>
+                                    <td><?php echo e($user->updated_at->format('d M Y, h:i A')); ?></td>
                                     <td>
-                                        @if (auth()->user()->type === 'Super Admin')
+                                        <?php if(auth()->user()->type === 'Super Admin'): ?>
                                             <button type="button"
                                                 class="btn btn-sm p-0 text-primary border-0 bg-transparent edit-user"
-                                                data-id="{{ $user->id }}">
+                                                data-id="<?php echo e($user->id); ?>">
                                                 <i class="fas fa-edit fa-lg"></i>
                                             </button>
-                                        @endif
+                                        <?php endif; ?>
 
                                         <button type="button"
                                             class="btn btn-sm p-0 text-danger border-0 bg-transparent delete-user"
-                                            data-id="{{ $user->id }}">
+                                            data-id="<?php echo e($user->id); ?>">
                                             <i class="fas fa-trash-alt fa-lg"></i>
                                         </button>
                                     </td>
 
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="5" class="text-center text-muted">No users found.</td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                         <!-- Edit User Modal -->
                         <div class="modal fade" id="editUserModal" tabindex="-1">
@@ -75,7 +75,7 @@
                                         <div id="editMessage"></div>
 
                                         <form id="editUserForm" enctype="multipart/form-data">
-                                            @csrf
+                                            <?php echo csrf_field(); ?>
 
                                             <input type="hidden" id="edit_user_id">
 
@@ -133,9 +133,10 @@
 
                     </table>
 
-                    {{-- Pagination --}}
+                    
                     <div class="d-flex justify-content-end mt-3">
-                        {{ $users->links() }}
+                        <?php echo e($users->links()); ?>
+
                     </div>
                 </div>
 
@@ -150,7 +151,7 @@
             button.addEventListener('click', function() {
                 let userId = this.dataset.id;
 
-                fetch("{{ url('admin/users') }}/" + userId + "/edit")
+                fetch("<?php echo e(url('admin/users')); ?>/" + userId + "/edit")
                     .then(res => res.json())
                     .then(user => {
                         document.getElementById('edit_user_id').value = user.id;
@@ -170,11 +171,11 @@
             let userId = document.getElementById('edit_user_id').value;
             let formData = new FormData(this);
 
-            fetch("{{ url('admin/users') }}/" + userId, {
+            fetch("<?php echo e(url('admin/users')); ?>/" + userId, {
                     method: "POST",
                     body: formData,
                     headers: {
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                        "X-CSRF-TOKEN": "<?php echo e(csrf_token()); ?>",
                         "X-HTTP-Method-Override": "PUT"
                     }
                 })
@@ -205,10 +206,10 @@
                     confirmButtonText: 'Yes, delete it!'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch("{{ url('admin/users') }}/" + userId, {
+                        fetch("<?php echo e(url('admin/users')); ?>/" + userId, {
                                 method: 'DELETE',
                                 headers: {
-                                    'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                                    'X-CSRF-TOKEN': "<?php echo e(csrf_token()); ?>",
                                     'Accept': 'application/json'
                                 }
                             })
@@ -243,4 +244,6 @@
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.vertical', ['subtitle' => 'Admin View'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH F:\Personal Projects\Vacay Guider\vacay-admin\resources\views/admin/users.blade.php ENDPATH**/ ?>
