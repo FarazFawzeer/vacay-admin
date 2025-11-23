@@ -27,80 +27,70 @@ class DestinationController extends Controller
     /**
      * Store a new destination.
      */
-    public function store(Request $request)
-    {
-         $validated = $request->validate([
-        'heading' => 'required|string|max:255',
-        'tour_ref_no' => 'required|string|max:255',
-        'itineraries' => 'nullable|array',
-        'itineraries.*.day' => 'nullable|integer',
-        'itineraries.*.place_id' => 'nullable|integer',
-        'itineraries.*.description' => 'nullable|string',
-        'itineraries.*.pictures' => 'nullable|file|image',
-        'itineraries.*.program_points' => 'nullable|array',
-        'itineraries.*.highlights' => 'nullable|array',
-        'itineraries.*.highlights.*.highlight_places' => 'nullable|string|max:255',
-        'itineraries.*.highlights.*.description' => 'nullable|string|max:1000',
-        'itineraries.*.highlights.*.images' => 'nullable|file|image',
+
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'program_points' => 'nullable|array',
+        'program_points.*' => 'nullable|string|max:255',
     ]);
 
-        // Convert ["aaa","bbb"] → [{"point":"aaa"},{"point":"bbb"}]
-        $programPoints = collect($validated['program_points'] ?? [])
-            ->filter() // remove empty values
-            ->map(fn($point) => ['point' => $point])
-            ->values()
-            ->toArray();
+    $programPoints = collect($validated['program_points'] ?? [])
+        ->filter()
+        ->map(fn($point) => ['point' => $point])
+        ->values()
+        ->toArray();
 
-        try {
-            Destination::create([
-                'name' => $validated['name'],
-                'program_points' => $programPoints,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Destination created successfully!',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to create destination. ' . $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    public function update(Request $request, Destination $destination)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'program_points' => 'nullable|array',
-            'program_points.*' => 'nullable|string|max:500',
+    try {
+        Destination::create([
+            'name' => $validated['name'],
+            'program_points' => $programPoints,
         ]);
 
-        // Convert ["aaa","bbb"] → [{"point":"aaa"},{"point":"bbb"}]
-        $programPoints = collect($validated['program_points'] ?? [])
-            ->filter() // remove empty values
-            ->map(fn($point) => ['point' => $point])
-            ->values()
-            ->toArray();
-
-        try {
-            $destination->update([
-                'name' => $validated['name'],
-                'program_points' => $programPoints,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Destination updated successfully!',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update destination. ' . $e->getMessage(),
-            ], 500);
-        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Destination created successfully!',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to create destination. ' . $e->getMessage(),
+        ], 500);
     }
+}
+
+public function update(Request $request, Destination $destination)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'program_points' => 'nullable|array',
+        'program_points.*' => 'nullable|string|max:500',
+    ]);
+
+    $programPoints = collect($validated['program_points'] ?? [])
+        ->filter()
+        ->map(fn($point) => ['point' => $point])
+        ->values()
+        ->toArray();
+
+    try {
+        $destination->update([
+            'name' => $validated['name'],
+            'program_points' => $programPoints,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Destination updated successfully!',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to update destination. ' . $e->getMessage(),
+        ], 500);
+    }
+}
 
     public function destroy(Destination $destination)
     {

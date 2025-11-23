@@ -19,8 +19,8 @@ class CustomerController extends Controller
         if ($request->filled('service')) {
             $query->where('service', $request->service);
         }
-        if ($request->filled('portal')) {
-            $query->where('portal', $request->portal);
+        if ($request->filled('heard_us')) {
+            $query->where('heard_us', $request->heard_us);
         }
 
         $customers = $query->paginate(10);
@@ -39,11 +39,17 @@ class CustomerController extends Controller
             ->where('portal', '!=', '')
             ->distinct()
             ->pluck('portal');
+
+        $heard_us_list = Customer::whereNotNull('heard_us')
+            ->where('heard_us', '!=', '')
+            ->distinct()
+            ->pluck('heard_us');
+
         if ($request->ajax()) {
             return view('customer.index-table', compact('customers'))->render();
         }
 
-        return view('customer.view', compact('customers', 'types', 'services', 'portals'));
+        return view('customer.view', compact('customers', 'types', 'services', 'heard_us_list'));
     }
 
 
@@ -113,6 +119,37 @@ class CustomerController extends Controller
                 'message' => 'Something went wrong. Please check your input.'
             ], 500);
         }
+    }
+
+    public function edit($id)
+    {
+        $customer = Customer::findOrFail($id);
+        return view('customer.edit', compact('customer'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $customer = Customer::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email',
+            'contact' => 'required|string|max:50',
+            'other_phone' => 'nullable|string|max:50',
+            'whatsapp_number' => 'nullable|string|max:50',
+            'date_of_birth' => 'nullable|date',
+            'address' => 'nullable|string',
+            'country' => 'nullable|string|max:100',
+            'service' => 'nullable|string',
+            'heard_us' => 'nullable|string',
+            'type' => 'required|string|in:Individual,Corporate',
+            'company_name' => 'nullable|string|max:255',
+        ]);
+
+        $customer->update($validated);
+
+        return redirect()->route('admin.customers.index')
+            ->with('success', 'Customer updated successfully.');
     }
 
 

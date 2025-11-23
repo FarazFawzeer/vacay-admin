@@ -47,12 +47,24 @@
                 </td>
                 <td>{{ $customer->portal ?? '-' }}</td>
                 <td>{{ $customer->updated_at->format('d M Y, h:i A') }}</td>
-               <td>
-    <button type="button" class="btn btn-sm p-0 text-danger border-0 bg-transparent delete-customer"
-        data-id="{{ $customer->id }}">
-        <i class="fas fa-trash-alt fa-lg"></i>
-    </button>
-</td>
+                <td>
+                    <div class="d-flex gap-2">
+
+                        <!-- Edit Button -->
+                        <a href="{{ route('admin.customers.edit', $customer->id) }}"
+                            class="btn btn-sm p-0 text-primary border-0 bg-transparent">
+                            <i class="fas fa-edit fa-lg"></i>
+                        </a>
+
+                        <!-- Delete Button -->
+                        <button type="button"
+                            class="btn btn-sm p-0 text-danger border-0 bg-transparent delete-customer"
+                            data-id="{{ $customer->id }}">
+                            <i class="fas fa-trash-alt fa-lg"></i>
+                        </button>
+                    </div>
+                </td>
+
 
             </tr>
         @empty

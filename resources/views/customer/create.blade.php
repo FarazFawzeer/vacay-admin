@@ -26,7 +26,7 @@
                     <div class="col-md-6 mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" name="email" id="email" class="form-control" value="{{ old('email') }}"
-                            placeholder="Ex: john@example.com" required>
+                            placeholder="Ex: john@example.com">
                     </div>
                 </div>
 
@@ -35,7 +35,7 @@
                     <div class="col-md-6 mb-3">
                         <label for="contact" class="form-label">Phone</label>
                         <input type="text" name="contact" id="contact" class="form-control"
-                            value="{{ old('contact') }}" placeholder="Ex: +94771234567">
+                            value="{{ old('contact') }}" placeholder="Ex: +94771234567" required>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="other_phone" class="form-label">Other Phone</label>
@@ -79,18 +79,27 @@
                         <label for="service" class="form-label">Service</label>
                         <select name="service" id="service" class="form-select">
                             <option value="">Select Service</option>
-                            <option value="Tour Package" {{ old('service') == 'Tour Package' ? 'selected' : '' }}>Tour
-                                Package</option>
-                            <option value="Rent Vehicle" {{ old('service') == 'Rent Vehicle' ? 'selected' : '' }}>Rent
-                                Vehicle</option>
+
+                            <option value="Tour Package" {{ old('service') == 'Tour Package' ? 'selected' : '' }}>
+                                Tour Package
+                            </option>
+                            <option value="Rent Vehicle" {{ old('service') == 'Rent Vehicle' ? 'selected' : '' }}>
+                                Rent Vehicle
+                            </option>
                             <option value="Transportation" {{ old('service') == 'Transportation' ? 'selected' : '' }}>
-                                Transportation</option>
+                                Transportation
+                            </option>
                             <option value="Airline Ticketing"
-                                {{ old('service') == 'Airline Ticketing' ? 'selected' : '' }}>Airline Ticketing</option>
+                                {{ old('service') == 'Airline Ticketing' ? 'selected' : '' }}>
+                                Airline Ticketing
+                            </option>
                             <option value="Insurance Service"
-                                {{ old('service') == 'Insurance Service' ? 'selected' : '' }}>Insurance Service</option>
+                                {{ old('service') == 'Insurance Service' ? 'selected' : '' }}>
+                                Insurance Service
+                            </option>
                             <option value="Visa Assistance" {{ old('service') == 'Visa Assistance' ? 'selected' : '' }}>
-                                Visa Assistance</option>
+                                Visa Assistance
+                            </option>
                         </select>
                     </div>
                     <div class="col-md-6 mb-3">
@@ -107,6 +116,22 @@
                             <option value="Instagram" {{ old('heard_us') == 'Instagram' ? 'selected' : '' }}>Instagram
                             </option>
                             <option value="TikTok" {{ old('heard_us') == 'TikTok' ? 'selected' : '' }}>TikTok</option>
+                                 <!-- Newly Added Options -->
+                            <option value="Contacts List" {{ old('service') == 'Contacts List' ? 'selected' : '' }}>
+                                Contacts List
+                            </option>
+                            <option value="Friends" {{ old('service') == 'Friends' ? 'selected' : '' }}>
+                                Friends
+                            </option>
+                            <option value="Family" {{ old('service') == 'Family' ? 'selected' : '' }}>
+                                Family
+                            </option>
+                            <option value="Koko" {{ old('service') == 'Koko' ? 'selected' : '' }}>
+                                Koko
+                            </option>
+                            <option value="Reference" {{ old('service') == 'Reference' ? 'selected' : '' }}>
+                                Reference
+                            </option>
                         </select>
                     </div>
                 </div>
