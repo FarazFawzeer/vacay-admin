@@ -13,6 +13,7 @@ class CustomerController extends Controller
     {
         $query = Customer::query();
 
+        // Filters
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
@@ -23,27 +24,27 @@ class CustomerController extends Controller
             $query->where('heard_us', $request->heard_us);
         }
 
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('name', 'LIKE', '%' . $request->search . '%');
+        }
+
+        // Sorting A-Z / Z-A
+        if ($request->filled('sort')) {
+            if ($request->sort == 'asc') {
+                $query->orderBy('name', 'asc');
+            } elseif ($request->sort == 'desc') {
+                $query->orderBy('name', 'desc');
+            }
+        }
+
         $customers = $query->paginate(10);
 
-        $types = Customer::whereNotNull('type')
-            ->where('type', '!=', '')
-            ->distinct()
-            ->pluck('type');
-
-        $services = Customer::whereNotNull('service')
-            ->where('service', '!=', '')
-            ->distinct()
-            ->pluck('service');
-
-        $portals = Customer::whereNotNull('portal')
-            ->where('portal', '!=', '')
-            ->distinct()
-            ->pluck('portal');
-
-        $heard_us_list = Customer::whereNotNull('heard_us')
-            ->where('heard_us', '!=', '')
-            ->distinct()
-            ->pluck('heard_us');
+        // Existing filter values
+        $types = Customer::whereNotNull('type')->where('type', '!=', '')->distinct()->pluck('type');
+        $services = Customer::whereNotNull('service')->where('service', '!=', '')->distinct()->pluck('service');
+        $portals = Customer::whereNotNull('portal')->where('portal', '!=', '')->distinct()->pluck('portal');
+        $heard_us_list = Customer::whereNotNull('heard_us')->where('heard_us', '!=', '')->distinct()->pluck('heard_us');
 
         if ($request->ajax()) {
             return view('customer.index-table', compact('customers'))->render();
@@ -51,6 +52,7 @@ class CustomerController extends Controller
 
         return view('customer.view', compact('customers', 'types', 'services', 'heard_us_list'));
     }
+
 
 
 

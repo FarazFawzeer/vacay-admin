@@ -42,6 +42,21 @@
                         @endforeach
                     </select>
                 </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Search</label>
+                    <input type="text" id="searchField" class="form-control" placeholder="Search by name">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Sort</label>
+                    <select id="sortOrder" class="form-select">
+                        <option value="">Default</option>
+                        <option value="asc">A → Z</option>
+                        <option value="desc">Z → A</option>
+                    </select>
+                </div>
+
             </div>
 
             <!-- Table -->
@@ -50,103 +65,116 @@
             </div>
         </div>
     </div>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const typeSelect = document.getElementById('filterType');
-    const serviceWrapper = document.getElementById('serviceFilterWrapper');
-    const serviceSelect = document.getElementById('filterService');
-    const heardUsSelect = document.getElementById('filterHeardUs');
-    const customerTable = document.getElementById('customerTable');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const typeSelect = document.getElementById('filterType');
+            const serviceWrapper = document.getElementById('serviceFilterWrapper');
+            const serviceSelect = document.getElementById('filterService');
+            const heardUsSelect = document.getElementById('filterHeardUs');
+            const customerTable = document.getElementById('customerTable');
+            const searchField = document.getElementById('searchField');
+            const sortOrder = document.getElementById('sortOrder');
 
-    // Fetch and update table data
-    function fetchFilteredData(url = null) {
-        let type = typeSelect.value;
-        let service = serviceSelect.value;
-        let heard_us = heardUsSelect.value;
+            // Fetch and update table data
+            function fetchFilteredData(url = null) {
+                let type = typeSelect.value;
+                let service = serviceSelect.value;
+                let heard_us = heardUsSelect.value;
+                let search = searchField.value;
+                let sort = sortOrder.value;
 
-        url = url || "{{ route('admin.customers.index') }}";
+                url = url || "{{ route('admin.customers.index') }}";
 
-        // Append query parameters
-        const separator = url.includes('?') ? '&' : '?';
-        url += `${separator}type=${type}&service=${service}&heard_us=${heard_us}`;
+                const separator = url.includes('?') ? '&' : '?';
 
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(res => res.text())
-            .then(data => {
-                customerTable.innerHTML = data;
+                url +=
+                    `${separator}type=${type}&service=${service}&heard_us=${heard_us}&search=${search}&sort=${sort}`;
 
-                // Scroll to top of page or card
-                window.scrollTo(0, 0);
-                const card = customerTable.closest('.card');
-                if (card) card.scrollIntoView({ behavior: 'smooth' });
-            });
-    }
-
-    // Filters
-    typeSelect.addEventListener('change', function() {
-        if (this.value.toLowerCase() === 'corporate') {
-            serviceWrapper.classList.remove('d-none');
-        } else {
-            serviceWrapper.classList.add('d-none');
-            serviceSelect.value = '';
-        }
-        fetchFilteredData();
-    });
-
-    serviceSelect.addEventListener('change', fetchFilteredData);
-    heardUsSelect.addEventListener('change', fetchFilteredData);
-
-    // Pagination AJAX
-    document.addEventListener('click', function(e) {
-        const paginationLink = e.target.closest('#customerTable .pagination a');
-        if (paginationLink) {
-            e.preventDefault();
-            let url = paginationLink.getAttribute('href');
-            fetchFilteredData(url);
-        }
-    });
-
-    // Delete customer using event delegation
-    customerTable.addEventListener('click', function(e) {
-        const deleteBtn = e.target.closest('.delete-customer');
-        if (!deleteBtn) return;
-
-        const customerId = deleteBtn.dataset.id;
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                fetch("{{ url('admin/customers') }}/" + customerId, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        const row = document.getElementById('customer-' + customerId);
-                        if (row) row.remove();
-                        Swal.fire('Deleted!', data.message, 'success');
-                    } else {
-                        Swal.fire('Error!', data.message || 'Something went wrong!', 'error');
-                    }
-                })
-                .catch(error => {
-                    Swal.fire('Error!', 'Something went wrong!', 'error');
-                });
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(res => res.text())
+                    .then(data => {
+                        customerTable.innerHTML = data;
+                    });
             }
-        });
-    });
-});
-</script>
 
+
+            // Filters
+            typeSelect.addEventListener('change', function() {
+                if (this.value.toLowerCase() === 'corporate') {
+                    serviceWrapper.classList.remove('d-none');
+                } else {
+                    serviceWrapper.classList.add('d-none');
+                    serviceSelect.value = '';
+                }
+                fetchFilteredData();
+            });
+
+            serviceSelect.addEventListener('change', fetchFilteredData);
+            heardUsSelect.addEventListener('change', fetchFilteredData);
+            searchField.addEventListener('keyup', function() {
+                fetchFilteredData();
+            });
+
+            sortOrder.addEventListener('change', function() {
+                fetchFilteredData();
+            });
+
+            // Pagination AJAX
+            document.addEventListener('click', function(e) {
+                const paginationLink = e.target.closest('#customerTable .pagination a');
+                if (paginationLink) {
+                    e.preventDefault();
+                    let url = paginationLink.getAttribute('href');
+                    fetchFilteredData(url);
+                }
+            });
+
+            // Delete customer using event delegation
+            customerTable.addEventListener('click', function(e) {
+                const deleteBtn = e.target.closest('.delete-customer');
+                if (!deleteBtn) return;
+
+                const customerId = deleteBtn.dataset.id;
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch("{{ url('admin/customers') }}/" + customerId, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const row = document.getElementById('customer-' +
+                                        customerId);
+                                    if (row) row.remove();
+                                    Swal.fire('Deleted!', data.message, 'success');
+                                } else {
+                                    Swal.fire('Error!', data.message || 'Something went wrong!',
+                                        'error');
+                                }
+                            })
+                            .catch(error => {
+                                Swal.fire('Error!', 'Something went wrong!', 'error');
+                            });
+                    }
+                });
+            });
+        });
+    </script>
 @endsection
