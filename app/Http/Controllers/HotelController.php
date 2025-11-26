@@ -9,11 +9,30 @@ use Illuminate\Support\Facades\Storage;
 class HotelController extends Controller
 {
     // Show all hotels
-    public function index()
-    {
-        $hotels = Hotel::orderBy('updated_at', 'desc')->paginate(10);
-        return view('details.hotel', compact('hotels'));
+   public function index(Request $request)
+{
+    $query = Hotel::query();
+
+    // Search by hotel name
+    if ($request->filled('search')) {
+        $query->where('hotel_name', 'like', '%' . $request->search . '%');
     }
+
+    // Filter by category
+    if ($request->filled('category')) {
+        $query->where('hotel_category', $request->category);
+    }
+
+    $hotels = $query->orderBy('updated_at', 'desc')->paginate(10);
+
+    // For AJAX requests, return a partial table
+    if ($request->ajax()) {
+        return view('details.partials.hotel_table', compact('hotels'))->render();
+    }
+
+    return view('details.hotel', compact('hotels'));
+}
+
 
     // Store new hotel (AJAX)
  public function store(Request $request)
@@ -27,6 +46,9 @@ class HotelController extends Controller
         'description' => 'nullable|string',
         'facilities' => 'nullable|string',
         'entertainment' => 'nullable|string',
+        'city' => 'nullable|string|max:255',
+        'address' => 'nullable|string|max:255',
+        'hotel_category' => 'nullable|string|max:255',
         'pictures.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
     ]);
 
@@ -34,8 +56,9 @@ class HotelController extends Controller
 
     if ($request->hasFile('pictures')) {
         foreach ($request->file('pictures') as $image) {
-            $path = $image->store('hotel', 'public');
-            $imagePaths[] = $path;
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('hotel'), $filename);
+            $imagePaths[] = 'hotel/' . $filename; // store relative path
         }
     }
 
@@ -48,6 +71,9 @@ class HotelController extends Controller
         'description' => $request->description,
         'facilities' => $request->facilities,
         'entertainment' => $request->entertainment,
+        'city' => $request->city,
+        'address' => $request->address,
+        'hotel_category' => $request->hotel_category,
         'pictures' => $imagePaths,
     ]);
 
@@ -59,8 +85,8 @@ class HotelController extends Controller
 }
 
 
-    // Update hotel (AJAX)
-public function update(Request $request, $id)
+
+  public function update(Request $request, $id)
 {
     $hotel = Hotel::findOrFail($id);
 
@@ -73,24 +99,33 @@ public function update(Request $request, $id)
         'description' => 'nullable|string',
         'facilities' => 'nullable|string',
         'entertainment' => 'nullable|string',
+        'city' => 'nullable|string|max:255',
+        'address' => 'nullable|string|max:255',
+        'hotel_category' => 'nullable|string|max:255',
         'pictures.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
     ]);
 
     $imagePaths = $hotel->pictures ?? [];
 
-    // If new images are uploaded → delete old ones first
+    // If new images uploaded → delete old ones
     if ($request->hasFile('pictures')) {
-        // Delete old images from storage
+
+        // Delete old images
         if (!empty($imagePaths)) {
             foreach ($imagePaths as $oldImage) {
-                Storage::disk('public')->delete($oldImage);
+                $oldPath = public_path($oldImage);
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
             }
         }
 
-        // Store new images
+        // Upload new ones
         $newPaths = [];
         foreach ($request->file('pictures') as $image) {
-            $newPaths[] = $image->store('hotel', 'public');
+            $filename = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('hotel'), $filename);
+            $newPaths[] = 'hotel/' . $filename;
         }
 
         $imagePaths = $newPaths;
@@ -105,6 +140,9 @@ public function update(Request $request, $id)
         'description' => $request->description,
         'facilities' => $request->facilities,
         'entertainment' => $request->entertainment,
+        'city' => $request->city,
+        'address' => $request->address,
+        'hotel_category' => $request->hotel_category,
         'pictures' => $imagePaths,
     ]);
 
@@ -124,8 +162,7 @@ public function update(Request $request, $id)
 
         // Delete stored images
         if ($hotel->pictures) {
-            $images = json_decode($hotel->pictures, true);
-            foreach ($images as $path) {
+            foreach ($hotel->pictures as $path) {
                 Storage::disk('public')->delete($path);
             }
         }

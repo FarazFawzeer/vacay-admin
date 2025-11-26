@@ -4,6 +4,22 @@
     @include('layouts.partials.page-title', ['title' => 'Customer', 'subtitle' => 'View'])
 
 
+<style>
+    /* Scrollable table wrapper */
+#customerTableWrapper {
+    max-height: calc(100vh - 250px); /* Adjust 250px for header, filters, and pagination */
+    overflow-y: auto;
+}
+
+/* Make table header sticky */
+#customerTable thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa; /* Match your header bg */
+    z-index: 10;
+}
+</style>
+
     <div class="card">
         <div class="card-header">
             <h5 class="card-title">Customer List</h5>
@@ -60,7 +76,7 @@
             </div>
 
             <!-- Table -->
-            <div class="table-responsive" id="customerTable">
+            <div class="table-responsive table-wrapper" style=" max-height: calc(100vh - 250px);    overflow-y: auto;" id="customerTable">
                 @include('customer.index-table') {{-- this will be returned also in AJAX --}}
             </div>
         </div>

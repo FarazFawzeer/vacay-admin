@@ -19,9 +19,12 @@ class Hotel extends Model
         'facilities',
         'entertainment',
         'pictures',
+        'city',
+        'address',
+        'hotel_category',
     ];
 
     protected $casts = [
-        'pictures' => 'array', // so you can store/retrieve multiple images easily
+        'pictures' => 'array',
     ];
 }

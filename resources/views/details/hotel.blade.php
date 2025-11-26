@@ -7,6 +7,22 @@
     ])
 
     <style>
+        /* Scrollable table wrapper */
+        #hotelTableWrapper {
+            max-height: calc(100vh - 250px);
+            /* Adjust 250px according to header, filters, pagination */
+            overflow-y: auto;
+        }
+
+        /* Make table header sticky */
+        #hotelTable thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+            /* Match table header background */
+            z-index: 10;
+        }
+
         .btn-equal {
             width: 80px;
             text-align: center;
@@ -54,9 +70,22 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" name="city" id="city" class="form-control"
+                                placeholder="Ex: Colombo" required>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <input type="text" name="address" id="address" class="form-control"
+                                placeholder="Ex: 123 Main Street" required>
+                        </div>
+                    </div>
                     {{-- Star --}}
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="star" class="form-label">Star Rating</label>
                             <select name="star" id="star" class="form-select">
                                 <option value="">Select Rating</option>
@@ -65,7 +94,25 @@
                                 @endfor
                             </select>
                         </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="hotel_category" class="form-label">Hotel Category</label>
+                            <select name="hotel_category" id="hotel_category" class="form-select" required>
+                                <option value="">Select Category</option>
+                                <option value="luxury">Luxury</option>
+                                <option value="standard">Standard</option>
+                                <option value="budget">Budget</option>
+                                <option value="villa">Villa</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="roomtype">Room Type</option>
+                                <option value="cabana">Cabana</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
                     </div>
+
+
+
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -76,18 +123,17 @@
 
                         <div class="col-md-6 mb-3">
                             <label for="meal_plan" class="form-label">Meal Plan</label>
-                            <input type="text" name="meal_plan" id="meal_plan" class="form-control"
-                                placeholder="Ex: Bed & Breakfast">
+                            <select name="meal_plan" id="meal_plan" class="form-select" required>
+                                <option value="">Select Meal Plan</option>
+                                <option value="half board">Half Board</option>
+                                <option value="full board">Full Board</option>
+                                <option value="all include">All Include</option>
+                                <option value="room only">Room Only</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea name="description" id="description" rows="3" class="form-control"
-                                placeholder="Short description about the hotel"></textarea>
-                        </div>
-                    </div>
+
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -103,22 +149,28 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="pictures" class="form-label">Hotel Pictures</label>
                             <input type="file" name="pictures[]" id="pictures" class="form-control" multiple
                                 accept="image/*">
                             <small class="text-muted">You can upload multiple images.</small>
                         </div>
-                    </div>
 
-                    {{-- Status --}}
-                    <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="status" class="form-label">Status</label>
                             <select name="status" id="status" class="form-select">
                                 <option value="1">Active</option>
                                 <option value="0">Inactive</option>
                             </select>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea name="description" id="description" rows="3" class="form-control"
+                                placeholder="Short description about the hotel"></textarea>
                         </div>
                     </div>
 
@@ -133,113 +185,72 @@
         {{-- Hotel List --}}
         <div class="card">
             <div class="card-body">
-                <div class="table-responsive" id="hotelTable">
-                    <table class="table table-hover table-centered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Hotel Name</th>
-                                <th>Star</th>
-                                <th>Room Type</th>
-                                <th>Meal Plan</th>
-                                <th>Facilities</th>
-                                <th>Entertainment</th>
-                                <th>Pictures</th>
-                                <th>Status</th>
-                                <th>Updated At</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($hotels as $hotel)
-                                <tr id="hotel-{{ $hotel->id }}">
-                                    <td>{{ $hotel->hotel_name }}</td>
-                                    <td>{{ $hotel->star ? $hotel->star . ' ★' : '-' }}</td>
-                                    <td>{{ $hotel->room_type ?? '-' }}</td>
-                                    <td>{{ $hotel->meal_plan ?? '-' }}</td>
-                                    <td>{{ Str::limit($hotel->facilities, 30) ?? '-' }}</td>
-                                    <td>{{ Str::limit($hotel->entertainment, 30) ?? '-' }}</td>
-                                    <td>
-                                        @if ($hotel->pictures)
-                                            @foreach ($hotel->pictures as $pic)
-                                                <img src="{{ asset('storage/' . $pic) }}" width="40" height="40"
-                                                    class="rounded me-1">
-                                            @endforeach
-                                        @else
-                                            <span class="text-muted">No images</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if ($hotel->status)
-                                            <span class="badge bg-success">Active</span>
-                                        @else
-                                            <span class="badge bg-danger">Inactive</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $hotel->updated_at->format('d M Y, h:i A') }}</td>
-                                    <td>
-
-                                        {{-- Edit Hotel --}}
-                                        <button type="button" class="icon-btn text-primary edit-hotel"
-                                            data-id="{{ $hotel->id }}" data-name="{{ $hotel->hotel_name }}"
-                                            data-star="{{ $hotel->star }}" data-status="{{ $hotel->status }}"
-                                            data-room_type="{{ $hotel->room_type }}"
-                                            data-meal_plan="{{ $hotel->meal_plan }}"
-                                            data-description="{{ $hotel->description }}"
-                                            data-facilities="{{ $hotel->facilities }}"
-                                            data-entertainment="{{ $hotel->entertainment }}"  data-pictures='@json($hotel->pictures)'
-                                             title="Edit Hotel">
-                                            <i class="bi bi-pencil-square fs-5"></i>
-                                        </button>
-
-
-                                        {{-- Delete Hotel --}}
-                                        <button type="button" class="icon-btn text-danger delete-hotel"
-                                            data-id="{{ $hotel->id }}" title="Delete Hotel">
-                                            <i class="bi bi-trash-fill fs-5"></i>
-                                        </button>
-
-                                    </td>
-
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">No hotels found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-
-                    {{-- Pagination --}}
-                    <div class="d-flex justify-content-end mt-3">
-                        {{ $hotels->links() }}
+                <div class="row mb-3 justify-content-end">
+                    <div class="col-md-3">
+                        <input type="text" id="hotelSearch" class="form-control"
+                            placeholder="Search by hotel name...">
                     </div>
+                    <div class="col-md-3">
+                        <select id="categoryFilter" class="form-select">
+                            <option value="">All Categories</option>
+                            <option value="luxury">Luxury</option>
+                            <option value="standard">Standard</option>
+                            <option value="budget">Budget</option>
+                            <option value="villa">Villa</option>
+                            <option value="apartment">Apartment</option>
+                            <option value="roomtype">Room Type</option>
+                            <option value="cabana">Cabana</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                <div class="table-responsive table-wrapper" style=" max-height: calc(100vh - 250px);    overflow-y: auto;"
+                    id="hotelTable">
+
                 </div>
             </div>
 
             <!-- Edit Hotel Modal -->
-            <div class="modal fade" id="editHotelModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
+            <!-- EDIT HOTEL MODAL -->
+            <div class="modal fade" id="editHotelModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered modal-xl">
                     <div class="modal-content">
-                        <form id="editHotelForm" method="POST">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Hotel</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <form id="editHotelForm" method="POST" enctype="multipart/form-data">
                             @csrf
-                            @method('PUT')
-                            <div class="modal-header">
-                                <h5 class="modal-title">Edit Hotel</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
+
+                            <div class="modal-body"  style="max-height: 70vh; overflow-y: auto;">
+
                                 <div id="editMessage"></div>
 
-                                {{-- Hotel Name --}}
+                                <!-- Hotel Name -->
                                 <div class="mb-3">
-                                    <label for="edit_hotel_name" class="form-label">Hotel Name</label>
+                                    <label class="form-label">Hotel Name</label>
                                     <input type="text" name="hotel_name" id="edit_hotel_name" class="form-control"
                                         required>
                                 </div>
 
-                                {{-- Star --}}
                                 <div class="mb-3">
-                                    <label for="edit_star" class="form-label">Star Rating</label>
+                                    <label for="edit_city" class="form-label">City</label>
+                                    <input type="text" name="city" id="edit_city" class="form-control">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="edit_address" class="form-label">Address</label>
+                                    <input type="text" name="address" id="edit_address" class="form-control"
+                                        >
+                                </div>
+
+                                <!-- Star -->
+                                <div class="mb-3">
+                                    <label class="form-label">Star Rating</label>
                                     <select name="star" id="edit_star" class="form-select">
                                         <option value="">Select Rating</option>
                                         @for ($i = 1; $i <= 5; $i++)
@@ -248,88 +259,120 @@
                                     </select>
                                 </div>
 
-
-                                {{-- Room Type --}}
+                                <!-- Category -->
                                 <div class="mb-3">
-                                    <label for="edit_room_type" class="form-label">Room Type</label>
+                                    <label class="form-label">Hotel Category</label>
+                                    <select name="hotel_category" id="edit_hotel_category" class="form-select">
+                                        <option value="">Select Category</option>
+                                        <option value="luxury">Luxury</option>
+                                        <option value="standard">Standard</option>
+                                        <option value="budget">Budget</option>
+                                        <option value="villa">Villa</option>
+                                        <option value="apartment">Apartment</option>
+                                        <option value="roomtype">Room Type</option>
+                                        <option value="cabana">Cabana</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <!-- Room Type -->
+                                <div class="mb-3">
+                                    <label class="form-label">Room Type</label>
                                     <input type="text" name="room_type" id="edit_room_type" class="form-control">
                                 </div>
 
-                                {{-- Meal Plan --}}
+                                <!-- Meal Plan -->
                                 <div class="mb-3">
-                                    <label for="edit_meal_plan" class="form-label">Meal Plan</label>
+                                    <label class="form-label">Meal Plan</label>
                                     <input type="text" name="meal_plan" id="edit_meal_plan" class="form-control">
                                 </div>
 
-                                {{-- Description --}}
+                                <!-- Description -->
                                 <div class="mb-3">
-                                    <label for="edit_description" class="form-label">Description</label>
+                                    <label class="form-label">Description</label>
                                     <textarea name="description" id="edit_description" class="form-control" rows="3"></textarea>
                                 </div>
 
-                                {{-- Facilities --}}
+                                <!-- Facilities -->
                                 <div class="mb-3">
-                                    <label for="edit_facilities" class="form-label">Facilities</label>
+                                    <label class="form-label">Facilities</label>
                                     <textarea name="facilities" id="edit_facilities" class="form-control" rows="2"></textarea>
                                 </div>
 
-                                {{-- Entertainment --}}
+                                <!-- Entertainment -->
                                 <div class="mb-3">
-                                    <label for="edit_entertainment" class="form-label">Entertainment</label>
+                                    <label class="form-label">Entertainment</label>
                                     <textarea name="entertainment" id="edit_entertainment" class="form-control" rows="2"></textarea>
                                 </div>
 
-                                {{-- Pictures --}}
+                                <!-- Pictures -->
                                 <div class="mb-3">
-                                    <label for="edit_pictures" class="form-label">Hotel Pictures</label>
-
-                                    <!-- Existing Images Preview -->
-                                    <div id="existingPictures" class="d-flex flex-wrap mb-2 gap-2">
-                                        <!-- existing images will be loaded here via JS -->
-                                    </div>
-
+                                    <label class="form-label">Hotel Pictures</label>
+                                    <div id="existingPictures" class="d-flex flex-wrap mb-2 gap-2"></div>
                                     <input type="file" name="pictures[]" id="edit_pictures" class="form-control"
-                                        multiple accept="image/*">
-
-                                    <small class="text-muted d-block mt-1">
-                                        Uploading new images will replace all existing ones.
-                                    </small>
+                                        multiple>
                                 </div>
 
-
-                                {{-- Status --}}
+                                <!-- Status -->
                                 <div class="mb-3">
-                                    <label for="edit_status" class="form-label">Status</label>
+                                    <label class="form-label">Status</label>
                                     <select name="status" id="edit_status" class="form-select">
                                         <option value="1">Active</option>
                                         <option value="0">Inactive</option>
                                     </select>
                                 </div>
+
                             </div>
+
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                 <button type="submit" class="btn btn-primary">Update Hotel</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             </div>
+
                         </form>
+
                     </div>
                 </div>
             </div>
 
+            <!-- IMAGE VIEWER MODAL -->
+            <div class="modal fade" id="imageViewerModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-body p-2 text-center">
+                            <img id="imageViewerImg" src="" alt="Preview"
+                                style="max-width:100%; max-height:70vh; object-fit:contain;">
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <small id="imageIndexInfo" class="text-muted"></small>
+                            <button type="button" class="btn btn-secondary btn-sm"
+                                data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     {{-- Scripts --}}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+
+            // ---------------------------
+            // TOGGLE CREATE FORM
+            // ---------------------------
             const toggleBtn = document.getElementById("toggleCreateForm");
             const formCard = document.getElementById("createHotelCard");
 
             toggleBtn.addEventListener("click", function() {
                 formCard.style.display = formCard.style.display === "none" ? "block" : "none";
-                toggleBtn.textContent = formCard.style.display === "block" ? "Close Form" : "+ Add Hotel";
+                toggleBtn.textContent =
+                    formCard.style.display === "block" ? "Close Form" : "+ Add Hotel";
             });
 
-            // Create Hotel AJAX
+            // ---------------------------
+            // AJAX: CREATE HOTEL
+            // ---------------------------
             document.getElementById('createHotelForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 let form = this;
@@ -349,44 +392,82 @@
                             messageBox.innerHTML =
                                 `<div class="alert alert-success">${data.message}</div>`;
                             form.reset();
-                            setTimeout(() => location.reload(), 1000);
+                            loadHotels();
                         } else {
                             let errors = data.errors ? Object.values(data.errors).flat().join('<br>') :
                                 data.message;
                             messageBox.innerHTML = `<div class="alert alert-danger">${errors}</div>`;
                         }
-                    })
-                    .catch(err => console.error(err));
+                    }).catch(err => console.error(err));
             });
 
-            // Edit Hotel
-            document.querySelector("#hotelTable").addEventListener("click", function(e) {
+            // ---------------------------
+            // AJAX: LOAD HOTELS (WITH FILTERS)
+            // ---------------------------
+            const hotelTableContainer = document.getElementById('hotelTable');
+            const searchInput = document.getElementById('hotelSearch');
+            const categorySelect = document.getElementById('categoryFilter');
+
+            function loadHotels(page = 1) {
+                const search = searchInput.value;
+                const category = categorySelect.value;
+                const url = `{{ route('admin.hotels.index') }}?search=${search}&category=${category}&page=${page}`;
+
+                fetch(url, {
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    })
+                    .then(res => res.text())
+                    .then(html => hotelTableContainer.innerHTML = html)
+                    .catch(err => console.error(err));
+            }
+
+            searchInput.addEventListener('keyup', () => loadHotels());
+            categorySelect.addEventListener('change', () => loadHotels());
+
+            // ---------------------------
+            // DELEGATE: EDIT HOTEL MODAL
+            // ---------------------------
+            hotelTableContainer.addEventListener("click", function(e) {
                 const btn = e.target.closest(".edit-hotel");
                 if (!btn) return;
 
                 const id = btn.dataset.id;
-                document.getElementById("editHotelForm").action = `/admin/hotels/${id}`;
-                document.getElementById("edit_hotel_name").value = btn.dataset.name;
-                document.getElementById("edit_star").value = btn.dataset.star;
-                document.getElementById("edit_room_type").value = btn.dataset.room_type || '';
-                document.getElementById("edit_meal_plan").value = btn.dataset.meal_plan || '';
-                document.getElementById("edit_description").value = btn.dataset.description || '';
-                document.getElementById("edit_facilities").value = btn.dataset.facilities || '';
-                document.getElementById("edit_entertainment").value = btn.dataset.entertainment || '';
-                document.getElementById("edit_status").value = btn.dataset.status;
+                const form = document.getElementById("editHotelForm");
+                form.action = `/admin/hotels/${id}`;
 
+                form.querySelector("#edit_hotel_name").value = btn.dataset.name;
+                form.querySelector("#edit_city").value = btn.dataset.city || '';
+                form.querySelector("#edit_address").value = btn.dataset.address || '';
+                form.querySelector("#edit_star").value = btn.dataset.star;
+                form.querySelector("#edit_hotel_category").value = btn.dataset.category;
+                form.querySelector("#edit_room_type").value = btn.dataset.room_type || '';
+                form.querySelector("#edit_meal_plan").value = btn.dataset.meal_plan || '';
+                form.querySelector("#edit_description").value = btn.dataset.description || '';
+                form.querySelector("#edit_facilities").value = btn.dataset.facilities || '';
+                form.querySelector("#edit_entertainment").value = btn.dataset.entertainment || '';
+                form.querySelector("#edit_status").value = btn.dataset.status;
+
+                // Load existing pictures
                 const pictureContainer = document.getElementById("existingPictures");
-                pictureContainer.innerHTML = "";
-
-                let pictures = btn.dataset.pictures ? JSON.parse(btn.dataset.pictures) : [];
+                pictureContainer.innerHTML = '';
+                let pictures = [];
+                try {
+                    pictures = JSON.parse(btn.dataset.pictures);
+                } catch (e) {
+                    pictures = [];
+                }
 
                 if (pictures.length > 0) {
                     pictures.forEach(pic => {
+                        // Since images are in public/hotel, use asset path directly
                         pictureContainer.innerHTML += `
-                    <div class="position-relative d-inline-block m-1">
-                        <img src="/storage/${pic}" class="rounded" width="80" height="80">
-                    </div>
-                `;
+            <div class="position-relative d-inline-block m-1">
+                <img src="/${pic}" class="rounded" width="80" height="80"
+                     style="object-fit:cover; cursor:pointer;"
+                     onclick="document.getElementById('imageViewerImg').src=this.src; new bootstrap.Modal(document.getElementById('imageViewerModal')).show();">
+            </div>`;
                     });
                 } else {
                     pictureContainer.innerHTML = `<span class="text-muted">No existing images</span>`;
@@ -395,11 +476,14 @@
                 new bootstrap.Modal(document.getElementById("editHotelModal")).show();
             });
 
-            // Submit Edit
+            // ---------------------------
+            // AJAX: UPDATE HOTEL
+            // ---------------------------
             document.getElementById("editHotelForm").addEventListener("submit", function(e) {
                 e.preventDefault();
                 const form = this;
                 const formData = new FormData(form);
+                formData.append('_method', 'PUT');
 
                 fetch(form.action, {
                         method: "POST",
@@ -414,18 +498,19 @@
                         if (data.success) {
                             messageBox.innerHTML =
                                 `<div class="alert alert-success">${data.message}</div>`;
-                            setTimeout(() => location.reload(), 1000);
+                            loadHotels();
                         } else {
                             const errors = data.errors ? Object.values(data.errors).flat().join(
                                 '<br>') : data.message;
                             messageBox.innerHTML = `<div class="alert alert-danger">${errors}</div>`;
                         }
-                    })
-                    .catch(err => console.error(err));
+                    }).catch(err => console.error(err));
             });
 
-            // Delete Hotel
-            document.querySelector("#hotelTable").addEventListener("click", function(e) {
+            // ---------------------------
+            // DELETE HOTEL
+            // ---------------------------
+            hotelTableContainer.addEventListener("click", function(e) {
                 const btn = e.target.closest(".delete-hotel");
                 if (!btn) return;
 
@@ -451,29 +536,57 @@
                             .then(res => res.json())
                             .then(data => {
                                 if (data.success) {
-                                    // Remove row from table
-                                    document.getElementById('hotel-' + id).remove();
-
+                                    loadHotels();
                                     Swal.fire({
                                         title: "Deleted!",
-                                        text: "Hotel has been deleted successfully.",
+                                        text: "Hotel deleted.",
                                         icon: "success",
-                                        timer: 2000,
+                                        timer: 1500,
                                         showConfirmButton: false
                                     });
-                                } else {
-                                    Swal.fire("Error!", data.message ||
-                                        "Failed to delete hotel.", "error");
-                                }
-                            })
-                            .catch(err => {
-                                Swal.fire("Error!", "Something went wrong.", "error");
-                                console.error(err);
-                            });
+                                } else Swal.fire("Error!", data.message ||
+                                    "Failed to delete hotel.", "error");
+                            }).catch(err => Swal.fire("Error!", "Something went wrong.", "error"));
                     }
                 });
             });
 
+            // ---------------------------
+            // IMAGE VIEWER
+            // ---------------------------
+           hotelTableContainer.addEventListener("click", function(e) {
+    const imgBtn = e.target.closest(".view-image");
+    if (!imgBtn) return;
+
+    const src = imgBtn.dataset.src;
+    const all = imgBtn.dataset.all ? JSON.parse(imgBtn.dataset.all) : [];
+    const viewerImg = document.getElementById("imageViewerImg");
+    viewerImg.src = src;
+
+    const info = document.getElementById("imageIndexInfo");
+    if (all.length > 0) {
+        const filename = src.split('/').pop();
+        const idx = all.indexOf(filename);
+        info.textContent = idx >= 0 ? `${idx+1} of ${all.length}` : `1 of ${all.length}`;
+    } else info.textContent = '';
+
+    new bootstrap.Modal(document.getElementById("imageViewerModal")).show();
+});
+
+
+            hotelTableContainer.addEventListener('click', function(e) {
+                const link = e.target.closest('.pagination a');
+                if (!link) return;
+                e.preventDefault();
+                const url = new URL(link.href);
+                const page = url.searchParams.get('page') || 1;
+                loadHotels(page);
+            });
+
+            // ---------------------------
+            // INITIAL LOAD
+            // ---------------------------
+            loadHotels();
         });
     </script>
 @endsection
