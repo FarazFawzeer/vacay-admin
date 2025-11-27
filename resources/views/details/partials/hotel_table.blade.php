@@ -2,16 +2,11 @@
     <thead class="table-light">
         <tr>
             <th>Hotel Name</th>
+            <th>Category</th>
+            <th>Country</th>
             <th>City</th>
             <th>Star</th>
-            <th>Category</th>
-            <th>Room Type</th>
-            <th>Meal Plan</th>
-            <th>Facilities</th>
-            <th>Entertainment</th>
-            <th>Pictures</th>
             <th>Status</th>
-            <th>Updated At</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -19,40 +14,41 @@
         @forelse($hotels as $hotel)
             <tr id="hotel-{{ $hotel->id }}">
                 <td>{{ $hotel->hotel_name }}</td>
+                <td>{{ ucfirst($hotel->hotel_category) ?? '-' }}</td>
+                <td>{{ $hotel->country ?? '-' }}</td>
                 <td>{{ $hotel->city ?? '-' }}</td>
                 <td>{{ $hotel->star ? $hotel->star . ' ★' : '-' }}</td>
-                <td>{{ ucfirst($hotel->hotel_category) ?? '-' }}</td>
-                <td>{{ $hotel->room_type ?? '-' }}</td>
-                <td>{{ $hotel->meal_plan ?? '-' }}</td>
-                <td>{{ Str::limit($hotel->facilities, 30) ?? '-' }}</td>
-                <td>{{ Str::limit($hotel->entertainment, 30) ?? '-' }}</td>
+
+
+
+
+
                 <td>
-                    @if ($hotel->pictures)
-                        @foreach ($hotel->pictures as $pic)
-                            <img src="{{ asset($pic) }}" width="40" height="40" class="rounded me-1 view-image"
-                                data-src="{{ asset($pic) }}" data-all='@json($hotel->pictures)'>
-                        @endforeach
-                    @else
-                        <span class="text-muted">No images</span>
+                    @if ($hotel->status == 1)
+                        <span class="badge bg-success">Active</span>
+                    @elseif ($hotel->status == 0)
+                        <span class="badge bg-danger">Inactive</span>
+                    @elseif ($hotel->status == 2)
+                        <span class="badge bg-warning text-dark">Expire</span>
                     @endif
                 </td>
 
+
+
                 <td>
-                    @if ($hotel->status)
-                        <span class="badge bg-success">Active</span>
-                    @else
-                        <span class="badge bg-danger">Inactive</span>
-                    @endif
-                </td>
-                <td>{{ $hotel->updated_at->format('d M Y, h:i A') }}</td>
-                <td>
+
+                    <a href="{{ route('admin.hotels.show', $hotel->id) }}" class="icon-btn text-info" title="View Details">
+                        <i class="bi bi-eye-fill fs-5"></i>
+                    </a>
+
                     <button type="button" class="icon-btn text-primary edit-hotel" data-id="{{ $hotel->id }}"
                         data-name="{{ $hotel->hotel_name }}" data-star="{{ $hotel->star }}"
-                        data-category="{{ $hotel->hotel_category }}" data-room_type="{{ $hotel->room_type }}"
-                        data-meal_plan="{{ $hotel->meal_plan }}" data-description="{{ $hotel->description }}"
-                        data-facilities="{{ $hotel->facilities }}" data-entertainment="{{ $hotel->entertainment }}"
-                        data-status="{{ $hotel->status }}" data-city="{{ $hotel->city }}"
-                        data-address="{{ $hotel->address }}" data-pictures='@json($hotel->pictures)'
+                        data-category="{{ $hotel->hotel_category }}" data-room_type='@json($hotel->room_type)'
+                        data-meal_plan="{{ $hotel->meal_plan }}" data-meal_costs='@json($hotel->meal_costs)'
+                        data-description="{{ $hotel->description }}" data-facilities='@json($hotel->facilities)'
+                        data-entertainment='@json($hotel->entertainment)' data-status="{{ $hotel->status }}"
+                        data-city="{{ $hotel->city }}" data-address="{{ $hotel->address }}"
+                        data-country="{{ $hotel->country }}" data-pictures='@json($hotel->pictures)'
                         title="Edit Hotel">
                         <i class="bi bi-pencil-square fs-5"></i>
                     </button>
@@ -70,6 +66,7 @@
             </tr>
         @endforelse
     </tbody>
+
 </table>
 
 <div class="d-flex justify-content-end mt-3">

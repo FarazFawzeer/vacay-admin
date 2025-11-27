@@ -63,29 +63,36 @@
 
                     {{-- Hotel Name --}}
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="hotel_name" class="form-label">Hotel Name</label>
                             <input type="text" name="hotel_name" id="hotel_name" class="form-control"
                                 placeholder="Ex: Hilton Colombo" required>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" name="country" id="country" class="form-control"
+                                placeholder="Ex: Sri Lanka" required>
+                        </div>
                     </div>
 
                     <div class="row">
+
                         <div class="col-md-6 mb-3">
                             <label for="city" class="form-label">City</label>
                             <input type="text" name="city" id="city" class="form-control"
-                                placeholder="Ex: Colombo" required>
+                                placeholder="Ex: Colombo">
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label for="address" class="form-label">Address</label>
                             <input type="text" name="address" id="address" class="form-control"
-                                placeholder="Ex: 123 Main Street" required>
+                                placeholder="Ex: 123 Main Street">
                         </div>
+
                     </div>
                     {{-- Star --}}
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="star" class="form-label">Star Rating</label>
                             <select name="star" id="star" class="form-select">
                                 <option value="">Select Rating</option>
@@ -95,7 +102,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="hotel_category" class="form-label">Hotel Category</label>
                             <select name="hotel_category" id="hotel_category" class="form-select" required>
                                 <option value="">Select Category</option>
@@ -109,19 +116,8 @@
                                 <option value="other">Other</option>
                             </select>
                         </div>
-                    </div>
 
-
-
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="room_type" class="form-label">Room Type</label>
-                            <input type="text" name="room_type" id="room_type" class="form-control"
-                                placeholder="Ex: Deluxe, Suite">
-                        </div>
-
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="meal_plan" class="form-label">Meal Plan</label>
                             <select name="meal_plan" id="meal_plan" class="form-select" required>
                                 <option value="">Select Meal Plan</option>
@@ -135,18 +131,150 @@
 
 
 
+
+
+
                     <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="facilities" class="form-label">Facilities</label>
-                            <textarea name="facilities" id="facilities" rows="2" class="form-control" placeholder="List of facilities"></textarea>
+
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Room Types</label>
+                            <div id="roomTypeWrapper">
+
+                                <!-- Default Item -->
+                                <div class="row room-type-item mb-2">
+                                    <div class="col-md-4">
+                                        <input type="text" name="room_type[]" class="form-control"
+                                            placeholder="Room Type (Ex: Deluxe)">
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <input type="number" step="0.01" name="room_price[]" class="form-control"
+                                            placeholder="Price">
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        <select name="room_currency[]" class="form-control">
+                                            <option value="USD">USD</option>
+                                            <option value="LKR">LKR</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button type="button" id="addRoomType" class="btn btn-sm btn-primary mt-2">Add Room
+                                Type</button>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="entertainment" class="form-label">Entertainment</label>
-                            <textarea name="entertainment" id="entertainment" rows="2" class="form-control"
-                                placeholder="List of entertainment options"></textarea>
+                            <label class="form-label">Facilities</label>
+                            <div id="facilitiesWrapper">
+                                <div class="input-group mb-2 facilities-item">
+                                    <input type="text" name="facilities[]" class="form-control"
+                                        placeholder="Ex: Free WiFi">
+                                    <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                </div>
+                            </div>
+                            <button type="button" id="addFacility" class="btn btn-sm btn-primary">Add Facility</button>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Entertainment</label>
+                            <div id="entertainmentWrapper">
+                                <div class="input-group mb-2 entertainment-item">
+                                    <input type="text" name="entertainment[]" class="form-control"
+                                        placeholder="Ex: Live Music">
+                                    <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                </div>
+                            </div>
+                            <button type="button" id="addEntertainment" class="btn btn-sm btn-primary">Add
+                                Entertainment</button>
+
                         </div>
                     </div>
+
+
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <label class="form-label"><strong>Meal & Aditional Costs</strong></label>
+
+                            <div id="mealCostWrapper">
+
+                                <!-- DEFAULT BREAKFAST -->
+                                <div class="row mb-2 meal-item">
+                                    <div class="col-md-3">
+                                        <input type="text" name="meal_name[]" value="Breakfast" class="form-control"
+                                            readonly>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" step="0.01" name="meal_price[]" class="form-control"
+                                            placeholder="Price">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select name="meal_currency[]" class="form-control">
+                                            <option value="USD">USD</option>
+                                            <option value="LKR">LKR</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-danger remove-meal">Remove</button>
+                                    </div>
+                                </div>
+
+                                <!-- DEFAULT LUNCH -->
+                                <div class="row mb-2 meal-item">
+                                    <div class="col-md-3">
+                                        <input type="text" name="meal_name[]" value="Lunch" class="form-control"
+                                            readonly>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" step="0.01" name="meal_price[]" class="form-control"
+                                            placeholder="Price">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select name="meal_currency[]" class="form-control">
+                                            <option value="USD">USD</option>
+                                            <option value="LKR">LKR</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-danger remove-meal">Remove</button>
+                                    </div>
+                                </div>
+
+                                <!-- DEFAULT DINNER -->
+                                <div class="row mb-2 meal-item">
+                                    <div class="col-md-3">
+                                        <input type="text" name="meal_name[]" value="Dinner" class="form-control"
+                                            readonly>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" step="0.01" name="meal_price[]" class="form-control"
+                                            placeholder="Price">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select name="meal_currency[]" class="form-control">
+                                            <option value="USD">USD</option>
+                                            <option value="LKR">LKR</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="button" class="btn btn-danger remove-meal">Remove</button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <button type="button" id="addMealCost" class="btn btn-sm btn-primary mt-2">Add Meal
+                                Cost</button>
+                        </div>
+                    </div>
+
+
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -161,6 +289,7 @@
                             <select name="status" id="status" class="form-select">
                                 <option value="1">Active</option>
                                 <option value="0">Inactive</option>
+                                <option value="2">Expire</option>
                             </select>
                         </div>
                     </div>
@@ -186,10 +315,9 @@
         <div class="card">
             <div class="card-body">
                 <div class="row mb-3 justify-content-end">
-                    <div class="col-md-3">
-                        <input type="text" id="hotelSearch" class="form-control"
-                            placeholder="Search by hotel name...">
-                    </div>
+                 <div class="col-md-3">
+    <input type="text" id="hotelSearch" class="form-control" placeholder="Search by hotel name, city, country, category...">
+</div>
                     <div class="col-md-3">
                         <select id="categoryFilter" class="form-select">
                             <option value="">All Categories</option>
@@ -214,6 +342,7 @@
 
             <!-- Edit Hotel Modal -->
             <!-- EDIT HOTEL MODAL -->
+            <!-- EDIT HOTEL MODAL -->
             <div class="modal fade" id="editHotelModal" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered modal-xl">
                     <div class="modal-content">
@@ -226,8 +355,7 @@
                         <form id="editHotelForm" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <div class="modal-body"  style="max-height: 70vh; overflow-y: auto;">
-
+                            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                                 <div id="editMessage"></div>
 
                                 <!-- Hotel Name -->
@@ -237,75 +365,98 @@
                                         required>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="edit_city" class="form-label">City</label>
-                                    <input type="text" name="city" id="edit_city" class="form-control">
+                                <!-- Country / City / Address -->
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Country</label>
+                                        <input type="text" name="country" id="edit_country" class="form-control">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">City</label>
+                                        <input type="text" name="city" id="edit_city" class="form-control">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Address</label>
+                                        <input type="text" name="address" id="edit_address" class="form-control">
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="edit_address" class="form-label">Address</label>
-                                    <input type="text" name="address" id="edit_address" class="form-control"
-                                        >
+                                <!-- Star Rating -->
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Star Rating</label>
+                                        <select name="star" id="edit_star" class="form-select">
+                                            <option value="">Select Rating</option>
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                <option value="{{ $i }}">{{ $i }} Star</option>
+                                            @endfor
+                                        </select>
+                                    </div>
+
+                                    <!-- Hotel Category -->
+
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Hotel Category</label>
+                                        <select name="hotel_category" id="edit_hotel_category" class="form-select">
+                                            <option value="">Select Category</option>
+                                            <option value="luxury">Luxury</option>
+                                            <option value="standard">Standard</option>
+                                            <option value="budget">Budget</option>
+                                            <option value="villa">Villa</option>
+                                            <option value="apartment">Apartment</option>
+                                            <option value="roomtype">Room Type</option>
+                                            <option value="cabana">Cabana</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Meal Plan -->
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Meal Plan</label>
+                                        <select name="meal_plan" id="edit_meal_plan" class="form-select">
+                                            <option value="">Select Meal Plan</option>
+                                            <option value="half board">Half Board</option>
+                                            <option value="full board">Full Board</option>
+                                            <option value="all include">All Include</option>
+                                            <option value="room only">Room Only</option>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <!-- Star -->
+                                <!-- Room Types (with Price & Currency) -->
                                 <div class="mb-3">
-                                    <label class="form-label">Star Rating</label>
-                                    <select name="star" id="edit_star" class="form-select">
-                                        <option value="">Select Rating</option>
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            <option value="{{ $i }}">{{ $i }} Star</option>
-                                        @endfor
-                                    </select>
+                                    <label class="form-label">Room Types</label>
+                                    <div id="editRoomTypeWrapper"></div>
+                                    <button type="button" id="editAddRoomType" class="btn btn-sm btn-primary mt-2">Add
+                                        Room Type</button>
                                 </div>
 
-                                <!-- Category -->
-                                <div class="mb-3">
-                                    <label class="form-label">Hotel Category</label>
-                                    <select name="hotel_category" id="edit_hotel_category" class="form-select">
-                                        <option value="">Select Category</option>
-                                        <option value="luxury">Luxury</option>
-                                        <option value="standard">Standard</option>
-                                        <option value="budget">Budget</option>
-                                        <option value="villa">Villa</option>
-                                        <option value="apartment">Apartment</option>
-                                        <option value="roomtype">Room Type</option>
-                                        <option value="cabana">Cabana</option>
-                                        <option value="other">Other</option>
-                                    </select>
-                                </div>
-
-                                <!-- Room Type -->
-                                <div class="mb-3">
-                                    <label class="form-label">Room Type</label>
-                                    <input type="text" name="room_type" id="edit_room_type" class="form-control">
-                                </div>
-
-                                <!-- Meal Plan -->
-                                <div class="mb-3">
-                                    <label class="form-label">Meal Plan</label>
-                                    <input type="text" name="meal_plan" id="edit_meal_plan" class="form-control">
-                                </div>
-
-                                <!-- Description -->
-                                <div class="mb-3">
-                                    <label class="form-label">Description</label>
-                                    <textarea name="description" id="edit_description" class="form-control" rows="3"></textarea>
-                                </div>
 
                                 <!-- Facilities -->
                                 <div class="mb-3">
                                     <label class="form-label">Facilities</label>
-                                    <textarea name="facilities" id="edit_facilities" class="form-control" rows="2"></textarea>
+                                    <div id="editFacilitiesWrapper"></div>
+                                    <button type="button" id="editAddFacility" class="btn btn-sm btn-primary mt-2">Add
+                                        Facility</button>
                                 </div>
 
                                 <!-- Entertainment -->
                                 <div class="mb-3">
                                     <label class="form-label">Entertainment</label>
-                                    <textarea name="entertainment" id="edit_entertainment" class="form-control" rows="2"></textarea>
+                                    <div id="editEntertainmentWrapper"></div>
+                                    <button type="button" id="editAddEntertainment"
+                                        class="btn btn-sm btn-primary mt-2">Add Entertainment</button>
                                 </div>
 
-                                <!-- Pictures -->
+                                <!-- Meal & Additional Costs -->
+                                <div class="mb-3">
+                                    <label class="form-label"><strong>Meal & Additional Costs</strong></label>
+                                    <div id="editMealCostWrapper"></div>
+                                    <button type="button" id="editAddMealCost" class="btn btn-sm btn-primary mt-2">Add
+                                        Aditional Cost</button>
+                                </div>
+
+                                <!-- Hotel Pictures -->
                                 <div class="mb-3">
                                     <label class="form-label">Hotel Pictures</label>
                                     <div id="existingPictures" class="d-flex flex-wrap mb-2 gap-2"></div>
@@ -319,8 +470,16 @@
                                     <select name="status" id="edit_status" class="form-select">
                                         <option value="1">Active</option>
                                         <option value="0">Inactive</option>
+                                        <option value="2">Expire</option>
                                     </select>
                                 </div>
+
+                                <!-- Description -->
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea name="description" id="edit_description" class="form-control" rows="3"></textarea>
+                                </div>
+
 
                             </div>
 
@@ -354,20 +513,154 @@
         </div>
     </div>
 
-    {{-- Scripts --}}
     <script>
         document.addEventListener("DOMContentLoaded", function() {
 
+            // ---------------------------
+            // DYNAMIC FIELDS FUNCTION
+            // ---------------------------
+            function addInput(wrapperId, placeholder, inputName) {
+                const wrapper = document.getElementById(wrapperId);
+                const div = document.createElement('div');
+                div.classList.add('input-group', 'mb-2');
+                div.innerHTML = `
+            <input type="text" name="${inputName}[]" class="form-control" placeholder="${placeholder}">
+            <button type="button" class="btn btn-danger remove-item">Remove</button>
+        `;
+                wrapper.appendChild(div);
+            }
+
+            // Event delegation for removing dynamic inputs
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-item')) {
+                    const parent = e.target.closest('.input-group') || e.target.closest(
+                        '.room-type-item') || e.target.closest('.meal-item');
+                    if (parent) parent.remove();
+                }
+                if (e.target.classList.contains('remove-meal')) {
+                    e.target.closest('.meal-item').remove();
+                }
+            });
+
+            // ---------------------------
+            // CREATE FORM: ADD DYNAMIC FIELDS
+            // ---------------------------
+            document.getElementById('addRoomType').addEventListener('click', function() {
+                const wrapper = document.getElementById('roomTypeWrapper');
+                const newItem = document.createElement('div');
+                newItem.classList.add('row', 'room-type-item', 'mb-2');
+                newItem.innerHTML = `
+            <div class="col-md-4">
+                <input type="text" name="room_type[]" class="form-control" placeholder="Room Type (Ex: Deluxe)">
+            </div>
+            <div class="col-md-3">
+                <input type="number" step="0.01" name="room_price[]" class="form-control" placeholder="Price">
+            </div>
+            <div class="col-md-3">
+                <select name="room_currency[]" class="form-control">
+                    <option value="USD">USD</option>
+                    <option value="LKR">LKR</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
+            </div>
+        `;
+                wrapper.appendChild(newItem);
+            });
+
+            document.getElementById('addMealCost').addEventListener('click', function() {
+                const wrapper = document.getElementById('mealCostWrapper');
+                const div = document.createElement('div');
+                div.classList.add('row', 'mb-2', 'meal-item');
+                div.innerHTML = `
+            <div class="col-md-3">
+                <input type="text" name="meal_name[]" class="form-control" placeholder="Meal Name">
+            </div>
+            <div class="col-md-3">
+                <input type="number" step="0.01" name="meal_price[]" class="form-control" placeholder="Price">
+            </div>
+            <div class="col-md-3">
+                <select name="meal_currency[]" class="form-control">
+                    <option value="USD">USD</option>
+                    <option value="LKR">LKR</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="btn btn-danger remove-meal">Remove</button>
+            </div>
+        `;
+                wrapper.appendChild(div);
+            });
+
+            document.getElementById('addFacility').addEventListener('click', () => addInput('facilitiesWrapper',
+                'Ex: Free WiFi', 'facilities'));
+            document.getElementById('addEntertainment').addEventListener('click', () => addInput(
+                'entertainmentWrapper', 'Ex: Live Music', 'entertainment'));
+
+            // EDIT FORM ADD BUTTONS
+            document.getElementById('editAddRoomType').addEventListener('click', function() {
+                const wrapper = document.getElementById('editRoomTypeWrapper');
+                const newItem = document.createElement('div');
+                newItem.classList.add('row', 'room-type-item', 'mb-2');
+                newItem.innerHTML = `
+        <div class="col-md-4">
+            <input type="text" name="room_type[]" class="form-control" placeholder="Room Type (Ex: Deluxe)">
+        </div>
+        <div class="col-md-3">
+            <input type="number" step="0.01" name="room_price[]" class="form-control" placeholder="Price">
+        </div>
+        <div class="col-md-3">
+            <select name="room_currency[]" class="form-control">
+                <option value="USD">USD</option>
+                <option value="LKR">LKR</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
+        </div>
+    `;
+                wrapper.appendChild(newItem);
+            });
+
+            document.getElementById('editAddFacility').addEventListener('click', () => addInput(
+                'editFacilitiesWrapper', 'Ex: Free WiFi', 'facilities'));
+            document.getElementById('editAddEntertainment').addEventListener('click', () => addInput(
+                'editEntertainmentWrapper', 'Ex: Live Music', 'entertainment'));
+
+
+
+            document.getElementById('editAddMealCost').addEventListener('click', function() {
+                const wrapper = document.getElementById('editMealCostWrapper');
+                const div = document.createElement('div');
+                div.classList.add('row', 'mb-2', 'meal-item');
+                div.innerHTML = `
+        <div class="col-md-3">
+            <input type="text" name="meal_name[]" class="form-control" placeholder="Meal Name">
+        </div>
+        <div class="col-md-3">
+            <input type="number" step="0.01" name="meal_price[]" class="form-control" placeholder="Price">
+        </div>
+        <div class="col-md-3">
+            <select name="meal_currency[]" class="form-control">
+                <option value="USD">USD</option>
+                <option value="LKR">LKR</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="button" class="btn btn-danger remove-meal w-100">Remove</button>
+        </div>
+    `;
+                wrapper.appendChild(div);
+            });
             // ---------------------------
             // TOGGLE CREATE FORM
             // ---------------------------
             const toggleBtn = document.getElementById("toggleCreateForm");
             const formCard = document.getElementById("createHotelCard");
-
-            toggleBtn.addEventListener("click", function() {
+            toggleBtn.addEventListener("click", () => {
                 formCard.style.display = formCard.style.display === "none" ? "block" : "none";
-                toggleBtn.textContent =
-                    formCard.style.display === "block" ? "Close Form" : "+ Add Hotel";
+                toggleBtn.textContent = formCard.style.display === "block" ? "Close Form" : "+ Add Hotel";
             });
 
             // ---------------------------
@@ -375,8 +668,8 @@
             // ---------------------------
             document.getElementById('createHotelForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                let form = this;
-                let formData = new FormData(form);
+                const form = this;
+                const formData = new FormData(form);
 
                 fetch(form.action, {
                         method: "POST",
@@ -387,22 +680,22 @@
                     })
                     .then(res => res.json())
                     .then(data => {
-                        let messageBox = document.getElementById('message');
+                        const messageBox = document.getElementById('message');
                         if (data.success) {
                             messageBox.innerHTML =
                                 `<div class="alert alert-success">${data.message}</div>`;
                             form.reset();
                             loadHotels();
                         } else {
-                            let errors = data.errors ? Object.values(data.errors).flat().join('<br>') :
-                                data.message;
+                            const errors = data.errors ? Object.values(data.errors).flat().join(
+                                '<br>') : data.message;
                             messageBox.innerHTML = `<div class="alert alert-danger">${errors}</div>`;
                         }
                     }).catch(err => console.error(err));
             });
 
             // ---------------------------
-            // AJAX: LOAD HOTELS (WITH FILTERS)
+            // AJAX: LOAD HOTELS WITH FILTERS
             // ---------------------------
             const hotelTableContainer = document.getElementById('hotelTable');
             const searchInput = document.getElementById('hotelSearch');
@@ -412,7 +705,6 @@
                 const search = searchInput.value;
                 const category = categorySelect.value;
                 const url = `{{ route('admin.hotels.index') }}?search=${search}&category=${category}&page=${page}`;
-
                 fetch(url, {
                         headers: {
                             "X-Requested-With": "XMLHttpRequest"
@@ -427,46 +719,156 @@
             categorySelect.addEventListener('change', () => loadHotels());
 
             // ---------------------------
-            // DELEGATE: EDIT HOTEL MODAL
+            // EDIT HOTEL MODAL
             // ---------------------------
-            hotelTableContainer.addEventListener("click", function(e) {
+            hotelTableContainer.addEventListener('click', function(e) {
                 const btn = e.target.closest(".edit-hotel");
                 if (!btn) return;
 
-                const id = btn.dataset.id;
                 const form = document.getElementById("editHotelForm");
-                form.action = `/admin/hotels/${id}`;
+                form.action = `/admin/hotels/${btn.dataset.id}`;
 
-                form.querySelector("#edit_hotel_name").value = btn.dataset.name;
+                // Basic fields
+                form.querySelector("#edit_hotel_name").value = btn.dataset.name || '';
                 form.querySelector("#edit_city").value = btn.dataset.city || '';
                 form.querySelector("#edit_address").value = btn.dataset.address || '';
-                form.querySelector("#edit_star").value = btn.dataset.star;
-                form.querySelector("#edit_hotel_category").value = btn.dataset.category;
-                form.querySelector("#edit_room_type").value = btn.dataset.room_type || '';
+                form.querySelector("#edit_country").value = btn.dataset.country || '';
+                form.querySelector("#edit_star").value = btn.dataset.star || '';
+                form.querySelector("#edit_hotel_category").value = btn.dataset.category || '';
                 form.querySelector("#edit_meal_plan").value = btn.dataset.meal_plan || '';
                 form.querySelector("#edit_description").value = btn.dataset.description || '';
-                form.querySelector("#edit_facilities").value = btn.dataset.facilities || '';
-                form.querySelector("#edit_entertainment").value = btn.dataset.entertainment || '';
-                form.querySelector("#edit_status").value = btn.dataset.status;
+                form.querySelector("#edit_status").value = btn.dataset.status || '1';
 
-                // Load existing pictures
+                // Dynamic fields
+                function loadDynamic(wrapperId, dataAttr, placeholder, inputName) {
+                    const wrapper = document.getElementById(wrapperId);
+                    wrapper.innerHTML = '';
+                    let items = [];
+                    try {
+                        items = JSON.parse(btn.dataset[dataAttr]) || [];
+                    } catch (e) {
+                        items = btn.dataset[dataAttr] ? [btn.dataset[dataAttr]] : [];
+                    }
+                    if (items.length) {
+                        items.forEach(() => addInput(wrapperId, placeholder, inputName));
+                        wrapper.querySelectorAll('input').forEach((input, i) => input.value = items[i]);
+                    } else {
+                        addInput(wrapperId, placeholder, inputName);
+                    }
+                }
+
+                function loadRoomTypes(wrapperId, dataAttr) {
+                    const wrapper = document.getElementById(wrapperId);
+                    wrapper.innerHTML = '';
+                    let items = [];
+                    try {
+                        items = JSON.parse(btn.dataset[dataAttr]) || [];
+                    } catch (e) {
+                        items = btn.dataset[dataAttr] ? [btn.dataset[dataAttr]] : [];
+                    }
+
+                    if (items.length) {
+                        items.forEach(item => {
+                            // Ensure item is an object
+                            if (!item || typeof item !== 'object') item = {};
+
+                            const div = document.createElement('div');
+                            div.classList.add('row', 'room-type-item', 'mb-2');
+                            div.innerHTML = `
+                <div class="col-md-4">
+                    <input type="text" name="room_type[]" class="form-control" placeholder="Room Type (Ex: Deluxe)" value="${item.type ?? ''}">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" step="0.01" name="room_price[]" class="form-control" placeholder="Price" value="${item.price ?? ''}">
+                </div>
+                <div class="col-md-3">
+                    <select name="room_currency[]" class="form-control">
+                        <option value="USD" ${item.currency=='USD'?'selected':''}>USD</option>
+                        <option value="LKR" ${item.currency=='LKR'?'selected':''}>LKR</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
+                </div>
+            `;
+                            wrapper.appendChild(div);
+                        });
+                    } else {
+                        // Add one empty row if no data
+                        document.getElementById('editAddRoomType').click();
+                    }
+                }
+
+
+                function loadMealCosts(wrapperId, dataAttr) {
+                    const wrapper = document.getElementById(wrapperId);
+                    wrapper.innerHTML = '';
+                    let items = [];
+
+                    try {
+                        items = JSON.parse(btn.dataset[dataAttr]) || [];
+                    } catch (e) {
+                        items = btn.dataset[dataAttr] ? [btn.dataset[dataAttr]] : [];
+                    }
+
+                    if (items.length) {
+                        items.forEach(item => {
+                            const div = document.createElement('div');
+                            div.classList.add('row', 'mb-2', 'meal-item');
+                            div.innerHTML = `
+                <div class="col-md-3">
+                    <input type="text" name="meal_name[]" class="form-control" placeholder="Meal Name" value="${item.name ?? ''}">
+                </div>
+                <div class="col-md-3">
+                    <input type="number" step="0.01" name="meal_price[]" class="form-control" placeholder="Price" value="${item.price ?? ''}">
+                </div>
+                <div class="col-md-3">
+                    <select name="meal_currency[]" class="form-control">
+                        <option value="USD" ${item.currency=='USD'?'selected':''}>USD</option>
+                        <option value="LKR" ${item.currency=='LKR'?'selected':''}>LKR</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-danger remove-meal w-100">Remove</button>
+                </div>
+            `;
+                            wrapper.appendChild(div);
+                        });
+                    } else {
+                        document.getElementById('editAddMealCost').click();
+                    }
+                }
+
+
+
+
+                loadRoomTypes('editRoomTypeWrapper', 'room_type');
+                loadMealCosts('editMealCostWrapper',
+                    'meal_costs'); // assuming meal_costs is the data attribute
+                loadDynamic('editFacilitiesWrapper', 'facilities', 'Ex: Free WiFi', 'facilities');
+                loadDynamic('editEntertainmentWrapper', 'entertainment', 'Ex: Live Music', 'entertainment');
+
+                // Pictures
                 const pictureContainer = document.getElementById("existingPictures");
                 pictureContainer.innerHTML = '';
+
                 let pictures = [];
-                try {
-                    pictures = JSON.parse(btn.dataset.pictures);
-                } catch (e) {
-                    pictures = [];
+                if (btn.dataset.pictures) {
+                    try {
+                        pictures = JSON.parse(btn.dataset.pictures);
+                        if (!Array.isArray(pictures)) pictures = [];
+                    } catch (e) {
+                        pictures = [];
+                    }
                 }
 
                 if (pictures.length > 0) {
                     pictures.forEach(pic => {
-                        // Since images are in public/hotel, use asset path directly
                         pictureContainer.innerHTML += `
             <div class="position-relative d-inline-block m-1">
                 <img src="/${pic}" class="rounded" width="80" height="80"
-                     style="object-fit:cover; cursor:pointer;"
-                     onclick="document.getElementById('imageViewerImg').src=this.src; new bootstrap.Modal(document.getElementById('imageViewerModal')).show();">
+                    style="object-fit:cover; cursor:pointer;"
+                    onclick="document.getElementById('imageViewerImg').src=this.src; new bootstrap.Modal(document.getElementById('imageViewerModal')).show();">
             </div>`;
                     });
                 } else {
@@ -475,6 +877,8 @@
 
                 new bootstrap.Modal(document.getElementById("editHotelModal")).show();
             });
+
+
 
             // ---------------------------
             // AJAX: UPDATE HOTEL
@@ -513,7 +917,6 @@
             hotelTableContainer.addEventListener("click", function(e) {
                 const btn = e.target.closest(".delete-hotel");
                 if (!btn) return;
-
                 const id = btn.dataset.id;
 
                 Swal.fire({
@@ -524,7 +927,7 @@
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#6c757d",
                     confirmButtonText: "Yes, delete it!"
-                }).then((result) => {
+                }).then(result => {
                     if (result.isConfirmed) {
                         fetch(`/admin/hotels/${id}`, {
                                 method: "DELETE",
@@ -554,26 +957,24 @@
             // ---------------------------
             // IMAGE VIEWER
             // ---------------------------
-           hotelTableContainer.addEventListener("click", function(e) {
-    const imgBtn = e.target.closest(".view-image");
-    if (!imgBtn) return;
+            hotelTableContainer.addEventListener("click", function(e) {
+                const imgBtn = e.target.closest(".view-image");
+                if (!imgBtn) return;
+                const src = imgBtn.dataset.src;
+                const all = imgBtn.dataset.all ? JSON.parse(imgBtn.dataset.all) : [];
+                document.getElementById("imageViewerImg").src = src;
+                const info = document.getElementById("imageIndexInfo");
+                if (all.length > 0) {
+                    const filename = src.split('/').pop();
+                    const idx = all.indexOf(filename);
+                    info.textContent = idx >= 0 ? `${idx+1} of ${all.length}` : `1 of ${all.length}`;
+                } else info.textContent = '';
+                new bootstrap.Modal(document.getElementById('imageViewerModal')).show();
+            });
 
-    const src = imgBtn.dataset.src;
-    const all = imgBtn.dataset.all ? JSON.parse(imgBtn.dataset.all) : [];
-    const viewerImg = document.getElementById("imageViewerImg");
-    viewerImg.src = src;
-
-    const info = document.getElementById("imageIndexInfo");
-    if (all.length > 0) {
-        const filename = src.split('/').pop();
-        const idx = all.indexOf(filename);
-        info.textContent = idx >= 0 ? `${idx+1} of ${all.length}` : `1 of ${all.length}`;
-    } else info.textContent = '';
-
-    new bootstrap.Modal(document.getElementById("imageViewerModal")).show();
-});
-
-
+            // ---------------------------
+            // PAGINATION LINKS
+            // ---------------------------
             hotelTableContainer.addEventListener('click', function(e) {
                 const link = e.target.closest('.pagination a');
                 if (!link) return;

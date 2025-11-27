@@ -22,9 +22,15 @@ class Hotel extends Model
         'city',
         'address',
         'hotel_category',
+        'country',
+        'meal_costs',
     ];
 
     protected $casts = [
-        'pictures' => 'array',
+        'pictures'      => 'array',
+        'room_type'     => 'array',
+        'facilities'    => 'array',
+        'entertainment' => 'array',
+        'meal_costs'    => 'array',
     ];
 }
