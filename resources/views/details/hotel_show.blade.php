@@ -13,13 +13,11 @@
             <a href="{{ route('admin.hotels.index') }}" class="btn btn-outline-secondary">
                 <i class="uil-arrow-left me-1"></i> Back to List
             </a>
-
         </div>
 
         <div class="row">
-            {{-- Main Content Area (8 columns) --}}
+            {{-- Main Content Area --}}
             <div class="col-lg-8">
-
                 {{-- Hotel Header/Summary Card --}}
                 <div class="card shadow-lg border-0 mb-4">
                     <div class="card-body p-4">
@@ -27,7 +25,6 @@
 
                         {{-- Badges/Metadata Row --}}
                         <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
-
                             {{-- Category Badge --}}
                             <span class="badge bg-info-subtle text-info fw-normal p-2">
                                 <i class="uil-building me-1"></i>
@@ -42,23 +39,11 @@
                                 <span class="ms-1">{{ $hotel->star ?? 0 }}/5 Stars</span>
                             </span>
 
-                            {{-- Status Badge (Replaced magic numbers with readable logic) --}}
+                            {{-- Status Badge --}}
                             @php
-                                $statusClass = [
-                                    1 => 'success', // Active
-                                    0 => 'danger', // Inactive
-                                    2 => 'dark', // Expired
-                                ];
-                                $statusIcon = [
-                                    1 => 'uil-check-circle',
-                                    0 => 'uil-times-circle',
-                                    2 => 'uil-clock',
-                                ];
-                                $statusText = [
-                                    1 => 'Active',
-                                    0 => 'Inactive',
-                                    2 => 'Expired',
-                                ];
+                                $statusClass = [1 => 'success', 0 => 'danger', 2 => 'dark'];
+                                $statusIcon = [1 => 'uil-check-circle', 0 => 'uil-times-circle', 2 => 'uil-clock'];
+                                $statusText = [1 => 'Active', 0 => 'Inactive', 2 => 'Expired'];
                                 $status = $hotel->status ?? 0;
                             @endphp
                             <span
@@ -68,41 +53,34 @@
                             </span>
                         </div>
 
-                        {{-- Location & Last Updated --}}
-                      {{-- Location & Last Updated --}}
-<div class="d-lg-flex justify-content-between align-items-center">
-    <div class="mb-2 mb-lg-0">
-        {{-- Country Highlighted --}}
-        <div class="d-flex align-items-center mb-1">
-            <i class="uil-map-marker me-2 fs-5 text-primary"></i>
-            <strong class="text-dark fs-5 me-2">
-                {{ $hotel->country ?? 'Country N/A' }}
-            </strong>
-        </div>
-
-        {{-- City and Address in Muted Text --}}
-        <p class="text-muted small mb-0 ms-4 ps-1 border-start border-2">
-            {{ $hotel->city ?? 'City N/A' }}
-            <span class="d-block d-sm-inline">, {{ $hotel->address ?? 'Address N/A' }}</span>
-        </p>
-    </div>
-    <div class="text-sm-end text-muted small">
-        Last Updated: <br class="d-lg-none">
-        <strong class="text-dark">
-            {{ $hotel->updated_at ? $hotel->updated_at->format('d M Y, h:i A') : 'N/A' }}
-        </strong>
-    </div>
-</div>
+                        {{-- Location --}}
+                        <div class="d-lg-flex justify-content-between align-items-center">
+                            <div class="mb-2 mb-lg-0">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="uil-map-marker me-2 fs-5 text-primary"></i>
+                                    <strong class="text-dark fs-5 me-2">{{ $hotel->country ?? 'Country N/A' }}</strong>
+                                </div>
+                                <p class="text-muted small mb-0 ms-4 ps-1 border-start border-2">
+                                    {{ $hotel->city ?? 'City N/A' }},
+                                    <span class="d-block d-sm-inline">{{ $hotel->address ?? 'Address N/A' }}</span>
+                                </p>
+                            </div>
+                            <div class="text-sm-end text-muted small">
+                                Last Updated: <br class="d-lg-none">
+                                <strong class="text-dark">
+                                    {{ $hotel->updated_at ? $hotel->updated_at->format('d M Y, h:i A') : 'N/A' }}
+                                </strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
 
                 {{-- Gallery Section --}}
                 @if (!empty($hotel->pictures) && is_array($hotel->pictures))
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-body p-4">
-                            <h4 class="card-title mb-3">
-                                <i class="uil-images me-2 text-primary"></i>Hotel Gallery
-                            </h4>
+                            <h4 class="card-title mb-3"><i class="uil-images me-2 text-primary"></i>Hotel Gallery</h4>
                             <div class="row g-3">
                                 @foreach ($hotel->pictures as $pic)
                                     <div class="col-md-4 col-sm-6 col-6">
@@ -119,36 +97,39 @@
                     </div>
                 @endif
 
-
                 {{-- Room Types & Pricing --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-4">
-                        <h4 class="card-title mb-3">
-                            <i class="uil-bed me-2 text-primary"></i>Room Types & Pricing
-                        </h4>
+                        <h4 class="card-title mb-3"><i class="uil-bed me-2 text-primary"></i>Room Types and Prices</h4>
                         @if (!empty($hotel->room_type) && is_array($hotel->room_type))
-                            <div class="row g-3">
+                            <ul class="list-unstyled mb-0">
                                 @foreach ($hotel->room_type as $room)
-                                    <div class="col-sm-6">
-                                        <div
-                                            class="p-3 border rounded bg-light d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h5 class="mb-0 text-dark">{{ $room['type'] ?? 'Unnamed Room' }}</h5>
-                                            </div>
-                                            <div class="text-end">
-                                                <strong class="h5 text-primary">
-                                                    {{ $room['currency'] ?? 'USD' }}
-                                                    {{ number_format($room['price'] ?? 0, 2) }}
-                                                </strong>
-                                            </div>
+                                    <li class="mb-3 p-3 border rounded d-flex align-items-center gap-3">
+                                        @if (!empty($room['image']))
+                                            <img src="{{ asset($room['image']) }}" alt="{{ $room['type'] ?? '' }}"
+                                                class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                        @endif
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block fs-5 text-dark">
+                                                <i
+                                                    class="uil-bed me-1 text-primary"></i>{{ $room['type'] ?? 'Not specified' }}
+                                            </strong>
+                                            <span class="d-block mt-1">
+                                                <i class="uil-utensils me-1 text-success"></i>
+                                                <strong>Meal Plan:</strong> {{ $room['meal_plan'] ?? 'N/A' }}
+                                            </span>
+                                            <span class="d-block mt-1">
+                                                <i class="uil-usd-circle me-1 text-warning"></i>
+                                                <strong>Price:</strong>
+                                                <span class="text-success fw-bold">{{ $room['currency'] ?? 'USD' }}
+                                                    {{ $room['price'] ?? 0 }}</span>
+                                            </span>
                                         </div>
-                                    </div>
+                                    </li>
                                 @endforeach
-                            </div>
+                            </ul>
                         @else
-                            <div class="alert alert-info bg-info-subtle text-info border-0 mt-3" role="alert">
-                                No specific room types or pricing information found.
-                            </div>
+                            <p class="text-muted mb-0">No room types added.</p>
                         @endif
                     </div>
                 </div>
@@ -156,17 +137,9 @@
                 {{-- Meal Plans --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-4">
-                        <h4 class="card-title mb-3">
-                            <i class="uil-restaurant me-2 text-primary"></i>Meal Plans
+                        <h4 class="card-title mb-3"><i class="uil-restaurant me-2 text-primary"></i>Meal & Additional Costs
                         </h4>
-                        <div class="mb-3">
-                            <span class="badge bg-secondary-subtle text-secondary fw-medium fs-6 p-2">
-                                Primary Plan: {{ ucfirst($hotel->meal_plan) ?? 'N/A' }}
-                            </span>
-                        </div>
-
                         @if (!empty($hotel->meal_costs) && is_array($hotel->meal_costs))
-                            <h6 class="text-muted border-bottom pb-2 mb-3">Meal & Additional Costs</h6>
                             <div class="row g-2">
                                 @foreach ($hotel->meal_costs as $meal)
                                     <div class="col-sm-6">
@@ -188,13 +161,10 @@
                     </div>
                 </div>
 
-
                 {{-- Description --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-4">
-                        <h4 class="card-title mb-3">
-                            <i class="uil-file-alt me-2 text-primary"></i>About Hotel
-                        </h4>
+                        <h4 class="card-title mb-3"><i class="uil-file-alt me-2 text-primary"></i>About Hotel</h4>
                         <p class="text-secondary" style="line-height: 1.8;">
                             {{ $hotel->description ?? 'No detailed description available for this hotel.' }}
                         </p>
@@ -203,14 +173,56 @@
 
             </div>
 
-            {{-- Sidebar (4 columns) --}}
+            {{-- Sidebar --}}
+            {{-- Sidebar --}}
             <div class="col-lg-4">
+                {{-- Contact Details --}}
+                {{-- Contact Details --}}
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-3"><i class="uil-user-circle me-2 text-primary"></i>Contact Details</h4>
+
+                        {{-- Contact Person --}}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="uil-user fs-4 text-primary"></i>
+                            </div>
+                            <div class="w-100 d-flex justify-content-between">
+                                <div class="text-dark fw-semibold">1. Contact Person</div>
+                                <div class="text-muted">{{ $hotel->contact_person ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+
+                        {{-- Landline Number --}}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="me-3">
+                                <i class="uil-phone fs-4 text-success"></i>
+                            </div>
+                            <div class="w-100 d-flex justify-content-between">
+                                <div class="text-dark fw-semibold">2. Landline Number</div>
+                                <div class="text-muted">{{ $hotel->landline_number ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+
+                        {{-- Mobile Number --}}
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="uil-mobile-android fs-4 text-warning"></i>
+                            </div>
+                            <div class="w-100 d-flex justify-content-between">
+                                <div class="text-dark fw-semibold">3. Mobile Number</div>
+                                <div class="text-muted">{{ $hotel->mobile_number ?? 'N/A' }}</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
                 {{-- Facilities --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-4">
-                        <h4 class="card-title mb-3">
-                            <i class="uil-wrench me-2 text-primary"></i>Facilities
-                        </h4>
+                        <h4 class="card-title mb-3"><i class="uil-wrench me-2 text-primary"></i>Facilities</h4>
                         @if (!empty($hotel->facilities) && is_array($hotel->facilities))
                             <ul class="ps-4 mb-0">
                                 @foreach ($hotel->facilities as $facility)
@@ -220,16 +232,13 @@
                         @else
                             <p class="text-muted mb-0">No facilities listed.</p>
                         @endif
-
                     </div>
                 </div>
 
                 {{-- Entertainment --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-4">
-                        <h4 class="card-title mb-3">
-                            <i class="uil-music me-2 text-primary"></i>Entertainment
-                        </h4>
+                        <h4 class="card-title mb-3"><i class="uil-music me-2 text-primary"></i>Entertainment</h4>
                         @if (!empty($hotel->entertainment) && is_array($hotel->entertainment))
                             <ul class="ps-4 mb-0">
                                 @foreach ($hotel->entertainment as $ent)
@@ -242,6 +251,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -262,35 +272,28 @@
 
 @section('script')
     <script>
-        // Use an array to store image sources for potential future slideshow functionality
+        // Picture Viewer
         const pictureTriggers = document.querySelectorAll('.picture-viewer-trigger');
         const imageViewerImg = document.getElementById('imageViewerImg');
         const imageViewerModal = new bootstrap.Modal(document.getElementById('imageViewerModal'));
 
-        // Modal Trigger Logic
         pictureTriggers.forEach(item => {
             item.addEventListener('click', event => {
                 event.preventDefault();
-                const imgSrc = event.currentTarget.getAttribute('data-img-src');
-                imageViewerImg.src = imgSrc;
+                imageViewerImg.src = item.dataset.imgSrc;
                 imageViewerModal.show();
             });
         });
 
-        // Hover effect for gallery images
+        // Hover zoom effect
         document.querySelectorAll('.hover-zoom img').forEach(img => {
-            img.addEventListener('mouseenter', function() {
-                this.style.transform = 'scale(1.05)';
-            });
-            img.addEventListener('mouseleave', function() {
-                this.style.transform = 'scale(1)';
-            });
+            img.addEventListener('mouseenter', () => img.style.transform = 'scale(1.05)');
+            img.addEventListener('mouseleave', () => img.style.transform = 'scale(1)');
         });
     </script>
 @endsection
 
 @section('style')
-    {{-- Custom Styles for cleaner gallery hover and transition --}}
     <style>
         .hotel-bullet {
             position: relative;
@@ -304,7 +307,6 @@
             top: 2px;
             font-size: 20px;
             color: #0d6efd;
-            /* Same as primary */
             line-height: 16px;
         }
 
@@ -318,24 +320,19 @@
             transition: transform 0.3s ease-in-out, opacity 0.3s;
         }
 
-        /* Overlay for Zoom Icon */
         .hover-zoom::after {
             content: '\eb9f';
-            /* Unicons search/zoom icon */
             font-family: 'Unicons';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 2.5rem;
-            /* Larger icon */
             color: #fff;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
-            /* Allows click-through to the <a> tag */
             text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            /* Icon shadow for visibility */
         }
 
         .hover-zoom:hover::after {
@@ -344,7 +341,6 @@
 
         .hover-zoom:hover img {
             opacity: 0.75;
-            /* Slightly darker on hover */
         }
     </style>
 @endsection

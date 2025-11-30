@@ -14,16 +14,16 @@ class HotelController extends Controller
         $query = Hotel::query();
 
         // Search by hotel name
-if ($request->search) {
-    $search = $request->search;
+        if ($request->search) {
+            $search = $request->search;
 
-    $query->where(function($q) use ($search) {
-        $q->where('hotel_name', 'LIKE', "%{$search}%")
-          ->orWhere('city', 'LIKE', "%{$search}%")
-          ->orWhere('country', 'LIKE', "%{$search}%")
-          ->orWhere('hotel_category', 'LIKE', "%{$search}%");
-    });
-}
+            $query->where(function ($q) use ($search) {
+                $q->where('hotel_name', 'LIKE', "%{$search}%")
+                    ->orWhere('city', 'LIKE', "%{$search}%")
+                    ->orWhere('country', 'LIKE', "%{$search}%")
+                    ->orWhere('hotel_category', 'LIKE', "%{$search}%");
+            });
+        }
 
         // Filter by category
         if ($request->filled('category')) {
@@ -48,11 +48,18 @@ if ($request->search) {
         $request->validate([
             'hotel_name' => 'required|string|max:255',
             'star' => 'nullable|integer|min:1|max:7',
-            'status' => 'required|in:1,0,2', // Added "2" for Expire
-            'meal_plan' => 'nullable|string',
+            'status' => 'required|in:1,0,2',
             'description' => 'nullable|string',
             'room_type' => 'nullable|array',
             'room_type.*' => 'nullable|string|max:255',
+            'meal_plan' => 'nullable|array',
+            'meal_plan.*' => 'nullable|string|max:255',
+            'room_price' => 'nullable|array',
+            'room_price.*' => 'nullable|numeric',
+            'room_currency' => 'nullable|array',
+            'room_currency.*' => 'nullable|string|max:5',
+            'room_image' => 'nullable|array',
+            'room_image.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'facilities' => 'nullable|array',
             'facilities.*' => 'nullable|string|max:255',
             'entertainment' => 'nullable|array',
@@ -65,19 +72,22 @@ if ($request->search) {
             'meal_name' => 'nullable|array',
             'meal_price' => 'nullable|array',
             'meal_currency' => 'nullable|array',
+            'contact_person' => 'nullable|string|max:255',
+            'landline_number' => 'nullable|string|max:50',
+            'mobile_number' => 'nullable|string|max:50',
         ]);
 
-        // Handle pictures
+        // Handle hotel main pictures
         $imagePaths = [];
         if ($request->hasFile('pictures')) {
             foreach ($request->file('pictures') as $image) {
-                $filename = time() . '_' . $image->getClientOriginalName();
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $image->move(public_path('hotel'), $filename);
-                $imagePaths[] = 'hotel/' . $filename; // store relative path
+                $imagePaths[] = 'hotel/' . $filename;
             }
         }
 
-        // Prepare meal costs array
+        // Handle meal costs
         $mealCosts = [];
         if ($request->meal_name && is_array($request->meal_name)) {
             foreach ($request->meal_name as $index => $name) {
@@ -89,13 +99,27 @@ if ($request->search) {
             }
         }
 
+        // Handle room types with individual images
         $rooms = [];
         if ($request->room_type && is_array($request->room_type)) {
             foreach ($request->room_type as $index => $type) {
+                $imagePath = null;
+
+                if ($request->hasFile('room_image') && isset($request->file('room_image')[$index])) {
+                    $file = $request->file('room_image')[$index];
+                    if ($file && $file->isValid()) {
+                        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                        $file->move(public_path('hotel/room_types'), $filename);
+                        $imagePath = 'hotel/room_types/' . $filename;
+                    }
+                }
+
                 $rooms[] = [
                     'type' => $type,
+                    'meal_plan' => $request->meal_plan[$index] ?? null,
                     'price' => $request->room_price[$index] ?? 0,
                     'currency' => $request->room_currency[$index] ?? 'USD',
+                    'image' => $imagePath,
                 ];
             }
         }
@@ -106,8 +130,7 @@ if ($request->search) {
             'star' => $request->star,
             'status' => $request->status,
             'room_type' => $rooms,
-            'meal_plan' => $request->meal_plan,
-            'meal_costs' => $mealCosts, // <-- store meal costs here
+            'meal_costs' => $mealCosts,
             'description' => $request->description,
             'facilities' => $request->facilities,
             'entertainment' => $request->entertainment,
@@ -116,6 +139,9 @@ if ($request->search) {
             'country' => $request->country,
             'hotel_category' => $request->hotel_category,
             'pictures' => $imagePaths,
+            'contact_person' => $request->contact_person,
+            'landline_number' => $request->landline_number,
+            'mobile_number' => $request->mobile_number,
         ]);
 
         return response()->json([
@@ -135,13 +161,18 @@ if ($request->search) {
         $request->validate([
             'hotel_name' => 'required|string|max:255',
             'star' => 'nullable|integer|min:1|max:7',
-            'status' => 'required|in:1,0,2', // Added "2" for Expire
-            'meal_plan' => 'nullable|string',
+            'status' => 'required|in:1,0,2',
             'description' => 'nullable|string',
             'room_type' => 'nullable|array',
             'room_type.*' => 'nullable|string|max:255',
+            'meal_plan' => 'nullable|array',
+            'meal_plan.*' => 'nullable|string|max:255',
             'room_price' => 'nullable|array',
+            'room_price.*' => 'nullable|numeric',
             'room_currency' => 'nullable|array',
+            'room_currency.*' => 'nullable|string|max:5',
+            'room_image' => 'nullable|array',
+            'room_image.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'facilities' => 'nullable|array',
             'facilities.*' => 'nullable|string|max:255',
             'entertainment' => 'nullable|array',
@@ -154,10 +185,13 @@ if ($request->search) {
             'meal_name' => 'nullable|array',
             'meal_price' => 'nullable|array',
             'meal_currency' => 'nullable|array',
+            'contact_person' => 'nullable|string|max:255',
+            'landline_number' => 'nullable|string|max:50',
+            'mobile_number' => 'nullable|string|max:50',
         ]);
 
         // -------------------------
-        // Handle Pictures
+        // Handle hotel pictures
         // -------------------------
         $imagePaths = $hotel->pictures ?? [];
 
@@ -170,14 +204,12 @@ if ($request->search) {
                 }
             }
 
-            // Upload new images
-            $newPaths = [];
+            $imagePaths = [];
             foreach ($request->file('pictures') as $image) {
-                $filename = time() . '_' . $image->getClientOriginalName();
+                $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
                 $image->move(public_path('hotel'), $filename);
-                $newPaths[] = 'hotel/' . $filename;
+                $imagePaths[] = 'hotel/' . $filename;
             }
-            $imagePaths = $newPaths;
         }
 
         // -------------------------
@@ -195,28 +227,47 @@ if ($request->search) {
         }
 
         // -------------------------
-        // Handle Room Types
+        // Handle Room Types with Images
         // -------------------------
-        $rooms = [];
-        if ($request->room_type && is_array($request->room_type)) {
-            foreach ($request->room_type as $index => $type) {
-                $rooms[] = [
-                    'type' => $type,
-                    'price' => $request->room_price[$index] ?? 0,
-                    'currency' => $request->room_currency[$index] ?? 'USD',
-                ];
+        $roomTypes = $request->input('room_type', []);
+        $mealPlans = $request->input('meal_plan', []);
+        $prices = $request->input('room_price', []);
+        $currencies = $request->input('room_currency', []);
+        $roomImages = $request->file('room_image', []);
+
+        $finalRoomTypes = [];
+
+        foreach ($roomTypes as $index => $type) {
+            $imagePath = null;
+
+            // Handle uploaded room image
+            if (isset($roomImages[$index]) && $roomImages[$index] && $roomImages[$index]->isValid()) {
+                $filename = time() . '_' . uniqid() . '.' . $roomImages[$index]->getClientOriginalExtension();
+                $roomImages[$index]->move(public_path('hotel/room_types'), $filename);
+                $imagePath = 'hotel/room_types/' . $filename;
+            } else {
+                // keep existing image if updating and not uploading a new one
+                $existingRooms = $hotel->room_type ?? [];
+                $imagePath = $existingRooms[$index]['image'] ?? null;
             }
+
+            $finalRoomTypes[] = [
+                'type' => $type,
+                'meal_plan' => $mealPlans[$index] ?? null,
+                'price' => $prices[$index] ?? 0,
+                'currency' => $currencies[$index] ?? 'USD',
+                'image' => $imagePath,
+            ];
         }
 
         // -------------------------
-        // Update Hotel
+        // Update hotel
         // -------------------------
         $hotel->update([
             'hotel_name' => $request->hotel_name,
             'star' => $request->star,
             'status' => $request->status,
-            'room_type' => $rooms,
-            'meal_plan' => $request->meal_plan,
+            'room_type' => $finalRoomTypes,
             'meal_costs' => $mealCosts,
             'description' => $request->description,
             'facilities' => $request->facilities,
@@ -226,6 +277,9 @@ if ($request->search) {
             'country' => $request->country,
             'hotel_category' => $request->hotel_category,
             'pictures' => $imagePaths,
+            'contact_person' => $request->contact_person,
+            'landline_number' => $request->landline_number,
+            'mobile_number' => $request->mobile_number,
         ]);
 
         return response()->json([
@@ -234,6 +288,7 @@ if ($request->search) {
             'hotel' => $hotel,
         ]);
     }
+
 
 
     public function show(Hotel $hotel)

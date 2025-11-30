@@ -44,12 +44,13 @@
                     <button type="button" class="icon-btn text-primary edit-hotel" data-id="{{ $hotel->id }}"
                         data-name="{{ $hotel->hotel_name }}" data-star="{{ $hotel->star }}"
                         data-category="{{ $hotel->hotel_category }}" data-room_type='@json($hotel->room_type)'
-                        data-meal_plan="{{ $hotel->meal_plan }}" data-meal_costs='@json($hotel->meal_costs)'
-                        data-description="{{ $hotel->description }}" data-facilities='@json($hotel->facilities)'
-                        data-entertainment='@json($hotel->entertainment)' data-status="{{ $hotel->status }}"
-                        data-city="{{ $hotel->city }}" data-address="{{ $hotel->address }}"
-                        data-country="{{ $hotel->country }}" data-pictures='@json($hotel->pictures)'
-                        title="Edit Hotel">
+                        data-meal_costs='@json($hotel->meal_costs)' data-description="{{ $hotel->description }}"
+                        data-facilities='@json($hotel->facilities)' data-entertainment='@json($hotel->entertainment)'
+                        data-status="{{ $hotel->status }}" data-contact_person="{{ $hotel->contact_person }}"
+                        data-landline_number="{{ $hotel->landline_number }}"
+                        data-mobile_number="{{ $hotel->mobile_number }}" data-city="{{ $hotel->city }}"
+                        data-address="{{ $hotel->address }}" data-country="{{ $hotel->country }}"
+                        data-pictures='@json($hotel->pictures)' title="Edit Hotel">
                         <i class="bi bi-pencil-square fs-5"></i>
                     </button>
 

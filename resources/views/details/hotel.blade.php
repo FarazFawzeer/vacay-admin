@@ -90,9 +90,29 @@
                         </div>
 
                     </div>
-                    {{-- Star --}}
+
                     <div class="row">
                         <div class="col-md-4 mb-3">
+                            <label for="contact_person" class="form-label">Contact Person</label>
+                            <input type="text" name="contact_person" id="contact_person" class="form-control"
+                                placeholder="Ex: Mr. John Doe">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="landline_number" class="form-label">Landline Number</label>
+                            <input type="text" name="landline_number" id="landline_number" class="form-control"
+                                placeholder="Ex: 011-2345678">
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="mobile_number" class="form-label">Mobile Number</label>
+                            <input type="text" name="mobile_number" id="mobile_number" class="form-control"
+                                placeholder="Ex: 077-1234567">
+                        </div>
+                    </div>
+                    {{-- Star --}}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
                             <label for="star" class="form-label">Star Rating</label>
                             <select name="star" id="star" class="form-select">
                                 <option value="">Select Rating</option>
@@ -102,7 +122,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="hotel_category" class="form-label">Hotel Category</label>
                             <select name="hotel_category" id="hotel_category" class="form-select" required>
                                 <option value="">Select Category</option>
@@ -117,16 +137,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-4 mb-3">
-                            <label for="meal_plan" class="form-label">Meal Plan</label>
-                            <select name="meal_plan" id="meal_plan" class="form-select" required>
-                                <option value="">Select Meal Plan</option>
-                                <option value="half board">Half Board</option>
-                                <option value="full board">Full Board</option>
-                                <option value="all include">All Include</option>
-                                <option value="room only">Room Only</option>
-                            </select>
-                        </div>
+
                     </div>
 
 
@@ -138,30 +149,48 @@
 
                         <div class="col-md-12 mb-3">
                             <label class="form-label">Room Types</label>
+
                             <div id="roomTypeWrapper">
 
                                 <!-- Default Item -->
                                 <div class="row room-type-item mb-2">
-                                    <div class="col-md-4">
+
+                                    <div class="col-md-3">
                                         <input type="text" name="room_type[]" class="form-control"
                                             placeholder="Room Type (Ex: Deluxe)">
                                     </div>
 
                                     <div class="col-md-3">
+                                        <select name="meal_plan[]" class="form-control">
+                                            <option value="">Select Meal Plan</option>
+                                            <option value="half board">Half Board</option>
+                                            <option value="full board">Full Board</option>
+                                            <option value="all include">All Include</option>
+                                            <option value="room only">Room Only</option>
+                                            <option value="bed and breakfast">Bed and Breakfast</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-2">
                                         <input type="number" step="0.01" name="room_price[]" class="form-control"
                                             placeholder="Price">
                                     </div>
 
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <select name="room_currency[]" class="form-control">
                                             <option value="USD">USD</option>
                                             <option value="LKR">LKR</option>
                                         </select>
                                     </div>
 
+                                    <div class="col-md-2 mt-2">
+                                        <input type="file" name="room_image[]" class="form-control" accept="image/*">
+                                    </div>
+
                                     <div class="col-md-2">
                                         <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
                                     </div>
+
                                 </div>
 
                             </div>
@@ -169,6 +198,7 @@
                             <button type="button" id="addRoomType" class="btn btn-sm btn-primary mt-2">Add Room
                                 Type</button>
                         </div>
+
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Facilities</label>
@@ -315,9 +345,10 @@
         <div class="card">
             <div class="card-body">
                 <div class="row mb-3 justify-content-end">
-                 <div class="col-md-3">
-    <input type="text" id="hotelSearch" class="form-control" placeholder="Search by hotel name, city, country, category...">
-</div>
+                    <div class="col-md-3">
+                        <input type="text" id="hotelSearch" class="form-control"
+                            placeholder="Search by hotel name, city, country, category...">
+                    </div>
                     <div class="col-md-3">
                         <select id="categoryFilter" class="form-select">
                             <option value="">All Categories</option>
@@ -381,9 +412,31 @@
                                     </div>
                                 </div>
 
-                                <!-- Star Rating -->
+                                <!-- Contact Details -->
                                 <div class="row">
                                     <div class="col-md-4 mb-3">
+                                        <label class="form-label">Contact Person</label>
+                                        <input type="text" name="contact_person" id="edit_contact_person"
+                                            class="form-control" placeholder="Ex: Mr. John Doe">
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Landline Number</label>
+                                        <input type="text" name="landline_number" id="edit_landline_number"
+                                            class="form-control" placeholder="Ex: 011-2345678">
+                                    </div>
+
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Mobile Number</label>
+                                        <input type="text" name="mobile_number" id="edit_mobile_number"
+                                            class="form-control" placeholder="Ex: 077-1234567">
+                                    </div>
+                                </div>
+
+
+                                <!-- Star Rating -->
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">Star Rating</label>
                                         <select name="star" id="edit_star" class="form-select">
                                             <option value="">Select Rating</option>
@@ -395,7 +448,7 @@
 
                                     <!-- Hotel Category -->
 
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">Hotel Category</label>
                                         <select name="hotel_category" id="edit_hotel_category" class="form-select">
                                             <option value="">Select Category</option>
@@ -410,17 +463,7 @@
                                         </select>
                                     </div>
 
-                                    <!-- Meal Plan -->
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">Meal Plan</label>
-                                        <select name="meal_plan" id="edit_meal_plan" class="form-select">
-                                            <option value="">Select Meal Plan</option>
-                                            <option value="half board">Half Board</option>
-                                            <option value="full board">Full Board</option>
-                                            <option value="all include">All Include</option>
-                                            <option value="room only">Room Only</option>
-                                        </select>
-                                    </div>
+
                                 </div>
 
                                 <!-- Room Types (with Price & Currency) -->
@@ -550,25 +593,43 @@
                 const newItem = document.createElement('div');
                 newItem.classList.add('row', 'room-type-item', 'mb-2');
                 newItem.innerHTML = `
-            <div class="col-md-4">
-                <input type="text" name="room_type[]" class="form-control" placeholder="Room Type (Ex: Deluxe)">
+        <div class="col-md-3">
+            <input type="text" name="room_type[]" class="form-control" placeholder="Room Type">
+        </div>
+
+        <div class="col-md-3">
+            <select name="meal_plan[]" class="form-control">
+                <option value="">Select Meal Plan</option>
+                <option value="half board">Half Board</option>
+                <option value="full board">Full Board</option>
+                <option value="all include">All Include</option>
+                <option value="room only">Room Only</option>
+                <option value="bed and breakfast">Bed and Breakfast</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <input type="number" step="0.01" name="room_price[]" class="form-control" placeholder="Price">
+        </div>
+
+        <div class="col-md-2">
+            <select name="room_currency[]" class="form-control">
+                <option value="USD">USD</option>
+                <option value="LKR">LKR</option>
+            </select>
+        </div>
+
+           <div class="col-md-2 mt-2">
+                <input type="file" name="room_image[]" class="form-control" accept="image/*">
             </div>
-            <div class="col-md-3">
-                <input type="number" step="0.01" name="room_price[]" class="form-control" placeholder="Price">
-            </div>
-            <div class="col-md-3">
-                <select name="room_currency[]" class="form-control">
-                    <option value="USD">USD</option>
-                    <option value="LKR">LKR</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
-            </div>
-        `;
+
+
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
+        </div>
+    `;
                 wrapper.appendChild(newItem);
             });
-
             document.getElementById('addMealCost').addEventListener('click', function() {
                 const wrapper = document.getElementById('mealCostWrapper');
                 const div = document.createElement('div');
@@ -604,18 +665,36 @@
                 const newItem = document.createElement('div');
                 newItem.classList.add('row', 'room-type-item', 'mb-2');
                 newItem.innerHTML = `
-        <div class="col-md-4">
+        <div class="col-md-3">
             <input type="text" name="room_type[]" class="form-control" placeholder="Room Type (Ex: Deluxe)">
         </div>
+
         <div class="col-md-3">
+            <select name="meal_plan[]" class="form-control">
+                <option value="">Select Meal Plan</option>
+                <option value="half board">Half Board</option>
+                <option value="full board">Full Board</option>
+                <option value="all include">All Include</option>
+                <option value="room only">Room Only</option>
+                <option value="bed and breakfast">Bed and Breakfast</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
             <input type="number" step="0.01" name="room_price[]" class="form-control" placeholder="Price">
         </div>
-        <div class="col-md-3">
+
+        <div class="col-md-2">
             <select name="room_currency[]" class="form-control">
                 <option value="USD">USD</option>
                 <option value="LKR">LKR</option>
             </select>
         </div>
+
+        <div class="col-md-2 mt-2">
+            <input type="file" name="room_image[]" class="form-control" accept="image/*">
+        </div>
+
         <div class="col-md-2">
             <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
         </div>
@@ -729,15 +808,29 @@
                 form.action = `/admin/hotels/${btn.dataset.id}`;
 
                 // Basic fields
-                form.querySelector("#edit_hotel_name").value = btn.dataset.name || '';
-                form.querySelector("#edit_city").value = btn.dataset.city || '';
-                form.querySelector("#edit_address").value = btn.dataset.address || '';
-                form.querySelector("#edit_country").value = btn.dataset.country || '';
-                form.querySelector("#edit_star").value = btn.dataset.star || '';
-                form.querySelector("#edit_hotel_category").value = btn.dataset.category || '';
-                form.querySelector("#edit_meal_plan").value = btn.dataset.meal_plan || '';
-                form.querySelector("#edit_description").value = btn.dataset.description || '';
-                form.querySelector("#edit_status").value = btn.dataset.status || '1';
+                // Basic fields
+                form.querySelector("#edit_hotel_name").value = btn.dataset.name && btn.dataset.name !==
+                    'null' ? btn.dataset.name : '';
+                form.querySelector("#edit_contact_person").value = btn.dataset.contact_person && btn.dataset
+                    .contact_person !== 'null' ? btn.dataset.contact_person : '';
+                form.querySelector("#edit_landline_number").value = btn.dataset.landline_number && btn
+                    .dataset.landline_number !== 'null' ? btn.dataset.landline_number : '';
+                form.querySelector("#edit_mobile_number").value = btn.dataset.mobile_number && btn.dataset
+                    .mobile_number !== 'null' ? btn.dataset.mobile_number : '';
+                form.querySelector("#edit_city").value = btn.dataset.city && btn.dataset.city !== 'null' ?
+                    btn.dataset.city : '';
+                form.querySelector("#edit_address").value = btn.dataset.address && btn.dataset.address !==
+                    'null' ? btn.dataset.address : '';
+                form.querySelector("#edit_country").value = btn.dataset.country && btn.dataset.country !==
+                    'null' ? btn.dataset.country : '';
+                form.querySelector("#edit_star").value = btn.dataset.star && btn.dataset.star !== 'null' ?
+                    btn.dataset.star : '';
+                form.querySelector("#edit_hotel_category").value = btn.dataset.category && btn.dataset
+                    .category !== 'null' ? btn.dataset.category : '';
+                form.querySelector("#edit_description").value = btn.dataset.description && btn.dataset
+                    .description !== 'null' ? btn.dataset.description : '';
+                form.querySelector("#edit_status").value = btn.dataset.status && btn.dataset.status !==
+                    'null' ? btn.dataset.status : '1';
 
                 // Dynamic fields
                 function loadDynamic(wrapperId, dataAttr, placeholder, inputName) {
@@ -761,6 +854,7 @@
                     const wrapper = document.getElementById(wrapperId);
                     wrapper.innerHTML = '';
                     let items = [];
+
                     try {
                         items = JSON.parse(btn.dataset[dataAttr]) || [];
                     } catch (e) {
@@ -769,24 +863,55 @@
 
                     if (items.length) {
                         items.forEach(item => {
-                            // Ensure item is an object
                             if (!item || typeof item !== 'object') item = {};
 
                             const div = document.createElement('div');
                             div.classList.add('row', 'room-type-item', 'mb-2');
+
+                            // Existing image preview
+                            let existingImageHtml = '';
+                            if (item.image) {
+                                existingImageHtml = `
+                    <div class="mb-1">
+                        <img src="/${item.image}" width="80" height="80" class="rounded" style="object-fit:cover;">
+                    </div>
+                `;
+                            }
+
                             div.innerHTML = `
-                <div class="col-md-4">
-                    <input type="text" name="room_type[]" class="form-control" placeholder="Room Type (Ex: Deluxe)" value="${item.type ?? ''}">
-                </div>
                 <div class="col-md-3">
-                    <input type="number" step="0.01" name="room_price[]" class="form-control" placeholder="Price" value="${item.price ?? ''}">
+                    <input type="text" name="room_type[]" class="form-control" 
+                        placeholder="Room Type" value="${item.type ?? ''}">
                 </div>
+
                 <div class="col-md-3">
+                    <select name="meal_plan[]" class="form-control">
+                        <option value="">Select Meal Plan</option>
+                        <option value="half board" ${item.meal_plan=='half board'?'selected':''}>Half Board</option>
+                        <option value="full board" ${item.meal_plan=='full board'?'selected':''}>Full Board</option>
+                        <option value="all include" ${item.meal_plan=='all include'?'selected':''}>All Include</option>
+                        <option value="room only" ${item.meal_plan=='room only'?'selected':''}>Room Only</option>
+                        <option value="bed and breakfast" ${item.meal_plan=='bed and breakfast'?'selected':''}>Bed and Breakfast</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <input type="number" step="0.01" name="room_price[]" class="form-control" 
+                        value="${item.price ?? ''}" placeholder="Price">
+                </div>
+
+                <div class="col-md-2">
                     <select name="room_currency[]" class="form-control">
                         <option value="USD" ${item.currency=='USD'?'selected':''}>USD</option>
                         <option value="LKR" ${item.currency=='LKR'?'selected':''}>LKR</option>
                     </select>
                 </div>
+
+                <div class="col-md-2 mt-2">
+                    ${existingImageHtml}
+                    <input type="file" name="room_image[]" class="form-control" accept="image/*">
+                </div>
+
                 <div class="col-md-2">
                     <button type="button" class="btn btn-danger remove-item w-100">Remove</button>
                 </div>
@@ -794,7 +919,7 @@
                             wrapper.appendChild(div);
                         });
                     } else {
-                        // Add one empty row if no data
+                        // fallback to add empty field
                         document.getElementById('editAddRoomType').click();
                     }
                 }

@@ -24,11 +24,15 @@ class Hotel extends Model
         'hotel_category',
         'country',
         'meal_costs',
+        'contact_person',
+        'landline_number',
+        'mobile_number',
     ];
 
     protected $casts = [
         'pictures'      => 'array',
         'room_type'     => 'array',
+        'meal_plan' => 'array',
         'facilities'    => 'array',
         'entertainment' => 'array',
         'meal_costs'    => 'array',
