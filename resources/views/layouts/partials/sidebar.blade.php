@@ -72,6 +72,26 @@
                 </div>
             </li>
 
+            {{-- Agent --}}
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#sidebarAgent" data-bs-toggle="collapse" role="button"
+                    aria-expanded="false" aria-controls="sidebarAgent">
+                    <span class="nav-icon">
+                     <iconify-icon icon="mdi:account-tie-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Agent</span>
+                </a>
+                <div class="collapse" id="sidebarAgent">
+                    <ul class="nav sub-navbar-nav">
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.agents.create') }}">Create</a>
+                        </li>
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.agents.index') }}">View </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
             {{-- Enquiry --}}
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#sidebarEnquiry" data-bs-toggle="collapse" role="button"
@@ -110,7 +130,7 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.enquiry.airTicket') }}">
                                 <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
-                                Air Ticket 
+                                Air Ticket
                             </a>
                         </li>
                         <li class="sub-nav-item">
@@ -119,7 +139,7 @@
                                 Driving Permit Request
                             </a>
                         </li>
-                          <li class="sub-nav-item">
+                        <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.enquiry.chatbot') }}">
                                 <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
                                 Chatbot

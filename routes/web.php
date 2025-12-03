@@ -20,6 +20,7 @@ use App\Http\Controllers\VehicleInvBookingController;
 use App\Http\Controllers\RentVehicleBookingController;
 use App\Http\Controllers\VisaBookingController;
 use App\Http\Controllers\EnquiryController;
+use App\Http\Controllers\AgentController;
 
 require __DIR__ . '/auth.php';
 
@@ -36,8 +37,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::put('customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy'); // Delete customer
 
+
+    Route::resource('agents', AgentController::class);
+
     //destination
-Route::resource('destinations', DestinationController::class);
+    Route::resource('destinations', DestinationController::class);
 
     //tour packages
     Route::get('/packages/create', [PackageController::class, 'create'])->name('packages.create');

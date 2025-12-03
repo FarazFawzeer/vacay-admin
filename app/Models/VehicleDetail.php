@@ -41,11 +41,18 @@ class VehicleDetail extends Model
         'sub_image',
         'type',
         'status',
+        'fuel_type',       
+        'insurance_type',   
+        'agent_id',
     ];
 
 
-   protected $casts = [
-        'sub_image' => 'array', 
+    protected $casts = [
+        'sub_image' => 'array',
     ];
 
+    public function agent()
+    {
+        return $this->belongsTo(Agent::class, 'agent_id');
+    }
 }
