@@ -25,7 +25,18 @@
             <td>{{ $agent->phone ?? '-' }}</td>
             <td>{{ $agent->land_line ?? '-' }}</td>
             <td>{{ $agent->whatsapp ?? '-' }}</td>
-            <td>{{ $agent->service ?? '-' }}</td>
+
+            <!-- UPDATED SERVICE DISPLAY -->
+            <td>
+                @if(is_array($agent->service) && count($agent->service))
+                    @foreach($agent->service as $service)
+                        <span class="badge bg-primary me-1">{{ $service }}</span>
+                    @endforeach
+                @else
+                    <span class="text-muted">-</span>
+                @endif
+            </td>
+
             <td>
                 @if($agent->status)
                     <span class="badge bg-success">Active</span>
@@ -56,6 +67,6 @@
     </tbody>
 </table>
 
-<!-- Pagination -->
 <div class="d-flex justify-content-end mt-3">
     {{ $agents->links() }}
+</div>

@@ -121,9 +121,15 @@
 
                         {{-- Price --}}
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Price </label>
-                            <input type="number" step="0.01" name="price" class="form-control"
-                                placeholder="Ex: 50000">
+                            <label class="form-label">Price</label>
+                            <div class="input-group">
+                                <input type="number" step="0.01" name="price" class="form-control"
+                                    placeholder="Ex: 50000">
+                                <select name="currency" class="form-select" style="max-width: 120px;">
+                                    <option value="LKR" selected>LKR</option>
+                                    <option value="USD">USD</option>
+                                </select>
+                            </div>
                         </div>
                         {{-- Dynamic Fields --}}
                         <div class="col-md-6 mb-3 dynamic-field"
@@ -336,7 +342,8 @@
                                             data-first_aid_kit="{{ $vehicle->first_aid_kit }}"
                                             data-condition="{{ $vehicle->condition }}"
                                             data-transmission="{{ $vehicle->transmission }}"
-                                            data-price="{{ $vehicle->price }}" data-type="{{ $vehicle->type }}"
+                                            data-price="{{ $vehicle->price }}"
+                                            data-currency="{{ $vehicle->currency}}" data-type="{{ $vehicle->type }}"
                                             data-status="{{ $vehicle->status }}"
                                             data-fuel_type="{{ $vehicle->fuel_type }}"
                                             data-luggage_space="{{ $vehicle->luggage_space }}"
@@ -440,10 +447,18 @@
                                 </div>
 
                                 {{-- Price --}}
-                                <div class="col-md-4 mb-3">
+                                {{-- Price --}}
+                                <div class="col-md-6 mb-3">
                                     <label class="form-label">Price</label>
-                                    <input type="number" step="0.01" name="price" id="edit_price"
-                                        class="form-control">
+                                    <div class="input-group">
+                                        <input type="number" step="0.01" name="price" id="edit_price"
+                                            class="form-control" placeholder="Ex: 50000">
+                                        <select name="currency" id="edit_currency" class="form-select"
+                                            style="max-width: 120px;">
+                                            <option value="LKR">LKR</option>
+                                            <option value="USD">USD</option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 {{-- Dynamic Fields --}}
@@ -643,6 +658,7 @@
                                 data-condition="${vehicle.condition}"
                                 data-transmission="${vehicle.transmission}"
                                 data-price="${vehicle.price}"
+                                data-currency="${vehicle.currency}"
                                 data-type="${vehicle.type}"
                                 data-status="${vehicle.status}"
                                 data-fuel_type="${vehicle.fuel_type}"
@@ -696,6 +712,8 @@
                     document.getElementById('edit_model').value = editBtn.dataset.model || '';
                     document.getElementById('edit_milage').value = editBtn.dataset.milage || '';
                     document.getElementById('edit_price').value = editBtn.dataset.price || '';
+                    document.getElementById('edit_currency').value = editBtn.dataset.currency || 'LKR';
+
                     document.getElementById('edit_air_conditioned').value = editBtn.dataset
                         .air_conditioned || '0';
                     document.getElementById('edit_helmet').value = editBtn.dataset.helmet || '0';

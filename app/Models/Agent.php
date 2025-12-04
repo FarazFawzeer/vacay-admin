@@ -29,6 +29,10 @@ class Agent extends Model
     ];
 
 
+    protected $casts = [
+        'service' => 'array',
+    ];
+
     public function vehicles()
     {
         return $this->hasMany(VehicleDetail::class, 'agent_id');

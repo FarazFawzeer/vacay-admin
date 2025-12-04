@@ -66,17 +66,20 @@ class AgentController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:agents,email',
+            'email' => 'nullable|email|unique:agents,email',
             'company_name' => 'nullable|string|max:255',
             'company_city' => 'nullable|string|max:255',
             'company_country' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:50',
             'land_line' => 'nullable|string|max:50',
             'whatsapp' => 'nullable|string|max:50',
-            'service' => 'nullable|string',
+            'service' => 'nullable|string',   // This will contain JSON string
             'note' => 'nullable|string',
-            'status' => 'required', // change form values to 'active'/'inactive'
+            'status' => 'required',
         ]);
+
+        // Convert JSON string to array before saving
+        $services = $request->service ? json_decode($request->service, true) : [];
 
         Agent::create([
             'name' => $request->name,
@@ -87,14 +90,16 @@ class AgentController extends Controller
             'phone' => $request->phone,
             'land_line' => $request->land_line,
             'whatsapp' => $request->whatsapp,
-            'service' => $request->service,
+            'service' => $services, // <-- Save as array
             'note' => $request->note,
             'status' => $request->status,
         ]);
 
-        return redirect()->route('admin.agents.create')
+        return redirect()
+            ->route('admin.agents.create')
             ->with('success', 'Agent created successfully!');
     }
+
 
 
     // ============================
@@ -129,6 +134,8 @@ class AgentController extends Controller
             'status' => 'required', // accepts 'active' or 'inactive'
         ]);
 
+                $services = $request->service ? json_decode($request->service, true) : [];
+
         $agent->update([
             'name' => $request->name,
             'email' => $request->email,
@@ -138,12 +145,12 @@ class AgentController extends Controller
             'phone' => $request->phone,
             'land_line' => $request->land_line,
             'whatsapp' => $request->whatsapp,
-            'service' => $request->service,
+            'service' => $services, 
             'note' => $request->note,
             'status' => $request->status,
         ]);
 
-        return redirect()->route('admin.agents.edit', $agent->id) 
+        return redirect()->route('admin.agents.edit', $agent->id)
             ->with('success', 'Agent updated successfully.');
     }
 

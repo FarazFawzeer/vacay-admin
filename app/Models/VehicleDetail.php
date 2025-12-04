@@ -34,6 +34,7 @@ class VehicleDetail extends Model
         'transmission',
         'milage',
         'price',
+        'currency',
         'label',
         'name',
         'availability',
@@ -41,8 +42,8 @@ class VehicleDetail extends Model
         'sub_image',
         'type',
         'status',
-        'fuel_type',       
-        'insurance_type',   
+        'fuel_type',
+        'insurance_type',
         'agent_id',
     ];
 

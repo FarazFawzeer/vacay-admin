@@ -24,54 +24,69 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- Details Cards (Left Column - Larger) --}}
             <div class="lg:col-span-2 space-y-6">
-                
+
                 {{-- 🚨 NEW CARD: Agent Information 🚨 --}}
+                {{-- 🚨 NEW CARD: Agent / Owner Information 🚨 --}}
                 @if ($vehicle->agent ?? $vehicle->user)
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14h.01M12 18h.01M10 19l-2 2-2-2m12 0l-2-2-2 2M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                        </svg>
-                        Agent / Owner Information
-                    </h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        
-                        {{-- Agent Name --}}
-                        <div class="p-3 bg-yellow-50 rounded-lg">
-                            <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Name</p>
-                            <p class="text-sm font-semibold text-gray-900 mt-1">{{ $vehicle->agent->name ?? $vehicle->user->name }}</p>
-                        </div>
-                        
-                        {{-- Agent Email --}}
-                        @if ($vehicle->agent->email ?? $vehicle->user->email)
-                        <div class="p-3 bg-yellow-50 rounded-lg">
-                            <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Email</p>
-                            <p class="text-sm font-semibold text-gray-900 mt-1">
-                                <a href="mailto:{{ $vehicle->agent->email ?? $vehicle->user->email }}" class="text-blue-600 hover:text-blue-800 transition-colors">{{ $vehicle->agent->email ?? $vehicle->user->email }}</a>
-                            </p>
-                        </div>
-                        @endif
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14h.01M12 18h.01M10 19l-2 2-2-2m12 0l-2-2-2 2M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Agent / Owner Information
+                        </h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                        {{-- Agent Phone (Optional, assuming a phone field exists) --}}
-                        @if ($vehicle->agent->phone ?? $vehicle->user->phone)
-                        <div class="p-3 bg-yellow-50 rounded-lg">
-                            <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Phone</p>
-                            <p class="text-sm font-semibold text-gray-900 mt-1">
-                                <a href="tel:{{ $vehicle->agent->phone ?? $vehicle->user->phone }}" class="text-blue-600 hover:text-blue-800 transition-colors">{{ $vehicle->agent->phone ?? $vehicle->user->phone }}</a>
-                            </p>
-                        </div>
-                        @endif
-                        
-                        {{-- Agent ID (Optional) --}}
-                        <div class="p-3 bg-yellow-50 rounded-lg">
-                            <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Agent ID</p>
-                            <p class="text-sm font-semibold text-gray-900 mt-1">{{ $vehicle->agent->id ?? $vehicle->user->id }}</p>
-                        </div>
+                            {{-- Company Name --}}
+                            @if ($vehicle->agent->company_name ?? $vehicle->user->company_name)
+                                <div class="p-3 bg-yellow-50 rounded-lg">
+                                    <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Company Name</p>
+                                    <p class="text-sm font-semibold text-gray-900 mt-1">
+                                        {{ $vehicle->agent->company_name ?? $vehicle->user->company_name }}
+                                    </p>
+                                </div>
+                            @endif
 
+                            {{-- Agent / Owner Name --}}
+                            <div class="p-3 bg-yellow-50 rounded-lg">
+                                <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Name</p>
+                                <p class="text-sm font-semibold text-gray-900 mt-1">
+                                    {{ $vehicle->agent->name ?? $vehicle->user->name }}
+                                </p>
+                            </div>
+
+                            {{-- Email --}}
+                            @if ($vehicle->agent->email ?? $vehicle->user->email)
+                                <div class="p-3 bg-yellow-50 rounded-lg">
+                                    <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Email</p>
+                                    <p class="text-sm font-semibold text-gray-900 mt-1">
+                                        <a href="mailto:{{ $vehicle->agent->email ?? $vehicle->user->email }}"
+                                            class="text-blue-600 hover:text-blue-800 transition-colors">
+                                            {{ $vehicle->agent->email ?? $vehicle->user->email }}
+                                        </a>
+                                    </p>
+                                </div>
+                            @endif
+
+                            {{-- Phone --}}
+                            @if ($vehicle->agent->phone ?? $vehicle->user->phone)
+                                <div class="p-3 bg-yellow-50 rounded-lg">
+                                    <p class="text-xs font-medium text-yellow-600 uppercase tracking-wide">Phone</p>
+                                    <p class="text-sm font-semibold text-gray-900 mt-1">
+                                        <a href="tel:{{ $vehicle->agent->phone ?? $vehicle->user->phone }}"
+                                            class="text-blue-600 hover:text-blue-800 transition-colors">
+                                            {{ $vehicle->agent->phone ?? $vehicle->user->phone }}
+                                        </a>
+                                    </p>
+                                </div>
+                            @endif
+
+                        </div>
                     </div>
-                </div>
                 @endif
-                
+
+
                 {{-- Basic Info --}}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -178,7 +193,9 @@
                         Features
                     </h3>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        @if (!is_null($vehicle->air_conditioned))
+                        @if (
+                            !is_null($vehicle->air_conditioned) &&
+                                !in_array($vehicle->type, ['cycle', 'electricbike', 'scooter', 'motorcycle', 'tuktuk']))
                             <div
                                 class="flex items-center gap-2 p-3 rounded-lg {{ $vehicle->air_conditioned ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-50 text-gray-400' }}">
                                 @if ($vehicle->air_conditioned)
@@ -212,7 +229,9 @@
                                 <span class="text-sm font-medium">Helmet</span>
                             </div>
                         @endif
-                        @if (!is_null($vehicle->first_aid_kit))
+                          @if (
+                            !is_null($vehicle->air_conditioned) &&
+                                !in_array($vehicle->type, ['cycle', 'electricbike', 'scooter', 'motorcycle', 'tuktuk']))
                             <div
                                 class="flex items-center gap-2 p-3 rounded-lg {{ $vehicle->first_aid_kit ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-50 text-gray-400' }}">
                                 @if ($vehicle->first_aid_kit)
