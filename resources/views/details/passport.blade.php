@@ -177,7 +177,7 @@
 
                                     <td>
                                         @if ($p->id_photo)
-                                            <img src="{{ asset('storage/' . $p->id_photo) }}" width="50"
+                                            <img src="{{ asset('admin/storage/' . $p->id_photo) }}" width="50"
                                                 height="50" class="rounded">
                                         @else
                                             <span class="text-muted">No image</span>
@@ -405,7 +405,7 @@
 
                 const photoContainer = document.getElementById("existingPhoto");
                 photoContainer.innerHTML = btn.dataset.photo ?
-                    `<img src="/storage/${btn.dataset.photo}" width="80" height="80" class="rounded">` :
+                    `<img src="/admin/storage/${btn.dataset.photo}" width="80" height="80" class="rounded">` :
                     `<span class="text-muted">No existing image</span>`;
 
                 new bootstrap.Modal(document.getElementById("editPassportModal")).show();

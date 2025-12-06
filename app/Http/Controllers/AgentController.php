@@ -66,6 +66,7 @@ class AgentController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'designation' => 'nullable|string|max:100', // <-- Added designation
             'email' => 'nullable|email',
             'company_name' => 'nullable|string|max:255',
             'company_city' => 'nullable|string|max:255',
@@ -83,6 +84,7 @@ class AgentController extends Controller
 
         Agent::create([
             'name' => $request->name,
+            'designation' => $request->designation, // <-- Save designation
             'email' => $request->email,
             'company_name' => $request->company_name,
             'company_city' => $request->company_city,
@@ -99,6 +101,7 @@ class AgentController extends Controller
             ->route('admin.agents.create')
             ->with('success', 'Agent created successfully!');
     }
+
 
 
 
@@ -122,6 +125,7 @@ class AgentController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
+            'designation' => 'nullable|string|max:100',
             'email' => 'nullable|email',
             'company_name' => 'nullable|string|max:255',
             'company_city' => 'nullable|string|max:255',
@@ -138,6 +142,7 @@ class AgentController extends Controller
 
         $agent->update([
             'name' => $request->name,
+              'designation' => $request->designation,
             'email' => $request->email,
             'company_name' => $request->company_name,
             'company_city' => $request->company_city,

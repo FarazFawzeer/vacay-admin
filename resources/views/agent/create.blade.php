@@ -42,23 +42,29 @@
 
 
                 {{-- Name + Email --}}
+                {{-- Name + Email + Designation --}}
                 <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Full Name</label>
                         <input type="text" name="name" class="form-control" required placeholder="Ex: John Doe">
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Designation</label>
+                        <input type="text" name="designation" class="form-control" placeholder="Ex: Manager">
+                    </div>
+
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Email</label>
                         <input type="email" name="email" class="form-control" placeholder="Ex: john@gmail.com">
                     </div>
 
-
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Phone</label>
                         <input type="text" name="phone" class="form-control" placeholder="Ex: +94771234567">
                     </div>
                 </div>
+
 
 
 

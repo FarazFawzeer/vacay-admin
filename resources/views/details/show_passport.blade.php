@@ -173,7 +173,7 @@
 
                                 @if ($passport->id_photo)
                                     <div class="position-relative d-inline-block">
-                                        <img src="{{ asset('storage/' . $passport->id_photo) }}" alt="ID Photo"
+                                        <img src="{{ asset('admin/storage/' . $passport->id_photo) }}" alt="ID Photo"
                                             class="rounded border shadow-sm"
                                             style="width: 200px; height: auto; cursor: pointer;" data-bs-toggle="modal"
                                             data-bs-target="#photoModal">
@@ -211,7 +211,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center p-4">
-                        <img src="{{ asset('storage/' . $passport->id_photo) }}" alt="ID Photo"
+                        <img src="{{ asset('admin/storage/' . $passport->id_photo) }}" alt="ID Photo"
                             class="img-fluid rounded shadow" style="max-height: 70vh;">
                     </div>
                 </div>

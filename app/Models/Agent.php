@@ -15,6 +15,7 @@ class Agent extends Model
         'name',
         'email',
         'company_name',
+        'designation',
         'company_city',
         'company_country',
         'phone',
@@ -23,9 +24,6 @@ class Agent extends Model
         'service',
         'note',
         'status',
-        'agent_id',
-        'fuel_type',
-        'insurance_type',
     ];
 
 

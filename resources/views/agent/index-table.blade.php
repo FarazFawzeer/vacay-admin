@@ -2,6 +2,7 @@
     <thead class="table-light">
         <tr>
             <th>Name</th>
+            <th>Designation</th> <!-- New column -->
             <th>Email</th>
             <th>Company Name</th>
             <th>City</th>
@@ -18,6 +19,7 @@
         @forelse($agents as $agent)
         <tr id="agent-{{ $agent->id }}">
             <td>{{ $agent->name }}</td>
+            <td>{{ $agent->designation ?? '-' }}</td> <!-- New column value -->
             <td>{{ $agent->email }}</td>
             <td>{{ $agent->company_name ?? '-' }}</td>
             <td>{{ $agent->company_city ?? '-' }}</td>
