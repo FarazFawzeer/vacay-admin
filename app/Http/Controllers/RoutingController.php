@@ -31,4 +31,9 @@ class RoutingController extends Controller
     {
         return view($first . '.' . $second);
     }
+
+    public function thirdLevel(Request $request, $first, $second, $third)
+{
+    return view($first . '.' . $second . '.' . $third);
+}
 }

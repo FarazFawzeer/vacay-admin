@@ -226,7 +226,7 @@
                             <select name="agent_id" class="form-select" required>
                                 <option value="">Select Agent</option>
                                 @foreach ($agents as $agent)
-                                    <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                                    <option value="{{ $agent->id }}">{{ $agent->company_name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -304,7 +304,7 @@
                                 <tr id="vehicle-{{ $vehicle->id }}">
                                     <td>
                                         @if ($vehicle->vehicle_image)
-                                            <img src="{{ asset('storage/' . $vehicle->vehicle_image) }}"
+                                            <img src="{{ asset('admin/storage/' . $vehicle->vehicle_image) }}"
                                                 class="vehicle-img" alt="{{ $vehicle->name }}">
                                         @else
                                             <span class="text-muted">No Image</span>
@@ -555,7 +555,7 @@
                                     <select name="agent_id" id="edit_agent_id" class="form-select" required>
                                         <option value="">Select Agent</option>
                                         @foreach ($agents as $agent)
-                                            <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                                            <option value="{{ $agent->id }}">{{ $agent->company_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>

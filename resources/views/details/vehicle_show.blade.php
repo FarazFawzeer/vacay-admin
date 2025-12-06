@@ -282,7 +282,7 @@
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     @if ($vehicle->vehicle_image)
-                        <img src="{{ asset('storage/' . $vehicle->vehicle_image) }}" alt="{{ $vehicle->name }}"
+                        <img src="{{ url('admin/storage/' . $vehicle->vehicle_image) }}" alt="{{ $vehicle->name }}"
                             class="w-full h-64 object-cover ">
                     @else
                         <div class="w-full h-64 bg-gray-100 flex items-center justify-center">
@@ -322,7 +322,7 @@
                         <h3 class="text-sm font-medium text-gray-900 mb-3">Gallery</h3>
                         <div class="grid grid-cols-2 gap-2">
                             @foreach ($vehicle->sub_image as $img)
-                                <img src="{{ asset('storage/' . $img) }}" alt="Vehicle image"
+                                <img src="{{ url('admin/storage/' . $img) }}" alt="Vehicle image"
                                     class="w-full h-30 object-cover border rounded-lg hover:opacity-80 transition-opacity cursor-pointer">
                             @endforeach
                         </div>

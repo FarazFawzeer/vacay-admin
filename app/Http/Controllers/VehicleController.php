@@ -32,135 +32,144 @@ class VehicleController extends Controller
 
 
     // Store new vehicle (AJAX)
-public function store(Request $request)
-{
-    $request->validate([
-        'make'            => 'required|string|max:255',
-        'model'           => 'required|string|max:255',
-        'name'            => 'required|string|max:255',
-        'type'            => 'nullable|string|max:100',
-        'condition'       => 'nullable|string|max:100',
-        'transmission'    => 'nullable|string|max:50',
-        'milage'          => 'nullable',
-        'seats'           => 'nullable|integer|min:1',
-        'luggage_space'   => 'nullable|string|max:255',
-        'air_conditioned' => 'nullable|boolean',
-        'helmet'          => 'nullable|boolean',
-        'first_aid_kit'   => 'nullable|boolean',
-        'fuel_type'       => 'nullable|string|max:50',
-        'insurance_type'  => 'nullable|string|max:255',
-        'price'           => 'nullable|numeric|min:0',
-        'currency'        => 'nullable|string|in:LKR,USD',
-        'vehicle_image'   => 'nullable|image|mimes:jpg,jpeg,png,webp',
-        'sub_image'       => 'nullable|array|max:4',
-        'sub_image.*'     => 'image|mimes:jpg,jpeg,png,webp',
-        'status'          => 'required',
-        'agent_id'        => 'nullable|exists:agents,id',
-    ]);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'make'            => 'required|string|max:255',
+            'model'           => 'required|string|max:255',
+            'name'            => 'required|string|max:255',
+            'type'            => 'nullable|string|max:100',
+            'condition'       => 'nullable|string|max:100',
+            'transmission'    => 'nullable|string|max:50',
+            'milage'          => 'nullable',
+            'seats'           => 'nullable|integer|min:1',
+            'luggage_space'   => 'nullable|string|max:255',
+            'air_conditioned' => 'nullable|boolean',
+            'helmet'          => 'nullable|boolean',
+            'first_aid_kit'   => 'nullable|boolean',
+            'fuel_type'       => 'nullable|string|max:50',
+            'insurance_type'  => 'nullable|string|max:255',
+            'price'           => 'nullable|numeric|min:0',
+            'currency'        => 'nullable|string|in:LKR,USD',
+            'vehicle_image'   => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'sub_image'       => 'nullable|array|max:4',
+            'sub_image.*'     => 'image|mimes:jpg,jpeg,png,webp',
+            'status'          => 'required',
+            'agent_id'        => 'nullable|exists:agents,id',
+        ]);
 
-    $data = $request->except(['vehicle_image', 'sub_image']);
+        $data = $request->except(['vehicle_image', 'sub_image']);
 
-    // Default currency to LKR if not provided
-    $data['currency'] = $request->currency ?? 'LKR';
+        // Default currency to LKR if not provided
+        $data['currency'] = $request->currency ?? 'LKR';
+
+
+      if ($request->hasFile('vehicle_image')) {
+    $file = $request->file('vehicle_image');
+    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+    // Store in storage/app/public/vehicles
+    $file->storeAs('vehicles', $filename, 'public');
     
-
-    // ✅ Handle main vehicle image upload
-    if ($request->hasFile('vehicle_image')) {
-        $path = $request->file('vehicle_image')->store('vehicles', 'public');
-        $data['vehicle_image'] = $path;
-    }
-
-    // ✅ Handle multiple sub images upload
-    if ($request->hasFile('sub_image')) {
-        $subImages = [];
-        foreach ($request->file('sub_image') as $file) {
-            $path = $file->store('vehicles/sub_images', 'public');
-            $subImages[] = $path;
-        }
-        $data['sub_image'] = $subImages; // JSON encoded automatically
-    }
-
-    $vehicle = VehicleDetail::create($data);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Vehicle created successfully',
-        'vehicle' => $vehicle,
-    ]);
+    // Save path for asset access
+    $data['vehicle_image'] = 'vehicles/' . $filename;
 }
+
+        // Sub images
+     if ($request->hasFile('sub_image')) {
+    $subImages = [];
+    foreach ($request->file('sub_image') as $file) {
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+        // Store in storage disk
+        $file->storeAs('vehicles/sub_images', $filename, 'public');
+        $subImages[] = 'vehicles/sub_images/' . $filename;
+    }
+    $data['sub_image'] = $subImages;
+}
+
+
+
+        $vehicle = VehicleDetail::create($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Vehicle created successfully',
+            'vehicle' => $vehicle,
+        ]);
+    }
 
 
     // Update vehicle (AJAX)
-public function update(Request $request, $id)
-{
-    $vehicle = VehicleDetail::findOrFail($id);
+    public function update(Request $request, $id)
+    {
+        $vehicle = VehicleDetail::findOrFail($id);
 
-    $request->validate([
-        'make'             => 'required|string|max:255',
-        'model'            => 'nullable|string|max:255',
-        'name'             => 'required|string|max:255',
-        'type'             => 'nullable|string|max:100',
-        'condition'        => 'nullable|string|max:100',
-        'transmission'     => 'nullable|string|max:50',
-        'milage'           => 'nullable',
-        'seats'            => 'nullable|integer|min:1',
-        'max_seating_capacity' => 'nullable|integer|min:1',
-        'luggage_space'    => 'nullable|string|max:255',
-        'air_conditioned'  => 'nullable|boolean',
-        'helmet'           => 'nullable|boolean',
-        'first_aid_kit'    => 'nullable|boolean',
-        'fuel_type'        => 'nullable|string|max:50',
-        'insurance_type'   => 'nullable|string|max:255',
-        'agent_id'         => 'nullable|exists:agents,id',
-        'price'            => 'nullable|numeric|min:0',
-        'currency'         => 'nullable|string|in:LKR,USD',
-        'vehicle_image'    => 'nullable|image|mimes:jpg,jpeg,png,webp',
-        'sub_image'        => 'nullable|array|max:4',
-        'sub_image.*'      => 'nullable|image|mimes:jpg,jpeg,png,webp',
-        'status'           => 'required|boolean',
-    ]);
+        $request->validate([
+            'make'             => 'required|string|max:255',
+            'model'            => 'nullable|string|max:255',
+            'name'             => 'required|string|max:255',
+            'type'             => 'nullable|string|max:100',
+            'condition'        => 'nullable|string|max:100',
+            'transmission'     => 'nullable|string|max:50',
+            'milage'           => 'nullable',
+            'seats'            => 'nullable|integer|min:1',
+            'max_seating_capacity' => 'nullable|integer|min:1',
+            'luggage_space'    => 'nullable|string|max:255',
+            'air_conditioned'  => 'nullable|boolean',
+            'helmet'           => 'nullable|boolean',
+            'first_aid_kit'    => 'nullable|boolean',
+            'fuel_type'        => 'nullable|string|max:50',
+            'insurance_type'   => 'nullable|string|max:255',
+            'agent_id'         => 'nullable|exists:agents,id',
+            'price'            => 'nullable|numeric|min:0',
+            'currency'         => 'nullable|string|in:LKR,USD',
+            'vehicle_image'    => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'sub_image'        => 'nullable|array|max:4',
+            'sub_image.*'      => 'nullable|image|mimes:jpg,jpeg,png,webp',
+            'status'           => 'required|boolean',
+        ]);
 
-    $data = $request->except(['vehicle_image', 'sub_image']);
+        $data = $request->except(['vehicle_image', 'sub_image']);
+      if ($request->hasFile('vehicle_image')) {
+    $file = $request->file('vehicle_image');
+    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-    // ✅ Update main image
-    if ($request->hasFile('vehicle_image')) {
-        if ($vehicle->vehicle_image && \Storage::disk('public')->exists($vehicle->vehicle_image)) {
-            \Storage::disk('public')->delete($vehicle->vehicle_image);
-        }
-        $data['vehicle_image'] = $request->file('vehicle_image')->store('vehicles', 'public');
-    }
-
-    // ✅ Update sub images
-    if ($request->hasFile('sub_image')) {
-        if (!empty($vehicle->sub_image)) {
-            foreach ($vehicle->sub_image as $oldImg) {
-                if (\Storage::disk('public')->exists($oldImg)) {
-                    \Storage::disk('public')->delete($oldImg);
-                }
-            }
-        }
-
-        $newImages = [];
-        foreach ($request->file('sub_image') as $file) {
-            $newImages[] = $file->store('vehicles/sub_images', 'public');
-        }
-        $data['sub_image'] = $newImages;
-    }
-
-    // Ensure booleans are set correctly
-    $booleanFields = ['air_conditioned', 'helmet', 'first_aid_kit'];
-    foreach ($booleanFields as $field) {
-        $data[$field] = $request->has($field) ? (bool)$request->$field : null;
-    }
-
-    $vehicle->update($data);
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Vehicle updated successfully',
-        'vehicle' => $vehicle,
-    ]);
+    // Store in storage/app/public/vehicles
+    $file->storeAs('vehicles', $filename, 'public');
+    
+    // Save path for asset access
+    $data['vehicle_image'] = 'vehicles/' . $filename;
 }
+
+        // Sub images
+     if ($request->hasFile('sub_image')) {
+    $subImages = [];
+    foreach ($request->file('sub_image') as $file) {
+        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+
+        // Store in storage disk
+        $file->storeAs('vehicles/sub_images', $filename, 'public');
+        $subImages[] = 'vehicles/sub_images/' . $filename;
+    }
+    $data['sub_image'] = $subImages;
+}
+
+
+        // Ensure booleans are set correctly
+        $booleanFields = ['air_conditioned', 'helmet', 'first_aid_kit'];
+        foreach ($booleanFields as $field) {
+            $data[$field] = $request->has($field) ? (bool)$request->$field : null;
+        }
+
+        $vehicle->update($data);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Vehicle updated successfully',
+            'vehicle' => $vehicle,
+        ]);
+    }
 
 
     public function show(VehicleDetail $vehicle)

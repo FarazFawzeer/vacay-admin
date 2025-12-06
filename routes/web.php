@@ -24,7 +24,28 @@ use App\Http\Controllers\AgentController;
 
 require __DIR__ . '/auth.php';
 
+Route::get('/cc', function () {
+    Artisan::call('cache:clear');
+    Artisan::call('optimize:clear');
+    Artisan::call('config:clear');
+});
+
+
+
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
+
+Route::get('/storage/{path}', function ($path) {
+    $fullPath = storage_path('app/public/' . $path);
+
+    if (!File::exists($fullPath)) {
+        abort(404);
+    }
+
+    $mime = File::mimeType($fullPath);
+    return response()->file($fullPath, ['Content-Type' => $mime]);
+})->where('path', '.*');
+
+    
 
     //admin
     Route::resource('users', UserController::class);
@@ -166,16 +187,20 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     //profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('/vehicle-image/{filename}', function ($filename) {
+    $path = storage_path('app/public/vehicles/' . $filename);
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path);
 });
 
 
-
-Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
-    Route::get('', [RoutingController::class, 'index'])->name('root');
-    Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
-    Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
-    Route::get('{any}', [RoutingController::class, 'root'])->name('any');
 });
+
 
 
 Route::get('/login', function () {
@@ -194,3 +219,13 @@ Route::middleware('auth')->group(function () {
         return view('index'); // create resources/views/dashboard.blade.php
     });
 });
+
+
+Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
+    Route::get('', [RoutingController::class, 'index'])->name('root');
+    Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
+    Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
+    Route::get('{any}', [RoutingController::class, 'root'])->name('any');
+});
+
+
