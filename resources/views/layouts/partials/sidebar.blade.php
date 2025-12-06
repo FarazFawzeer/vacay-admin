@@ -77,7 +77,7 @@
                 <a class="nav-link menu-arrow" href="#sidebarAgent" data-bs-toggle="collapse" role="button"
                     aria-expanded="false" aria-controls="sidebarAgent">
                     <span class="nav-icon">
-                     <iconify-icon icon="mdi:account-tie-outline"></iconify-icon>
+                        <iconify-icon icon="mdi:account-multiple-outline"></iconify-icon>
                     </span>
                     <span class="nav-text"> Agent</span>
                 </a>
@@ -130,7 +130,7 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.enquiry.airTicket') }}">
                                 <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
-                                Air Ticket
+                                Air Ticket 
                             </a>
                         </li>
                         <li class="sub-nav-item">
@@ -139,7 +139,7 @@
                                 Driving Permit Request
                             </a>
                         </li>
-                        <li class="sub-nav-item">
+                          <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.enquiry.chatbot') }}">
                                 <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
                                 Chatbot
@@ -180,6 +180,9 @@
                         </li>
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.vehicles.index') }}">Vehicles</a>
+                        </li>
+                         <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.passports.index') }}">Passport</a>
                         </li>
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.visa.index') }}">Visa</a>
@@ -237,6 +240,7 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.visa-bookings.index') }}">Visa</a>
                         </li>
+                        
                     </ul>
                 </div>
             </li>

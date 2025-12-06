@@ -226,7 +226,7 @@
                             <select name="agent_id" class="form-select" required>
                                 <option value="">Select Agent</option>
                                 @foreach ($agents as $agent)
-                                    <option value="{{ $agent->id }}">{{ $agent->company_name }}</option>
+                                    <option value="{{ $agent->id }}">{{ $agent->company_name }} - {{ $agent->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -555,7 +555,7 @@
                                     <select name="agent_id" id="edit_agent_id" class="form-select" required>
                                         <option value="">Select Agent</option>
                                         @foreach ($agents as $agent)
-                                            <option value="{{ $agent->id }}">{{ $agent->company_name }}</option>
+                                            <option value="{{ $agent->id }}">{{ $agent->company_name }} - {{ $agent->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>

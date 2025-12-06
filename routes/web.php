@@ -21,6 +21,7 @@ use App\Http\Controllers\RentVehicleBookingController;
 use App\Http\Controllers\VisaBookingController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\PassportController;
 
 require __DIR__ . '/auth.php';
 
@@ -34,18 +35,18 @@ Route::get('/cc', function () {
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
-Route::get('/storage/{path}', function ($path) {
-    $fullPath = storage_path('app/public/' . $path);
+    Route::get('/storage/{path}', function ($path) {
+        $fullPath = storage_path('app/public/' . $path);
 
-    if (!File::exists($fullPath)) {
-        abort(404);
-    }
+        if (!File::exists($fullPath)) {
+            abort(404);
+        }
 
-    $mime = File::mimeType($fullPath);
-    return response()->file($fullPath, ['Content-Type' => $mime]);
-})->where('path', '.*');
+        $mime = File::mimeType($fullPath);
+        return response()->file($fullPath, ['Content-Type' => $mime]);
+    })->where('path', '.*');
 
-    
+
 
     //admin
     Route::resource('users', UserController::class);
@@ -124,6 +125,7 @@ Route::get('/storage/{path}', function ($path) {
     Route::post('visa-bookings/{booking}/status', [VisaBookingController::class, 'updateStatus'])->name('visa-bookings.updateStatus');
     Route::post('visa-bookings/generate-pdf', [VisaBookingController::class, 'generatePdf'])->name('visa-bookings.generatePdf');
 
+    Route::resource('passports', PassportController::class);
 
     Route::prefix('enquiry')->name('enquiry.')->group(function () {
         Route::get('tours', [EnquiryController::class, 'tours'])->name('tours');
@@ -189,16 +191,14 @@ Route::get('/storage/{path}', function ($path) {
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('/vehicle-image/{filename}', function ($filename) {
-    $path = storage_path('app/public/vehicles/' . $filename);
+        $path = storage_path('app/public/vehicles/' . $filename);
 
-    if (!file_exists($path)) {
-        abort(404);
-    }
+        if (!file_exists($path)) {
+            abort(404);
+        }
 
-    return response()->file($path);
-});
-
-
+        return response()->file($path);
+    });
 });
 
 
@@ -227,5 +227,3 @@ Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
     Route::get('{any}', [RoutingController::class, 'root'])->name('any');
 });
-
-

@@ -66,7 +66,7 @@ class AgentController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:agents,email',
+            'email' => 'nullable|email',
             'company_name' => 'nullable|string|max:255',
             'company_city' => 'nullable|string|max:255',
             'company_country' => 'nullable|string|max:255',
@@ -122,7 +122,7 @@ class AgentController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|unique:agents,email,' . $agent->id,
+            'email' => 'nullable|email',
             'company_name' => 'nullable|string|max:255',
             'company_city' => 'nullable|string|max:255',
             'company_country' => 'nullable|string|max:255',
@@ -134,7 +134,7 @@ class AgentController extends Controller
             'status' => 'required', // accepts 'active' or 'inactive'
         ]);
 
-                $services = $request->service ? json_decode($request->service, true) : [];
+        $services = $request->service ? json_decode($request->service, true) : [];
 
         $agent->update([
             'name' => $request->name,
@@ -145,7 +145,7 @@ class AgentController extends Controller
             'phone' => $request->phone,
             'land_line' => $request->land_line,
             'whatsapp' => $request->whatsapp,
-            'service' => $services, 
+            'service' => $services,
             'note' => $request->note,
             'status' => $request->status,
         ]);
