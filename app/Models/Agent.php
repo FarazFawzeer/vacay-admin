@@ -35,4 +35,9 @@ class Agent extends Model
     {
         return $this->hasMany(VehicleDetail::class, 'agent_id');
     }
+
+    public function visas()
+{
+    return $this->belongsToMany(Visa::class, 'agent_visa');
+}
 }

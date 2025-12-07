@@ -1,14 +1,14 @@
 <div class="app-sidebar">
     <!-- Sidebar Logo -->
-    <div class="logo-box">
+    <div class="logo-box" style="margin-top: 10px;">
         <a href="{{ route('any', 'index') }}" class="logo-dark">
             <img src="/images/vacayguider.png" class="logo-sm" alt="logo sm">
-            <img src="/images/vacayguider.png" class="logo-lg" alt="logo dark" style="width: 150px; height: 75px;">
+            <img src="/images/vacayguider.png" class="logo-lg" alt="logo dark" style="width: 150px; height: auto;">
         </a>
 
         <a href="{{ route('any', 'index') }}" class="logo-light">
             <img src="/images/vacayguider.png" class="logo-sm" alt="logo sm">
-            <img src="/images/vacayguider.png" class="logo-lg" alt="logo light" style="width: 150px; height: 75px;">
+            <img src="/images/vacayguider.png" class="logo-lg" alt="logo light" style="width: 150px; height: auto;">
         </a>
     </div>
 

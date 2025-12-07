@@ -33,6 +33,7 @@
         </div>
 
         {{-- Create Visa Form --}}
+        {{-- Create Visa Form --}}
         <div class="card mb-4" id="createVisaCard" style="display: none;">
             <div class="card-body">
                 <div id="message"></div>
@@ -44,9 +45,18 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Country</label>
-                            <input type="text" name="country" class="form-control" placeholder="Enter country name"
-                                required>
+                            <select name="country" class="form-select" required>
+                                <option value="">Select Country</option>
+                                @foreach ($countries as $country)
+                                    <option value="{{ $country['en'] }}"
+                                        {{ old('country') == $country['en'] ? 'selected' : '' }}>
+                                        {{ $country['en'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+
                         </div>
+
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Visa Type</label>
@@ -58,79 +68,89 @@
                             </select>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Visa Details</label>
+                            <textarea name="visa_details" class="form-control" rows="3" placeholder="Enter visa details..."></textarea>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Visa Details</label>
-                        <textarea name="visa_details" class="form-control" rows="3" placeholder="Enter visa details..."></textarea>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Documents (Image)</label>
+                            <input type="file" name="documents" class="form-control" accept="image/*">
+                        </div>
+
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Documents (Image)</label>
-                        <input type="file" name="documents" class="form-control" accept="image/*">
-                    </div>
+                    <div class="row">
+                        {{-- NEW NOTE FIELD --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Note (Optional)</label>
+                            <textarea name="note" class="form-control" rows="3" placeholder="Enter any additional notes..."></textarea>
+                        </div>
 
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Select Agents</label>
+                            <div class="border rounded p-2">
+                                @foreach ($agents as $agent)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="agents[]"
+                                            value="{{ $agent->id }}" id="agent{{ $agent->id }}">
+                                        <label class="form-check-label" for="agent{{ $agent->id }}">
+                                            {{ $agent->company_name }} - {{ $agent->name }}
+                                        </label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                     <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary">Create Visa</button>
+                        <button type="submit" class="btn btn-success">Create Visa</button>
                     </div>
+
                 </form>
             </div>
         </div>
 
-        {{-- Visa List --}}
+
+        {{-- Filters --}}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Country</label>
+                        <select id="filterCountry" class="form-select">
+                            <option value="">All Countries</option>
+                            @foreach ($countries as $country)
+                                <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Agent</label>
+                        <select id="filterAgent" class="form-select">
+                            <option value="">All Agents</option>
+                            @foreach ($agents as $agent)
+                                <option value="{{ $agent->id }}">{{ $agent->company_name }} - {{ $agent->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Search</label>
+                        <input type="text" id="filterSearch" class="form-control" placeholder="Search...">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Visa Table --}}
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive" id="visaTable">
-                    <table class="table table-hover table-centered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Country</th>
-                                <th>Visa Type</th>
-                                <th>Visa Details</th>
-                                <th>Documents</th>
-                                <th>Updated At</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($visas as $visa)
-                                <tr id="visa-{{ $visa->id }}">
-                                    <td>{{ $visa->country }}</td>
-                                    <td>{{ $visa->visa_type }}</td>
-                                    <td>{{ Str::limit($visa->visa_details, 40) ?? '-' }}</td>
-                                    <td>
-                                        @if ($visa->documents)
-                                            <img src="{{ asset('storage/' . $visa->documents) }}" width="50"
-                                                height="50" class="rounded">
-                                        @else
-                                            <span class="text-muted">No image</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $visa->updated_at->format('d M Y, h:i A') }}</td>
-                                    <td>
-                                        <button type="button" class="icon-btn text-primary edit-visa"
-                                            data-id="{{ $visa->id }}" data-country="{{ $visa->country }}"
-                                            data-type="{{ $visa->visa_type }}" data-details="{{ $visa->visa_details }}"
-                                            data-documents="{{ $visa->documents }}">
-                                            <i class="bi bi-pencil-square fs-5"></i>
-                                        </button>
-
-                                        <button type="button" class="icon-btn text-danger delete-visa"
-                                            data-id="{{ $visa->id }}">
-                                            <i class="bi bi-trash-fill fs-5"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">No visas found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-
-                    <div class="d-flex justify-content-end mt-3">
-                        {{ $visas->links() }}
-                    </div>
+                    @include('details.visa_table', ['visas' => $visas])
                 </div>
             </div>
         </div>
@@ -138,49 +158,89 @@
 
     {{-- Edit Modal --}}
     <div class="modal fade" id="editVisaModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
+        <div class="modal-dialog modal-lg ">
+            <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
                 <form id="editVisaForm" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
+
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Visa</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body">
+
+                    <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
                         <div id="editMessage"></div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Country</label>
-                            <input type="text" name="country" id="edit_country" class="form-control" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Country</label>
+                                <select name="country" id="edit_country" class="form-select" required>
+                                    <option value="">Select Country</option>
+                                    @foreach ($countries as $country)
+                                        <option value="{{ $country['en'] }}">
+                                            {{ $country['en'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Visa Type</label>
+                                <select name="visa_type" id="edit_type" class="form-select" required>
+                                    <option value="e-Visa (Online Applying)">e-Visa (Online Applying)</option>
+                                    <option value="On Arrival (No Visa Needed)">On Arrival (No Visa Needed)</option>
+                                    <option value="Apply Visa (To Embassy)">Apply Visa (To Embassy)</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Visa Type</label>
-                            <select name="visa_type" id="edit_type" class="form-select" required>
-                                <option value="e-Visa (Online Applying)">e-Visa (Online Applying)</option>
-                                <option value="On Arrival (No Visa Needed)">On Arrival (No Visa Needed)</option>
-                                <option value="Apply Visa (To Embassy)">Apply Visa (To Embassy)</option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Visa Details</label>
+                                <textarea name="visa_details" id="edit_details" class="form-control" rows="3"></textarea>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Documents</label>
+                                <div id="existingDoc" class="mb-2"></div>
+                                <input type="file" name="documents" class="form-control" accept="image/*">
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Visa Details</label>
-                            <textarea name="visa_details" id="edit_details" class="form-control" rows="3"></textarea>
-                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Note</label>
+                                <textarea name="note" id="edit_note" class="form-control" rows="3"></textarea>
+                            </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Documents</label>
-                            <div id="existingDoc" class="mb-2"></div>
-                            <input type="file" name="documents" class="form-control" accept="image/*">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Select Agents</label>
+                                <div class="border rounded p-2" id="edit_agent_list"
+                                    style="max-height: 200px; overflow-y: auto;">
+                                    @foreach ($agents as $agent)
+                                        <div class="form-check">
+                                            <input class="form-check-input edit-agent-checkbox" type="checkbox"
+                                                name="agents[]" value="{{ $agent->id }}"
+                                                id="editAgent{{ $agent->id }}">
+                                            <label class="form-check-label" for="editAgent{{ $agent->id }}">
+                                                {{ $agent->company_name }} - {{ $agent->name }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Update Visa</button>
+                        <button type="button" class="btn btn-secondary" style="width: 150px;"
+                            data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" style="width: 150px;">Update Visa</button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
@@ -232,23 +292,42 @@
             });
 
             // 🔹 Edit Visa - Open Modal
+            // 🔹 Edit Visa - Open Modal
             document.querySelector("#visaTable").addEventListener("click", e => {
                 const btn = e.target.closest(".edit-visa");
                 if (!btn) return;
 
                 const id = btn.dataset.id;
+
+                // Set form action
                 document.getElementById("editVisaForm").action = `/admin/visa/${id}`;
+
+                // Text fields
                 document.getElementById("edit_country").value = btn.dataset.country;
                 document.getElementById("edit_type").value = btn.dataset.type;
                 document.getElementById("edit_details").value = btn.dataset.details || "";
+                document.getElementById("edit_note").value = btn.dataset.note || "";
 
+                // Existing image
                 const docContainer = document.getElementById("existingDoc");
                 docContainer.innerHTML = btn.dataset.documents ?
-                    `<img src="/storage/${btn.dataset.documents}" width="80" height="80" class="rounded">` :
+                    `<img src="/admin/storage/${btn.dataset.documents}" width="80" class="rounded">` :
                     `<span class="text-muted">No existing image</span>`;
+
+                // Reset agent checkboxes
+                document.querySelectorAll(".edit-agent-checkbox").forEach(cb => cb.checked = false);
+
+                // Mark assigned agents
+                let agentIds = btn.dataset.agents ? btn.dataset.agents.split(",") : [];
+
+                agentIds.forEach(id => {
+                    let checkbox = document.getElementById("editAgent" + id.trim());
+                    if (checkbox) checkbox.checked = true;
+                });
 
                 new bootstrap.Modal(document.getElementById("editVisaModal")).show();
             });
+
 
             // 🔹 Update Visa
             document.getElementById("editVisaForm").addEventListener("submit", function(e) {
@@ -328,6 +407,26 @@
                             });
                     }
                 });
+            });
+
+            function fetchVisas() {
+                let country = document.getElementById('filterCountry').value;
+                let agent = document.getElementById('filterAgent').value;
+                let search = document.getElementById('filterSearch').value;
+                fetch(`{{ route('admin.visa.index') }}?country=${country}&agent=${agent}&search=${search}`, {
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    })
+                    .then(res => res.text())
+                    .then(html => document.getElementById('visaTable').innerHTML = html);
+            }
+            document.getElementById('filterCountry').addEventListener('change', fetchVisas);
+            document.getElementById('filterAgent').addEventListener('change', fetchVisas);
+            let typingTimer;
+            document.getElementById('filterSearch').addEventListener('keyup', function() {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(fetchVisas, 500);
             });
         });
     </script>
