@@ -1,4 +1,3 @@
-
 <table class="table table-hover table-centered">
     <thead class="table-light">
         <tr>
@@ -42,7 +41,15 @@
                 <td>{{ $customer->company_name ?? '-' }}</td>
                 <td>{{ $customer->address }}</td>
                 <td>{{ $customer->country ?? '-' }}</td>
-                <td>{{ $customer->service ?? '-' }}</td>
+                <td>
+                    @if (!empty($customer->service) && is_array($customer->service))
+                        @foreach ($customer->service as $srv)
+                            <span class="badge bg-primary">{{ $srv }}</span>
+                        @endforeach
+                    @else
+                        -
+                    @endif
+                </td>
                 <td>{{ $customer->heard_us ?? '-' }}</td>
                 <td>{{ $customer->date_of_entry ? \Carbon\Carbon::parse($customer->date_of_entry)->format('d M Y, h:i A') : '-' }}
                 </td>

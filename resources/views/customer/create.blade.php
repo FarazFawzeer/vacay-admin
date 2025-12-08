@@ -75,39 +75,44 @@
 
                 {{-- Service + Heard Us --}}
                 <div class="row">
+                    {{-- Service (Select + Custom Input) --}}
                     <div class="col-md-6 mb-3">
-                        <label for="service" class="form-label">Service</label>
-                        <select name="service" id="service" class="form-select">
-                            <option value="">Select Service</option>
+                        <label class="form-label">Services</label>
 
-                            <option value="Tour Package" {{ old('service') == 'Tour Package' ? 'selected' : '' }}>
-                                Tour Package
-                            </option>
-                            <option value="Rent Vehicle" {{ old('service') == 'Rent Vehicle' ? 'selected' : '' }}>
-                                Rent Vehicle
-                            </option>
-                            <option value="Transportation" {{ old('service') == 'Transportation' ? 'selected' : '' }}>
-                                Transportation
-                            </option>
-                            <option value="Airline Ticketing"
-                                {{ old('service') == 'Airline Ticketing' ? 'selected' : '' }}>
-                                Airline Ticketing
-                            </option>
-                            <option value="Insurance Service"
-                                {{ old('service') == 'Insurance Service' ? 'selected' : '' }}>
-                                Insurance Service
-                            </option>
-                            <option value="Visa Assistance" {{ old('service') == 'Visa Assistance' ? 'selected' : '' }}>
-                                Visa Assistance
-                            </option>
-                        </select>
+                        <div class="d-flex gap-2 mb-2">
+                            <select class="form-control" id="serviceSelect">
+                                <option value="">-- Select Service --</option>
+                                <option value="Tour">Tour</option>
+                                <option value="Rent Vehicle">Rent Vehicle</option>
+                                <option value="Transportation">Transportation</option>
+                                <option value="Visa">Visa</option>
+                                <option value="Air Ticketing">Air Ticketing</option>
+                                <option value="Passport">Passport</option>
+                                <option value="custom">+ Add Custom Service</option>
+                            </select>
+
+                            <button type="button" id="addServiceBtn" class="btn btn-success">
+                                Add
+                            </button>
+                        </div>
+
+                        <!-- Custom input -->
+                        <input type="text" id="customServiceInput" class="form-control mb-2 d-none"
+                            placeholder="Enter custom service">
+
+                        <!-- Display added services -->
+                        <ul id="serviceList" class="list-group"></ul>
                     </div>
+
+                    <!-- Hidden JSON input to submit array -->
+                    <input type="hidden" name="service" id="serviceJson">
+
                     <div class="col-md-6 mb-3">
                         <label for="heard_us" class="form-label">From where did you hear about us?</label>
                         <select name="heard_us" id="heard_us" class="form-select">
                             <option value="">Select</option>
-                            <option value="Working Customer"
-                                {{ old('heard_us') == 'Working Customer' ? 'selected' : '' }}>Working Customer</option>
+                            <option value="Working Customer" {{ old('heard_us') == 'Working Customer' ? 'selected' : '' }}>
+                                Working Customer</option>
                             <option value="Trip Advisor" {{ old('heard_us') == 'Trip Advisor' ? 'selected' : '' }}>Trip
                                 Advisor</option>
                             <option value="Google" {{ old('heard_us') == 'Google' ? 'selected' : '' }}>Google</option>
@@ -116,7 +121,7 @@
                             <option value="Instagram" {{ old('heard_us') == 'Instagram' ? 'selected' : '' }}>Instagram
                             </option>
                             <option value="TikTok" {{ old('heard_us') == 'TikTok' ? 'selected' : '' }}>TikTok</option>
-                                 <!-- Newly Added Options -->
+                            <!-- Newly Added Options -->
                             <option value="Contacts List" {{ old('service') == 'Contacts List' ? 'selected' : '' }}>
                                 Contacts List
                             </option>
@@ -177,6 +182,70 @@
     </script>
     {{-- AJAX Submit --}}
     <script>
+        const serviceSelect = document.getElementById('serviceSelect');
+        const customInput = document.getElementById('customServiceInput');
+        const addBtn = document.getElementById('addServiceBtn');
+        const serviceList = document.getElementById('serviceList');
+        const serviceJson = document.getElementById('serviceJson');
+
+        let services = [];
+
+        // Show custom input
+        serviceSelect.addEventListener('change', () => {
+            if (serviceSelect.value === 'custom') {
+                customInput.classList.remove('d-none');
+                customInput.value = '';
+                customInput.focus();
+            } else {
+                customInput.classList.add('d-none');
+            }
+        });
+
+        // Add service
+        addBtn.addEventListener('click', () => {
+            let value = serviceSelect.value;
+
+            if (value === 'custom') {
+                value = customInput.value.trim();
+            }
+
+            if (!value) {
+                alert("Please select or enter a service");
+                return;
+            }
+
+            // Avoid duplicates (optional)
+            if (services.includes(value)) {
+                alert("Service already added");
+                return;
+            }
+
+            services.push(value);
+            updateServiceList();
+        });
+
+        function updateServiceList() {
+            serviceList.innerHTML = '';
+
+            services.forEach((srv, index) => {
+                const li = document.createElement('li');
+                li.className = "list-group-item d-flex justify-content-between align-items-center";
+                li.innerHTML = `
+            ${srv}
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeService(${index})">X</button>
+        `;
+                serviceList.appendChild(li);
+            });
+
+            serviceJson.value = JSON.stringify(services);
+        }
+
+        function removeService(index) {
+            services.splice(index, 1);
+            updateServiceList();
+        }
+
+
         document.getElementById('createCustomerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             let form = this;
@@ -195,6 +264,12 @@
                     if (data.success) {
                         messageBox.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
                         form.reset();
+
+                        // Clear service field
+                        services = [];
+                        serviceList.innerHTML = '';
+                        serviceJson.value = '';
+
                         setTimeout(() => {
                             messageBox.innerHTML = "";
                         }, 3000);
@@ -203,6 +278,7 @@
                         messageBox.innerHTML = `<div class="alert alert-danger">${errors}</div>`;
                     }
                 })
+
                 .catch(error => {
                     document.getElementById('message').innerHTML =
                         `<div class="alert alert-danger">Something went wrong. Please try again.</div>`;

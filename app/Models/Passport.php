@@ -23,6 +23,10 @@ class Passport extends Model
         'id_photo',
     ];
 
+    protected $casts = [
+        'id_photo' => 'array', // cast JSON to array
+    ];
+
     public function customer()
     {
         return $this->belongsTo(Customer::class);

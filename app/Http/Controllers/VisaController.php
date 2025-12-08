@@ -9,41 +9,41 @@ use Illuminate\Support\Facades\Storage;
 
 class VisaController extends Controller
 {
-   public function index(Request $request)
-{
-    $query = Visa::with('agents')->orderBy('updated_at', 'desc');
+    public function index(Request $request)
+    {
+        $query = Visa::with('agents')->orderBy('updated_at', 'desc');
 
-    if ($request->filled('country')) {
-        $query->where('country', $request->country);
+        if ($request->filled('country')) {
+            $query->where('country', $request->country);
+        }
+
+        if ($request->filled('agent')) {
+            $agentId = $request->agent;
+            $query->whereHas('agents', function ($q) use ($agentId) {
+                $q->where('agents.id', $agentId); // Fix ambiguity here
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('country', 'like', "%{$search}%")
+                    ->orWhere('visa_type', 'like', "%{$search}%")
+                    ->orWhere('visa_details', 'like', "%{$search}%");
+            });
+        }
+
+        $visas = $query->paginate(10);
+
+        if ($request->ajax()) {
+            return view('details.visa_table', compact('visas'))->render(); // Partial
+        }
+
+        $agents = Agent::orderBy('name')->get();
+        $countries = json_decode(file_get_contents(resource_path('data/countries.json')), true);
+
+        return view('details.visa', compact('visas', 'agents', 'countries'));
     }
-
-    if ($request->filled('agent')) {
-        $agentId = $request->agent;
-        $query->whereHas('agents', function ($q) use ($agentId) {
-            $q->where('agents.id', $agentId); // Fix ambiguity here
-        });
-    }
-
-    if ($request->filled('search')) {
-        $search = $request->search;
-        $query->where(function ($q) use ($search) {
-            $q->where('country', 'like', "%{$search}%")
-              ->orWhere('visa_type', 'like', "%{$search}%")
-              ->orWhere('visa_details', 'like', "%{$search}%");
-        });
-    }
-
-    $visas = $query->paginate(10);
-
-    if ($request->ajax()) {
-        return view('details.visa_table', compact('visas'))->render(); // Partial
-    }
-
-    $agents = Agent::orderBy('name')->get();
-    $countries = json_decode(file_get_contents(resource_path('data/countries.json')), true);
-
-    return view('details.visa', compact('visas', 'agents', 'countries'));
-}
 
 
     // Store new visa
@@ -138,17 +138,24 @@ class VisaController extends Controller
     // Delete visa
     public function destroy($id)
     {
-        $visa = Visa::findOrFail($id);
+        $visa = Visa::find($id); // Use find instead of findOrFail
+        if (!$visa) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Visa record not found.'
+            ], 404);
+        }
 
-        if ($visa->documents) {
-            Storage::disk('public')->delete($visa->documents);
+        // Optional: delete documents if exists
+        if ($visa->documents && file_exists(storage_path('app/public/' . $visa->documents))) {
+            unlink(storage_path('app/public/' . $visa->documents));
         }
 
         $visa->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Visa record deleted successfully!',
+            'message' => 'Visa deleted successfully.'
         ]);
     }
 }

@@ -32,8 +32,9 @@
                             data-note="{{ $visa->note }}"
                             data-agents="{{ $visa->agents->pluck('id')->implode(',') }}"> <i
                                 class="bi bi-pencil-square fs-5"></i></button>
-                        <button type="button" class="icon-btn text-danger delete-visa" ...><i
-                                class="bi bi-trash-fill fs-5"></i></button>
+                        <button type="button" class="icon-btn text-danger delete-visa" data-id="{{ $visa->id }}">
+                            <i class="bi bi-trash-fill fs-5"></i>
+                        </button>
                     </td>
                 </tr>
             @empty

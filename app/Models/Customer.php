@@ -27,13 +27,14 @@ class Customer extends Model
         'date_of_birth',
         'company_name',
         'country',
-        'service',
         'heard_us',
         'portal',
+        'service'
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
         'date_of_entry' => 'datetime',
+        'service' => 'array',
     ];
 }

@@ -17,21 +17,48 @@
 
                 <div class="card-body p-4">
                     <!-- Customer Section -->
+                    <!-- Customer Section -->
                     <div class="mb-4 pb-3 border-bottom">
                         <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                            Customer Information</h6>
-                        <div class="d-flex align-items-center">
+                            Customer Information
+                        </h6>
+                        <div class="d-flex align-items-center mb-3">
                             <div
                                 class="avatar-sm rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-3">
                                 <i class="bi bi-person text-primary" style="font-size: 1.5rem;"></i>
                             </div>
                             <div>
                                 <p class="mb-0 fw-semibold text-dark">
-                                    {{ $passport->customer->name ?? $passport->customer->first_name }}</p>
+                                    {{ $passport->customer->name ?? $passport->customer->first_name }}
+                                </p>
                                 <small class="text-muted">Account Holder</small>
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-2">
+                                <strong>Customer Code:</strong> {{ $passport->customer->customer_code ?? '-' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Email:</strong> {{ $passport->customer->email ?? '-' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Contact:</strong> {{ $passport->customer->contact ?? '-' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Address:</strong> {{ $passport->customer->address ?? '-' }}
+                            </div>
+
+                            <div class="col-md-6 mb-2">
+                                <strong>Country:</strong> {{ $passport->customer->country ?? '-' }}
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <strong>Type:</strong> {{ $passport->customer->type ?? '-' }}
+                            </div>
+
+                        </div>
                     </div>
+
 
                     <!-- Personal Details -->
                     <!-- Personal Details -->
@@ -164,26 +191,30 @@
 
 
                     <!-- ID Photo -->
+                    <!-- ID Photo -->
                     <div>
                         <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                            Identification Photo</h6>
-                        <div class="d-flex align-items-start">
+                            Identification Photo
+                        </h6>
+                        <div class="d-flex align-items-start flex-wrap">
                             <i class="mdi mdi-image text-primary me-2 mt-1" style="font-size: 1.2rem;"></i>
-                            <div class="flex-grow-1">
+                            <div class="flex-grow-1 d-flex flex-wrap gap-2">
 
-                                @if ($passport->id_photo)
-                                    <div class="position-relative d-inline-block">
-                                        <img src="{{ asset('admin/storage/' . $passport->id_photo) }}" alt="ID Photo"
-                                            class="rounded border shadow-sm"
-                                            style="width: 200px; height: auto; cursor: pointer;" data-bs-toggle="modal"
-                                            data-bs-target="#photoModal">
-                                        <div class="position-absolute top-0 end-0 m-2">
-                                            <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="modal"
-                                                data-bs-target="#photoModal">
-                                                <i class="mdi mdi-magnify"></i>
-                                            </button>
+                                @if ($passport->id_photo && is_array($passport->id_photo))
+                                    @foreach ($passport->id_photo as $index => $photo)
+                                        <div class="position-relative d-inline-block">
+                                            <img src="{{ asset('admin/storage/' . $photo) }}" alt="ID Photo"
+                                                class="rounded border shadow-sm"
+                                                style="width: 200px; height: auto; cursor: pointer;"
+                                                data-bs-toggle="modal" data-bs-target="#photoModal{{ $index }}">
+                                            <div class="position-absolute top-0 end-0 m-2">
+                                                <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="modal"
+                                                    data-bs-target="#photoModal{{ $index }}">
+                                                    <i class="mdi mdi-magnify"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endforeach
                                 @else
                                     <div class="d-inline-flex align-items-center justify-content-center bg-light rounded border"
                                         style="width: 200px; height: 150px;">
@@ -193,29 +224,36 @@
                                         </div>
                                     </div>
                                 @endif
+
                             </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Photo Modal -->
-    @if ($passport->id_photo)
-        <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title" id="photoModalLabel">ID Photo</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body text-center p-4">
-                        <img src="{{ asset('admin/storage/' . $passport->id_photo) }}" alt="ID Photo"
-                            class="img-fluid rounded shadow" style="max-height: 70vh;">
+    @if ($passport->id_photo && is_array($passport->id_photo))
+        @foreach ($passport->id_photo as $index => $photo)
+            <div class="modal fade" id="photoModal{{ $index }}" tabindex="-1"
+                aria-labelledby="photoModalLabel{{ $index }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header border-0">
+                            <h5 class="modal-title" id="photoModalLabel{{ $index }}">ID Photo</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center p-4">
+                            <img src="{{ asset('admin/storage/' . $photo) }}" alt="ID Photo"
+                                class="img-fluid rounded shadow" style="max-height: 70vh;">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        @endforeach
     @endif
+
 @endsection

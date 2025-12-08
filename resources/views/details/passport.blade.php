@@ -140,8 +140,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label"> Photo (Image)</label>
-                        <input type="file" name="id_photo" class="form-control" accept="image/*">
+                        <label class="form-label">Photos (You can select multiple)</label>
+                        <input type="file" name="id_photo[]" class="form-control" accept="image/*" multiple>
                     </div>
 
                     <div class="d-flex justify-content-end">
@@ -162,7 +162,7 @@
                                 <th>Passport No</th>
                                 <th>Nationality</th>
                                 <th>Expiry</th>
-                                <th>Photo</th>
+                                <th>Image</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -174,17 +174,16 @@
                                     <td>{{ $p->passport_number }}</td>
                                     <td>{{ $p->nationality }}</td>
                                     <td>{{ $p->passport_expire_date }}</td>
-
                                     <td>
                                         @if ($p->id_photo)
-                                            <img src="{{ asset('admin/storage/' . $p->id_photo) }}" width="50"
-                                                height="50" class="rounded">
+                                            @foreach ($p->id_photo as $photo)
+                                                <img src="{{ asset('admin/storage/' . $photo) }}" width="50"
+                                                    height="50" class="rounded me-1 mb-1">
+                                            @endforeach
                                         @else
                                             <span class="text-muted">No image</span>
                                         @endif
                                     </td>
-
-
 
                                     <td>
                                         <!-- Show Passport -->
@@ -201,7 +200,7 @@
                                             data-passno="{{ $p->passport_number }}"
                                             data-exp="{{ $p->passport_expire_date }}" data-dob="{{ $p->dob }}"
                                             data-issue="{{ $p->issue_date }}" data-idnum="{{ $p->id_number }}"
-                                            data-photo="{{ $p->id_photo }}">
+                                            data-photo='@json($p->id_photo)'>
                                             <i class="bi bi-pencil-square fs-5"></i>
                                         </button>
 
@@ -320,9 +319,11 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Photo</label>
+                            <label class="form-label">Existing Photos</label>
                             <div id="existingPhoto" class="mb-2"></div>
-                            <input type="file" name="id_photo" class="form-control" accept="image/*">
+
+                            <label class="form-label">Add More Photos</label>
+                            <input type="file" name="id_photo[]" class="form-control" accept="image/*" multiple>
                         </div>
 
                     </div>
@@ -346,7 +347,7 @@
             toggleBtn.addEventListener("click", function() {
                 formCard.style.display = formCard.style.display === "none" ? "block" : "none";
                 toggleBtn.textContent = formCard.style.display === "block" ? "Close Form" :
-                "+ Add Passport";
+                    "+ Add Passport";
             });
 
             // Create Passport
@@ -404,9 +405,20 @@
                 document.getElementById("edit_idnum").value = btn.dataset.idnum;
 
                 const photoContainer = document.getElementById("existingPhoto");
-                photoContainer.innerHTML = btn.dataset.photo ?
-                    `<img src="/admin/storage/${btn.dataset.photo}" width="80" height="80" class="rounded">` :
-                    `<span class="text-muted">No existing image</span>`;
+                if (btn.dataset.photo) {
+                    let photos = [];
+                    try {
+                        photos = JSON.parse(btn.dataset.photo); // parse JSON array
+                    } catch (e) {
+                        photos = [btn.dataset.photo]; // fallback for single string
+                    }
+
+                    photoContainer.innerHTML = photos.map(photo =>
+                        `<img src="/admin/storage/${photo}" width="80" height="80" class="rounded me-1 mb-1">`
+                    ).join('');
+                } else {
+                    photoContainer.innerHTML = `<span class="text-muted">No existing image</span>`;
+                }
 
                 new bootstrap.Modal(document.getElementById("editPassportModal")).show();
             });
