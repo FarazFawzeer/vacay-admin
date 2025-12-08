@@ -64,29 +64,29 @@ class VehicleController extends Controller
         $data['currency'] = $request->currency ?? 'LKR';
 
 
-      if ($request->hasFile('vehicle_image')) {
-    $file = $request->file('vehicle_image');
-    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        if ($request->hasFile('vehicle_image')) {
+            $file = $request->file('vehicle_image');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-    // Store in storage/app/public/vehicles
-    $file->storeAs('vehicles', $filename, 'public');
-    
-    // Save path for asset access
-    $data['vehicle_image'] = 'vehicles/' . $filename;
-}
+            // Store in storage/app/public/vehicles
+            $file->storeAs('vehicles', $filename, 'public');
+
+            // Save path for asset access
+            $data['vehicle_image'] = 'vehicles/' . $filename;
+        }
 
         // Sub images
-     if ($request->hasFile('sub_image')) {
-    $subImages = [];
-    foreach ($request->file('sub_image') as $file) {
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        if ($request->hasFile('sub_image')) {
+            $subImages = [];
+            foreach ($request->file('sub_image') as $file) {
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-        // Store in storage disk
-        $file->storeAs('vehicles/sub_images', $filename, 'public');
-        $subImages[] = 'vehicles/sub_images/' . $filename;
-    }
-    $data['sub_image'] = $subImages;
-}
+                // Store in storage disk
+                $file->storeAs('vehicles/sub_images', $filename, 'public');
+                $subImages[] = 'vehicles/sub_images/' . $filename;
+            }
+            $data['sub_image'] = $subImages;
+        }
 
 
 
@@ -131,29 +131,29 @@ class VehicleController extends Controller
         ]);
 
         $data = $request->except(['vehicle_image', 'sub_image']);
-      if ($request->hasFile('vehicle_image')) {
-    $file = $request->file('vehicle_image');
-    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        if ($request->hasFile('vehicle_image')) {
+            $file = $request->file('vehicle_image');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-    // Store in storage/app/public/vehicles
-    $file->storeAs('vehicles', $filename, 'public');
-    
-    // Save path for asset access
-    $data['vehicle_image'] = 'vehicles/' . $filename;
-}
+            // Store in storage/app/public/vehicles
+            $file->storeAs('vehicles', $filename, 'public');
+
+            // Save path for asset access
+            $data['vehicle_image'] = 'vehicles/' . $filename;
+        }
 
         // Sub images
-     if ($request->hasFile('sub_image')) {
-    $subImages = [];
-    foreach ($request->file('sub_image') as $file) {
-        $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        if ($request->hasFile('sub_image')) {
+            $subImages = [];
+            foreach ($request->file('sub_image') as $file) {
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
-        // Store in storage disk
-        $file->storeAs('vehicles/sub_images', $filename, 'public');
-        $subImages[] = 'vehicles/sub_images/' . $filename;
-    }
-    $data['sub_image'] = $subImages;
-}
+                // Store in storage disk
+                $file->storeAs('vehicles/sub_images', $filename, 'public');
+                $subImages[] = 'vehicles/sub_images/' . $filename;
+            }
+            $data['sub_image'] = $subImages;
+        }
 
 
         // Ensure booleans are set correctly

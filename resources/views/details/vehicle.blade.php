@@ -287,6 +287,7 @@
                             <tr>
                                 <th>Image</th>
                                 <th>Name</th>
+                                         <th>Agent</th>
                                 <th>Manufacturer</th>
                                 <th>Model</th>
                                 <th>Condition</th>
@@ -311,6 +312,7 @@
                                         @endif
                                     </td>
                                     <td>{{ $vehicle->name }}</td>
+                                    <td>{{ $vehicle->agent->name ?? '-'}} - {{ $vehicle->agent->company_name ?? '-'}}</td>
                                     <td>{{ $vehicle->make }}</td>
                                     <td>{{ $vehicle->model }}</td>
                                     <td>{{ ucfirst($vehicle->condition ?? '-') }}</td>
@@ -629,6 +631,7 @@
                     <tr id="vehicle-${vehicle.id}">
                         <td>${vehicle.vehicle_image ? `<img src="/storage/${vehicle.vehicle_image}" class="vehicle-img">` : '<span class="text-muted">No Image</span>'}</td>
                         <td>${vehicle.name}</td>
+                            <td>${vehicle.agent ? `${vehicle.agent.name} - ${vehicle.agent.company_name}` : '-'}</td>
                         <td>${vehicle.make}</td>
                         <td>${vehicle.model}</td>
                         <td>${vehicle.condition ? vehicle.condition.charAt(0).toUpperCase() + vehicle.condition.slice(1) : '-'}</td>
