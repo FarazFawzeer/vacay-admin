@@ -140,8 +140,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Photos (You can select multiple)</label>
-                        <input type="file" name="id_photo[]" class="form-control" accept="image/*" multiple>
+                        <label class="form-label">Photos (You can select multiple) or Select pdf</label>
+                        <input type="file" name="id_photo[]" class="form-control" accept="image/*,.pdf" multiple>
+
                     </div>
 
                     <div class="d-flex justify-content-end">
@@ -154,6 +155,14 @@
         {{-- Passport List --}}
         <div class="card">
             <div class="card-body">
+
+
+                <div class="mb-3 d-flex justify-content-end">
+                    <form id="passportSearchForm" class="d-flex" style="width: 250px;">
+                        <input type="text" name="search" class="form-control" placeholder="Search...">
+                    </form>
+                </div>
+
                 <div class="table-responsive" id="passportTable">
                     <table class="table table-hover table-centered">
                         <thead class="table-light">
@@ -175,14 +184,22 @@
                                     <td>{{ $p->nationality }}</td>
                                     <td>{{ $p->passport_expire_date }}</td>
                                     <td>
-                                        @if ($p->id_photo)
-                                            @foreach ($p->id_photo as $photo)
-                                                <img src="{{ asset('admin/storage/' . $photo) }}" width="50"
-                                                    height="50" class="rounded me-1 mb-1">
-                                            @endforeach
-                                        @else
-                                            <span class="text-muted">No image</span>
-                                        @endif
+                                        @foreach ($p->id_photo as $file)
+                                            @php
+                                                $ext = pathinfo($file, PATHINFO_EXTENSION);
+                                            @endphp
+
+                                            @if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp']))
+                                                <img src="{{ asset('admin/storage/' . $file) }}" width="50"
+                                                    class="rounded me-1 mb-1">
+                                            @elseif($ext === 'pdf')
+                                                <a href="{{ asset('admin/storage/' . $file) }}" target="_blank"
+                                                    class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                                                </a>
+                                            @endif
+                                        @endforeach
+
                                     </td>
 
                                     <td>
@@ -221,7 +238,8 @@
                     </table>
 
                     <div class="d-flex justify-content-end mt-3">
-                        {{ $passports->links() }}
+                        {{ $passports->appends(request()->query())->links() }}
+
                     </div>
                 </div>
             </div>
@@ -322,8 +340,8 @@
                             <label class="form-label">Existing Photos</label>
                             <div id="existingPhoto" class="mb-2"></div>
 
-                            <label class="form-label">Add More Photos</label>
-                            <input type="file" name="id_photo[]" class="form-control" accept="image/*" multiple>
+                            <label class="form-label">Add More Photos or PDf</label>
+                            <input type="file" name="id_photo[]" class="form-control" accept="image/*,.pdf" multiple>
                         </div>
 
                     </div>
@@ -337,8 +355,29 @@
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     {{-- Scripts --}}
     <script>
+        $(document).on('keyup', 'input[name="search"]', function() {
+
+            let searchValue = $(this).val();
+
+            $.ajax({
+                url: "{{ route('admin.passports.index') }}",
+                type: "GET",
+                data: {
+                    search: searchValue
+                },
+                success: function(response) {
+                    // Replace ONLY the table section
+                    $("#passportTable").html($(response).find("#passportTable").html());
+                }
+            });
+
+        });
+
+
         document.addEventListener("DOMContentLoaded", function() {
             const toggleBtn = document.getElementById("toggleCreateForm");
             const formCard = document.getElementById("createPassportCard");
@@ -384,6 +423,17 @@
                     });
             });
 
+            let filesToRemove = []; // Global for edit modal
+
+            // Remove existing file (delegated)
+            document.getElementById("existingPhoto").addEventListener("click", function(e) {
+                if (e.target.classList.contains("remove-existing-file")) {
+                    const file = e.target.dataset.file;
+                    filesToRemove.push(file);
+                    e.target.closest(".existing-file-wrapper").remove();
+                }
+            });
+
             // Open Edit Modal
             document.querySelector("#passportTable").addEventListener("click", e => {
                 const btn = e.target.closest(".edit-passport");
@@ -406,19 +456,36 @@
 
                 const photoContainer = document.getElementById("existingPhoto");
                 if (btn.dataset.photo) {
-                    let photos = [];
+                    let files = [];
                     try {
-                        photos = JSON.parse(btn.dataset.photo); // parse JSON array
+                        files = JSON.parse(btn.dataset.photo);
                     } catch (e) {
-                        photos = [btn.dataset.photo]; // fallback for single string
+                        files = [btn.dataset.photo];
                     }
 
-                    photoContainer.innerHTML = photos.map(photo =>
-                        `<img src="/admin/storage/${photo}" width="80" height="80" class="rounded me-1 mb-1">`
-                    ).join('');
+                    photoContainer.innerHTML = files.map(file => {
+                        let ext = file.split('.').pop().toLowerCase();
+                        if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                            return `
+                <div class="existing-file-wrapper d-inline-block position-relative me-2 mb-2">
+                    <img src="/admin/storage/${file}" width="80" height="80" class="rounded border">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 remove-existing-file" data-file="${file}" style="z-index:1"></button>
+                </div>`;
+                        } else if (ext === 'pdf') {
+                            return `
+                <div class="existing-file-wrapper d-inline-block position-relative me-2 mb-2">
+                    <a href="/admin/storage/${file}" target="_blank" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> PDF
+                    </a>
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 remove-existing-file" data-file="${file}" style="z-index:1"></button>
+                </div>`;
+                        }
+                        return '';
+                    }).join('');
                 } else {
-                    photoContainer.innerHTML = `<span class="text-muted">No existing image</span>`;
+                    photoContainer.innerHTML = `<span class="text-muted">No existing files</span>`;
                 }
+
 
                 new bootstrap.Modal(document.getElementById("editPassportModal")).show();
             });
@@ -427,6 +494,7 @@
             document.getElementById("editPassportForm").addEventListener("submit", function(e) {
                 e.preventDefault();
                 let formData = new FormData(this);
+                filesToRemove.forEach(file => formData.append("files_to_remove[]", file));
 
                 fetch(this.action, {
                         method: "POST",

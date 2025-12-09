@@ -72,10 +72,12 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('packages', [PackageController::class, 'index'])->name('packages.index');
     Route::get('packages/{id}/edit', [PackageController::class, 'edit'])->name('packages.edit');
     Route::put('packages/{id}/update', [PackageController::class, 'update'])->name('packages.update');
+    Route::delete('packages/{package}', [PackageController::class, 'destroy'])->name('packages.destroy');
 
     Route::post('packages/status/{package}', [PackageController::class, 'toggleStatus'])->name('admin.packages.toggleStatus');
     Route::get('packages/{id}', [PackageController::class, 'show'])->name('packages.show');
     Route::get('/package/{id}/pdf', [PackageController::class, 'downloadPackagePdf'])->name('package.pdf');
+
 
 
     Route::get('tour-bookings', [TourQuotationController::class, 'index'])->name('tour-bookings.index');

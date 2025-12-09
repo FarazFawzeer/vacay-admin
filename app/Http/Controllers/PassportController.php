@@ -6,15 +6,33 @@ use App\Models\Passport;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+
 
 class PassportController extends Controller
 {
     /**
      * Display a listing of passports.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $passports = Passport::with('customer')->latest()->paginate(10); // <-- FIXED
+        $query = Passport::with('customer')->latest();
+
+        // Apply search
+        if ($request->search) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('passport_number', 'like', "%$search%")
+                    ->orWhere('nationality', 'like', "%$search%")
+                    ->orWhereHas('customer', function ($c) use ($search) {
+                        $c->where('name', 'like', "%$search%")
+                            ->orWhere('first_name', 'like', "%$search%");
+                    });
+            });
+        }
+
+        $passports = $query->paginate(10);
         $customers = Customer::all();
 
         return view('details.passport', compact('passports', 'customers'));
@@ -49,7 +67,9 @@ class PassportController extends Controller
             'sex' => 'nullable|in:male,female,other',
             'issue_date' => 'nullable|date',
             'id_number' => 'nullable|string|max:255',
-            'id_photo.*' => 'nullable|image|mimes:jpg,jpeg,png', // handle multiple images
+            'id_photo.*' => 'nullable|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+
+
         ]);
 
         if ($validator->fails()) {
@@ -106,7 +126,9 @@ class PassportController extends Controller
             'sex' => 'nullable|in:male,female,other',
             'issue_date' => 'nullable|date',
             'id_number' => 'nullable|string|max:255',
-            'id_photo.*' => 'nullable|image|mimes:jpg,jpeg,png', // multiple images
+            'id_photo.*' => 'nullable|mimes:jpg,jpeg,png,webp,pdf',
+            'files_to_remove' => 'nullable|array',
+            'files_to_remove.*' => 'string',
         ]);
 
         if ($validator->fails()) {
@@ -118,8 +140,20 @@ class PassportController extends Controller
 
         $data = $validator->validated();
 
-        $idPhotos = $passport->id_photo ?? []; // existing photos
+        $idPhotos = $passport->id_photo ?? [];
 
+        // Remove files if user requested
+        if (isset($data['files_to_remove'])) {
+            foreach ($data['files_to_remove'] as $file) {
+                if (in_array($file, $idPhotos) && Storage::disk('public')->exists($file)) {
+                    Storage::disk('public')->delete($file);
+                    $idPhotos = array_diff($idPhotos, [$file]);
+                }
+            }
+            $idPhotos = array_values($idPhotos); // reindex
+        }
+
+        // Add newly uploaded files
         if ($request->hasFile('id_photo')) {
             foreach ($request->file('id_photo') as $file) {
                 $idPhotos[] = $file->store('passport_photos', 'public');

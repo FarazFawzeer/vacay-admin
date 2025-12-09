@@ -591,12 +591,29 @@ class PackageController extends Controller
             return $item;
         });
 
-        return view('tour.show', compact('package', 'tourSummaries','packageInclusions'));
+        return view('tour.show', compact('package', 'tourSummaries', 'packageInclusions'));
     }
+
+    public function destroy(Package $package)
+    {
+        try {
+            $package->delete(); // Delete package
+            return response()->json([
+                'success' => true,
+                'message' => 'Package deleted successfully!'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete package.'
+            ], 500);
+        }
+    }
+
 
     public function downloadPackagePdf($id)
     {
-        $package = Package::with(['detailItineraries.highlights', 'packageVehicles','packageInclusions'])->findOrFail($id);
+        $package = Package::with(['detailItineraries.highlights', 'packageVehicles', 'packageInclusions'])->findOrFail($id);
         $tourSummaries = TourSummary::where('package_id', $id)->get();
 
         // 🔹 Decode itinerary program_points and highlight images
@@ -615,7 +632,7 @@ class PackageController extends Controller
             return $itinerary;
         });
 
-        
+
 
         // 🔹 Render Blade to HTML
         $htmlContent = View::make('tour.pdf.package', [

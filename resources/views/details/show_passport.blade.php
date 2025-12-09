@@ -194,22 +194,40 @@
                     <!-- ID Photo -->
                     <div>
                         <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                            Identification Photo
+                            Identification Proof
                         </h6>
                         <div class="d-flex align-items-start flex-wrap">
                             <i class="mdi mdi-image text-primary me-2 mt-1" style="font-size: 1.2rem;"></i>
                             <div class="flex-grow-1 d-flex flex-wrap gap-2">
 
                                 @if ($passport->id_photo && is_array($passport->id_photo))
-                                    @foreach ($passport->id_photo as $index => $photo)
+                                    @foreach ($passport->id_photo as $index => $file)
+                                        @php
+                                            $ext = pathinfo($file, PATHINFO_EXTENSION);
+                                        @endphp
+
                                         <div class="position-relative d-inline-block">
-                                            <img src="{{ asset('admin/storage/' . $photo) }}" alt="ID Photo"
-                                                class="rounded border shadow-sm"
-                                                style="width: 200px; height: auto; cursor: pointer;"
-                                                data-bs-toggle="modal" data-bs-target="#photoModal{{ $index }}">
-                                            <div class="position-absolute top-0 end-0 m-2">
-                                                <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="modal"
+                                            @if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp']))
+                                                <img src="{{ asset('admin/storage/' . $file) }}" alt="ID Photo"
+                                                    class="rounded border shadow-sm"
+                                                    style="width: 200px; height: auto; cursor: pointer;"
+                                                    data-bs-toggle="modal"
                                                     data-bs-target="#photoModal{{ $index }}">
+                                            @elseif(strtolower($ext) === 'pdf')
+                                                <a href="{{ asset('admin/storage/' . $file) }}" target="_blank"
+                                                    class="d-inline-flex align-items-center justify-content-center bg-light rounded border shadow-sm"
+                                                    style="width: 200px; height: 150px; text-decoration: none;">
+                                                    <i class="bi bi-file-earmark-pdf-fill text-danger"
+                                                        style="font-size: 2rem;"></i>
+                                                    <span class="ms-2 small text-dark">PDF Document</span>
+                                                </a>
+                                            @endif
+
+                                            <div class="position-absolute top-0 end-0 m-2">
+                                                <button class="btn btn-sm btn-light rounded-circle"
+                                                    @if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp'])) data-bs-toggle="modal" data-bs-target="#photoModal{{ $index }}"
+                                @elseif(strtolower($ext) === 'pdf')
+                                    onclick="window.open('{{ asset('admin/storage/' . $file) }}','_blank')" @endif>
                                                     <i class="mdi mdi-magnify"></i>
                                                 </button>
                                             </div>
@@ -220,7 +238,7 @@
                                         style="width: 200px; height: 150px;">
                                         <div class="text-center">
                                             <i class="mdi mdi-image-off text-muted" style="font-size: 2rem;"></i>
-                                            <p class="text-muted small mb-0 mt-2">No image available</p>
+                                            <p class="text-muted small mb-0 mt-2">No file available</p>
                                         </div>
                                     </div>
                                 @endif
@@ -228,6 +246,7 @@
                             </div>
                         </div>
                     </div>
+
 
                 </div>
             </div>
