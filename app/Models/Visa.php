@@ -9,17 +9,29 @@ class Visa extends Model
 {
     use HasFactory;
 
-    protected $table = 'visa'; // specify table name
-
     protected $fillable = [
-        'country',
+        'from_country',
+        'to_country',
         'visa_type',
-        'visa_details',
-        'documents',
+        'custom_visa_type',
+        'documents', // JSON
         'agent_id',
+        'auth_id',
+        'checklist',
+        'status',
         'note',
-          'user_id'
     ];
+
+    protected $casts = [
+        'documents' => 'array', // automatically casts JSON to array
+        'checklist' => 'array',
+    ];
+
+    // One Visa has many Visa Categories
+    public function categories()
+    {
+        return $this->hasMany(VisaCategory::class);
+    }
 
     public function agent()
     {
@@ -31,11 +43,9 @@ class Visa extends Model
         return $this->belongsToMany(Agent::class, 'agent_visa');
     }
 
-    
+    // Visa belongs to a User (creator)
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'auth_id');
     }
-
-    
 }

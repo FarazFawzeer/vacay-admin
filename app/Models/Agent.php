@@ -37,7 +37,7 @@ class Agent extends Model
     }
 
     public function visas()
-{
-    return $this->belongsToMany(Visa::class, 'agent_visa');
-}
+    {
+        return $this->hasMany(Visa::class, 'agent_id');
+    }
 }
