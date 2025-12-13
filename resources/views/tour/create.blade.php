@@ -29,43 +29,24 @@
                 @csrf
 
                 {{-- Main Info --}}
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="heading" class="form-label">Heading</label>
-                        <input type="text" name="heading" id="heading" class="form-control"
-                            placeholder="e.g., Explore Sri Lanka in 7 Days" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="tour_ref_no" class="form-label">Reference No</label>
-                        <input type="text" name="tour_ref_no" id="tour_ref_no" class="form-control"
-                            placeholder="e.g., SLT-001" required>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea name="description" id="description" class="form-control"
-                            placeholder="Detailed package description with itinerary overview"></textarea>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="summary_description" class="form-label">Summary Description</label>
-                        <textarea name="summary_description" id="summary_description" class="form-control"
-                            placeholder="Short 2–3 line summary for quick view"></textarea>
-                    </div>
-                </div>
+                {{-- Country / Category / Type --}}
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label for="country" class="form-label">Country</label>
                         <input type="text" name="country" id="country" class="form-control"
                             placeholder="e.g., Sri Lanka">
                     </div>
+
                     <div class="col-md-4 mb-3">
-                        <label for="place" class="form-label">Place</label>
-                        <input type="text" name="place" id="place" class="form-control"
-                            placeholder="e.g., Kandy, Colombo">
+                        <label for="category" class="form-label">Category</label>
+                        <select name="category" id="category" class="form-select">
+                            <option value="">-- Select Category --</option>
+                            <option value="special">Special</option>
+                            <option value="city">City</option>
+                            <option value="tailor">Tailor Made</option>
+                        </select>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label for="type" class="form-label">Type</label>
                         <select name="type" id="type" class="form-select">
@@ -76,42 +57,61 @@
                     </div>
                 </div>
 
+                {{-- Heading / Reference --}}
                 <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select name="category" id="category" class="form-select">
-                            <option value="">-- Select Category --</option>
-                            <option value="special">Special</option>
-                            <option value="city">City</option>
-                            <option value="tailor">Tailor Made</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="days" class="form-label">Days</label>
-                        <input type="number" name="days" id="days" class="form-control" placeholder="e.g., 7">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="nights" class="form-label">Nights</label>
-                        <input type="number" name="nights" id="nights" class="form-control" placeholder="e.g., 6">
+                    <div class="col-md-6 mb-3">
+                        <label for="heading" class="form-label">Heading</label>
+                        <input type="text" name="heading" id="heading" class="form-control"
+                            placeholder="e.g., Explore Sri Lanka in 7 Days" required>
                     </div>
 
-                    <div class="col-md-3 mb-3">
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" type="checkbox" name="hilight_show_hide"
-                                id="hilight_show_hide" value="1">
-                            <label class="form-check-label" for="hilight_show_hide">
-                                Highlight Show
-                            </label>
-                        </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="tour_ref_no" class="form-label">Reference No</label>
+                        <input type="text" name="tour_ref_no" id="tour_ref_no" class="form-control"
+                            placeholder="e.g., SLT-001" required>
                     </div>
                 </div>
 
+                {{-- Main & Summary Description --}}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="description" class="form-label">Main Description</label>
+                        <textarea name="description" id="description" class="form-control" placeholder="Detailed package description"></textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="summary_description" class="form-label">Summary Description</label>
+                        <textarea name="summary_description" id="summary_description" class="form-control" placeholder="Short 2–3 line summary"></textarea>
+                    </div>
+                </div>
+
+                {{-- Place / Days / Nights --}}
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label for="ratings" class="form-label">Ratings</label>
+                        <label for="place" class="form-label">Tour Place</label>
+                        <input type="text" name="place" id="place" class="form-control"
+                            placeholder="e.g., Kandy, Colombo">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="days" class="form-label">Days</label>
+                        <input type="number" name="days" id="days" class="form-control" placeholder="e.g., 7">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="nights" class="form-label">Nights</label>
+                        <input type="number" name="nights" id="nights" class="form-control" placeholder="e.g., 6">
+                    </div>
+                </div>
+
+                {{-- Rating / Status / Price --}}
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="ratings" class="form-label">Rating</label>
                         <input type="number" step="0.1" min="0" max="5" name="ratings"
                             id="ratings" class="form-control" placeholder="e.g., 4.5">
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label for="status" class="form-label">Status</label>
                         <select name="status" id="status" class="form-select">
@@ -119,25 +119,46 @@
                             <option value="0">Inactive</option>
                         </select>
                     </div>
+
                     <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">Price (USD)</label>
-                        <input type="number" step="0.01" name="price" id="price" class="form-control"
-                            placeholder="e.g., 1200.00">
+                        <label class="form-label">Price</label>
+                        <div class="input-group">
+                            <select name="currency" class="form-select" style="max-width: 120px;">
+                                <option value="USD">USD</option>
+                                <option value="LKR">LKR</option>
+                                <option value="EUR">EUR</option>
+                            </select>
+                            <input type="number" step="0.01" name="price" id="price" class="form-control"
+                                placeholder="e.g., 1200.00">
+                        </div>
                     </div>
                 </div>
 
+                {{-- Images --}}
                 <div class="row">
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label for="main_picture" class="form-label">Main Picture</label>
-                        <input type="file" name="main_picture" id="main_picture" class="form-control"
-                            placeholder="Upload main image">
+                        <input type="file" name="main_picture" id="main_picture" class="form-control">
                     </div>
-                    <div class="col-md-6 mb-3">
+
+                    <div class="col-md-4 mb-3">
                         <label for="map_image" class="form-label">Map Image</label>
-                        <input type="file" name="map_image" id="map_image" class="form-control"
-                            placeholder="Upload route map">
+                        <input type="file" name="map_image" id="map_image" class="form-control">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check mt-4">
+                             <label class="form-check-label" for="hilight_show_hide">
+                                Highlight Show
+                            </label>
+                            <input class="form-check-input" type="checkbox" name="hilight_show_hide"
+                                id="hilight_show_hide" value="1">
+                           
+                        </div>
                     </div>
                 </div>
+
+
 
                 {{-- Tour Summaries --}}
                 <div class="card my-4">
@@ -412,7 +433,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                                                             <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                                                                 <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>

@@ -32,7 +32,7 @@
                                 <label class="text-muted small mb-1">Visa Type</label>
                                 <p class="mb-0 fw-bold text-dark">
                                     {{ $visa->visa_type ?? '-' }}
-                                    @if($visa->visa_type === 'custom' && $visa->custom_visa_type)
+                                    @if ($visa->visa_type === 'custom' && $visa->custom_visa_type)
                                         <span class="text-muted">({{ $visa->custom_visa_type }})</span>
                                     @endif
                                 </p>
@@ -44,7 +44,7 @@
                         <h6 class="text-uppercase text-muted mb-3 fs-6-sm">
                             Visa Categories & Pricing
                         </h6>
-                        @if($visa->categories && $visa->categories->count() > 0)
+                        @if ($visa->categories && $visa->categories->count() > 0)
                             <div class="table-responsive">
                                 <table class="table table-striped table-hover mb-0">
                                     <thead class="table-light">
@@ -58,13 +58,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($visa->categories as $cat)
+                                        @foreach ($visa->categories as $cat)
                                             <tr>
                                                 <td>{{ $cat->visa_type ?? '-' }}</td>
                                                 <td>{{ $cat->state ?? '-' }}</td>
-                                                <td>{{ $cat->days ?? $cat->how_many_days ?? '-' }}</td>
+                                                <td>{{ $cat->days ?? ($cat->how_many_days ?? '-') }}</td>
                                                 <td>{{ $cat->visa_validity ?? '-' }}</td>
-                                                <td class="fw-bold">{{ $cat->price ? number_format($cat->price) : '-' }} {{ $cat->currency ?? '' }}</td>
+                                                <td class="fw-bold">{{ $cat->price ? number_format($cat->price) : '-' }}
+                                                    {{ $cat->currency ?? '' }}</td>
                                                 <td>{{ $cat->processing_time ?? '-' }}</td>
                                             </tr>
                                         @endforeach
@@ -81,25 +82,31 @@
                             Documents
                         </h6>
                         <div class="d-flex flex-wrap">
-                            @if($visa->documents && count($visa->documents) > 0)
-                                @foreach($visa->documents as $doc)
+                            @if ($visa->documents && count($visa->documents) > 0)
+                                @foreach ($visa->documents as $doc)
                                     @php
                                         $ext = pathinfo($doc, PATHINFO_EXTENSION);
-                                        $path = asset('storage/' . $doc);
+                                        $path = asset('admin/storage/' . $doc);
                                     @endphp
                                     <div class="me-3 mb-3 text-center">
-                                        @if(in_array(strtolower($ext), ['jpg','jpeg','png','webp']))
+                                        @if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'webp']))
                                             <a href="{{ $path }}" target="_blank">
-                                                <img src="{{ $path }}" alt="Document" width="100" class="rounded border shadow-sm" style="height: 100px; object-fit: cover;">
+                                                <img src="{{ $path }}" alt="Document" width="100"
+                                                    class="rounded border shadow-sm"
+                                                    style="height: 100px; object-fit: cover;">
                                             </a>
                                             <p class="small text-muted mt-1 mb-0">{{ strtoupper($ext) }}</p>
                                         @elseif(strtolower($ext) === 'pdf')
-                                            <a href="{{ $path }}" target="_blank" class="btn btn-lg btn-danger rounded-circle d-block mx-auto" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
+                                            <a href="{{ $path }}" target="_blank"
+                                                class="btn btn-lg btn-danger rounded-circle d-block mx-auto"
+                                                style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
                                                 <i class="bi bi-file-earmark-pdf-fill fs-3"></i>
                                             </a>
                                             <p class="small text-muted mt-1 mb-0">PDF File</p>
                                         @else
-                                            <a href="{{ $path }}" target="_blank" class="btn btn-lg btn-outline-secondary rounded-circle d-block mx-auto" style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
+                                            <a href="{{ $path }}" target="_blank"
+                                                class="btn btn-lg btn-outline-secondary rounded-circle d-block mx-auto"
+                                                style="width: 100px; height: 100px; display: flex; align-items: center; justify-content: center;">
                                                 <i class="bi bi-file-earmark-text fs-3"></i>
                                             </a>
                                             <p class="small text-muted mt-1 mb-0">{{ strtoupper($ext) }} File</p>
@@ -116,9 +123,9 @@
                         <h6 class="text-uppercase text-muted mb-3 fs-6-sm">
                             Required Documents / Checklist
                         </h6>
-                        @if(is_array($visa->checklist) && count($visa->checklist) > 0)
+                        @if (is_array($visa->checklist) && count($visa->checklist) > 0)
                             <ul class="list-unstyled">
-                                @foreach($visa->checklist as $item)
+                                @foreach ($visa->checklist as $item)
                                     <li class="d-flex align-items-start mb-2">
                                         <i class="mdi mdi-check-circle-outline text-success me-2 mt-1"></i>
                                         <span>{{ $item }}</span>
@@ -145,14 +152,15 @@
                         </h6>
                         <div>
                             @forelse($visa->agents as $agent)
-                                <span class="badge bg-primary text-white me-2 mb-2 p-2 fs-6">{{ $agent->company_name }} - {{ $agent->name }}</span>
+                                <span class="badge bg-primary text-white me-2 mb-2 p-2 fs-6">{{ $agent->company_name }} -
+                                    {{ $agent->name }}</span>
                             @empty
                                 <span class="text-muted">No agents assigned.</span>
                             @endforelse
                         </div>
                     </div>
 
-                    @if(auth()->user() && auth()->user()->type === 'Super Admin')
+                    @if (auth()->user() && auth()->user()->type === 'Super Admin')
                         <div class="mt-4 pt-3 border-top">
                             <h6 class="text-uppercase text-muted mb-3 fs-6-sm">
                                 System Information
@@ -166,11 +174,15 @@
                                         </tr>
                                         <tr>
                                             <th class="py-1">Created At:</th>
-                                            <td class="py-1">{{ $visa->created_at ? $visa->created_at->format('d M Y, h:i A') : '-' }}</td>
+                                            <td class="py-1">
+                                                {{ $visa->created_at ? $visa->created_at->format('d M Y, h:i A') : '-' }}
+                                            </td>
                                         </tr>
                                         <tr>
                                             <th class="py-1">Last Updated:</th>
-                                            <td class="py-1">{{ $visa->updated_at ? $visa->updated_at->format('d M Y, h:i A') : '-' }}</td>
+                                            <td class="py-1">
+                                                {{ $visa->updated_at ? $visa->updated_at->format('d M Y, h:i A') : '-' }}
+                                            </td>
                                         </tr>
                                     </table>
                                 </div>
@@ -192,7 +204,8 @@
     <style>
         /* Optional: Custom style for section headers */
         .fs-6-sm {
-            font-size: 0.75rem !important; /* Retaining your original small size */
+            font-size: 0.75rem !important;
+            /* Retaining your original small size */
             letter-spacing: 0.5px;
         }
     </style>

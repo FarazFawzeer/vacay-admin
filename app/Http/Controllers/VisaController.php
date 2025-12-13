@@ -136,7 +136,7 @@ class VisaController extends Controller
 
         // Countries
         $countries = json_decode(file_get_contents(resource_path('data/countries.json')), true);
-
+        $agents = Agent::orderBy('name')->get();
         // Handle documents (stored as array)
         $documents = collect($visa->documents ?? [])->map(function ($docPath) {
             return [
@@ -153,7 +153,9 @@ class VisaController extends Controller
             'visa' => $visa,
             'countries' => $countries,
             'documents' => $documents,
-            'checklist' => $checklist
+            'checklist' => $checklist,
+            'agents' => $agents,
+
         ]);
     }
 

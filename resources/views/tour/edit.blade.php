@@ -19,58 +19,15 @@
 
                 {{-- Main Info --}}
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="heading" class="form-label">Heading</label>
-                        <input type="text" name="heading" id="heading" class="form-control"
-                            value="{{ old('heading', $package->heading) }}" required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="tour_ref_no" class="form-label">Reference No</label>
-                        <input type="text" name="tour_ref_no" id="tour_ref_no" class="form-control"
-                            value="{{ old('tour_ref_no', $package->tour_ref_no) }}" required>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea name="description" id="description" class="form-control">{{ old('description', $package->description) }}</textarea>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="summary_description" class="form-label">Summary Description</label>
-                        <textarea name="summary_description" id="summary_description" class="form-control">{{ old('summary_description', $package->summary_description) }}</textarea>
-                    </div>
-                </div>
-
-                <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label for="country" class="form-label">Country</label>
-                        <input type="text" name="country" id="country" class="form-control"
+                        <label class="form-label">Country</label>
+                        <input type="text" name="country" class="form-control"
                             value="{{ old('country', $package->country_name) }}">
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label for="place" class="form-label">Place</label>
-                        <input type="text" name="place" id="place" class="form-control"
-                            value="{{ old('place', $package->place) }}">
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label for="type" class="form-label">Type</label>
-                        <select name="type" id="type" class="form-select">
-                            <option value="inbound" {{ $package->type == 'inbound' ? 'selected' : '' }}>Inbound</option>
-                            <option value="outbound" {{ $package->type == 'outbound' ? 'selected' : '' }}>Outbound</option>
-                        </select>
-                    </div>
-                </div>
-
-                {{-- Category, Days, Nights --}}
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select name="category" id="category" class="form-select">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-select">
                             <option value="special" {{ $package->tour_category == 'special' ? 'selected' : '' }}>Special
                             </option>
                             <option value="city" {{ $package->tour_category == 'city' ? 'selected' : '' }}>City</option>
@@ -79,38 +36,68 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3 mb-3">
-                        <label for="days" class="form-label">Days</label>
-                        <input type="number" name="days" id="days" class="form-control"
-                            value="{{ old('days', $package->days) }}">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Type</label>
+                        <select name="type" class="form-select">
+                            <option value="inbound" {{ $package->type == 'inbound' ? 'selected' : '' }}>Inbound</option>
+                            <option value="outbound" {{ $package->type == 'outbound' ? 'selected' : '' }}>Outbound</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Heading</label>
+                        <input type="text" name="heading" class="form-control"
+                            value="{{ old('heading', $package->heading) }}" required>
                     </div>
 
-                    <div class="col-md-3 mb-3">
-                        <label for="nights" class="form-label">Nights</label>
-                        <input type="number" name="nights" id="nights" class="form-control"
-                            value="{{ old('nights', $package->nights) }}">
-                    </div>
-
-                    <div class="col-md-3 mb-3">
-                        <div class="form-check mt-4">
-                            <input type="checkbox" name="special_feature" value="1"
-                                {{ $package->hilight_show_hide ? 'checked' : '' }}>
-
-                            <label class="form-check-label" for="special_feature">Highlight Show </label>
-                        </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Reference No</label>
+                        <input type="text" name="tour_ref_no" class="form-control"
+                            value="{{ old('tour_ref_no', $package->tour_ref_no) }}" required>
                     </div>
                 </div>
 
-                {{-- Ratings, Status, Price --}}
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Main Description</label>
+                        <textarea name="description" class="form-control">{{ old('description', $package->description) }}</textarea>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Summary Description</label>
+                        <textarea name="summary_description" class="form-control">{{ old('summary_description', $package->summary_description) }}</textarea>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label for="ratings" class="form-label">Ratings</label>
+                        <label class="form-label">Tour Place</label>
+                        <input type="text" name="place" class="form-control"
+                            value="{{ old('place', $package->place) }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Days</label>
+                        <input type="number" name="days" class="form-control"
+                            value="{{ old('days', $package->days) }}">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Nights</label>
+                        <input type="number" name="nights" class="form-control"
+                            value="{{ old('nights', $package->nights) }}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Rating</label>
                         <input type="number" step="0.1" min="0" max="5" name="ratings"
                             class="form-control" value="{{ old('ratings', $package->ratings) }}">
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label for="status" class="form-label">Status</label>
+                        <label class="form-label">Status</label>
                         <select name="status" class="form-select">
                             <option value="1" {{ $package->status == 1 ? 'selected' : '' }}>Active</option>
                             <option value="0" {{ $package->status == 0 ? 'selected' : '' }}>Inactive</option>
@@ -118,34 +105,35 @@
                     </div>
 
                     <div class="col-md-4 mb-3">
-                        <label for="price" class="form-label">Price (USD)</label>
-                        <input type="number" step="0.01" name="price" id="price" class="form-control"
+                        <label class="form-label">Price (USD)</label>
+                        <input type="number" step="0.01" name="price" class="form-control"
                             value="{{ old('price', $package->price) }}">
                     </div>
                 </div>
-
-                {{-- Main Picture --}}
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="main_picture" class="form-label">Main Picture</label>
-                        <input type="file" name="main_picture" id="main_picture" class="form-control">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Main Picture</label>
+                        <input type="file" name="main_picture" class="form-control">
                         @if ($package->picture)
-                            <div class="mt-2">
-                                <img src="{{ asset('storage/' . $package->picture) }}" width="120"
-                                    class="rounded shadow">
-                            </div>
+                            <img src="{{ asset('storage/' . $package->picture) }}" width="120" class="mt-2 rounded">
                         @endif
                     </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label for="map_image" class="form-label">Map Image</label>
-                        <input type="file" name="map_image" id="map_image" class="form-control">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Map Image</label>
+                        <input type="file" name="map_image" class="form-control">
                         @if ($package->map_image)
-                            <div class="mt-2">
-                                <img src="{{ asset('storage/' . $package->map_image) }}" width="120"
-                                    class="rounded shadow">
-                            </div>
+                            <img src="{{ asset('storage/' . $package->map_image) }}" width="120"
+                                class="mt-2 rounded">
                         @endif
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" name="special_feature" value="1"
+                                {{ $package->hilight_show_hide ? 'checked' : '' }}>
+                            <label class="form-check-label">Highlight Show</label>
+                        </div>
                     </div>
                 </div>
 
@@ -416,50 +404,53 @@
                 </div>
 
 
-               {{-- Inclusion / Exclusion / Cancellation Section --}}
-<div class="card mt-4">
-    <div class="card-header bg-light">
-        <h5 class="mb-0">Inclusions / Exclusions / Cancellation</h5>
-    </div>
+                {{-- Inclusion / Exclusion / Cancellation Section --}}
+                <div class="card mt-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Inclusions / Exclusions / Cancellation</h5>
+                    </div>
 
-    <div class="card-body" id="inclusionWrapper">
-        @foreach ($inclusions as $index => $item)
-            <div class="mb-4 border-bottom pb-3 inclusion-block" data-index="{{ $index }}">
-                <h6 class="fw-bold text-capitalize text-primary">{{ ucfirst($item->type) }}</h6>
+                    <div class="card-body" id="inclusionWrapper">
+                        @foreach ($inclusions as $index => $item)
+                            <div class="mb-4 border-bottom pb-3 inclusion-block" data-index="{{ $index }}">
+                                <h6 class="fw-bold text-capitalize text-primary">{{ ucfirst($item->type) }}</h6>
 
-                {{-- Heading --}}
-                <div class="mb-2">
-                    <label><strong>Heading:</strong></label>
-                    <input type="text" name="package_inclusions[{{ $index }}][heading]"
-                        class="form-control"
-                        value="{{ old('package_inclusions.' . $index . '.heading', $item->heading) }}">
+                                {{-- Heading --}}
+                                <div class="mb-2">
+                                    <label><strong>Heading:</strong></label>
+                                    <input type="text" name="package_inclusions[{{ $index }}][heading]"
+                                        class="form-control"
+                                        value="{{ old('package_inclusions.' . $index . '.heading', $item->heading) }}">
+                                </div>
+
+                                {{-- Points --}}
+                                <label><strong>Points:</strong></label>
+                                <div class="points-wrapper mb-2">
+                                    @foreach ($item->points as $pIndex => $point)
+                                        <div class="d-flex mb-2 point-row">
+                                            <input type="text"
+                                                name="package_inclusions[{{ $index }}][points][{{ $pIndex }}]"
+                                                value="{{ $point }}" class="form-control me-2">
+                                            <button type="button" class="btn btn-danger btn-sm remove-point">X</button>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <button type="button" class="btn btn-outline-primary btn-sm add-point">+ Add
+                                    Point</button>
+
+                                {{-- Note --}}
+                                <div class="mt-3">
+                                    <label><strong>Note:</strong></label>
+                                    <textarea name="package_inclusions[{{ $index }}][note]" class="form-control" rows="2">{{ $item->note }}</textarea>
+                                </div>
+
+                                <input type="hidden" name="package_inclusions[{{ $index }}][type]"
+                                    value="{{ $item->type }}">
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-
-                {{-- Points --}}
-                <label><strong>Points:</strong></label>
-                <div class="points-wrapper mb-2">
-                    @foreach ($item->points as $pIndex => $point)
-                        <div class="d-flex mb-2 point-row">
-                            <input type="text" name="package_inclusions[{{ $index }}][points][{{ $pIndex }}]"
-                                value="{{ $point }}" class="form-control me-2">
-                            <button type="button" class="btn btn-danger btn-sm remove-point">X</button>
-                        </div>
-                    @endforeach
-                </div>
-
-                <button type="button" class="btn btn-outline-primary btn-sm add-point">+ Add Point</button>
-
-                {{-- Note --}}
-                <div class="mt-3">
-                    <label><strong>Note:</strong></label>
-                    <textarea name="package_inclusions[{{ $index }}][note]" class="form-control" rows="2">{{ $item->note }}</textarea>
-                </div>
-
-                <input type="hidden" name="package_inclusions[{{ $index }}][type]" value="{{ $item->type }}">
-            </div>
-        @endforeach
-    </div>
-</div>
 
 
                 {{-- Submit --}}
@@ -621,9 +612,9 @@
                         </div>
                         <div class="col-md-3">
                             ${h.image ? `
-                                                                                            <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
-                                                                                            <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
-                                                                                        ` : ''}
+                                                                                                    <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
+                                                                                                    <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
+                                                                                                ` : ''}
                             <input type="file" 
                                 name="itineraries[${index}][highlights][${highlightCounter}][images]" 
                                 class="form-control">
@@ -810,26 +801,26 @@
         }
 
 
-document.addEventListener('click', function(e) {
-    // Remove point
-    if (e.target && e.target.classList.contains('remove-point')) {
-        e.target.closest('.point-row').remove();
-    }
+        document.addEventListener('click', function(e) {
+            // Remove point
+            if (e.target && e.target.classList.contains('remove-point')) {
+                e.target.closest('.point-row').remove();
+            }
 
-    // Add point
-    if (e.target && e.target.classList.contains('add-point')) {
-        const wrapper = e.target.previousElementSibling; // points-wrapper
-        const index = e.target.closest('.inclusion-block').dataset.index;
-        const pointCount = wrapper.querySelectorAll('.point-row').length;
-        const newPointHtml = `
+            // Add point
+            if (e.target && e.target.classList.contains('add-point')) {
+                const wrapper = e.target.previousElementSibling; // points-wrapper
+                const index = e.target.closest('.inclusion-block').dataset.index;
+                const pointCount = wrapper.querySelectorAll('.point-row').length;
+                const newPointHtml = `
             <div class="d-flex mb-2 point-row">
                 <input type="text" name="package_inclusions[${index}][points][${pointCount}]" class="form-control me-2" placeholder="Point description">
                 <button type="button" class="btn btn-danger btn-sm remove-point">X</button>
             </div>
         `;
-        wrapper.insertAdjacentHTML('beforeend', newPointHtml);
-    }
-});
+                wrapper.insertAdjacentHTML('beforeend', newPointHtml);
+            }
+        });
 
         // ======= REMOVE ELEMENT HELPER =======
         function removeElement(id) {

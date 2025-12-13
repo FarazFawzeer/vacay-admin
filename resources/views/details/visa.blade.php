@@ -4,6 +4,11 @@
     @include('layouts.partials.page-title', ['title' => 'Add Visa', 'subtitle' => 'Visa'])
 
     <style>
+        #editVisaModal .modal-body {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+
         .btn-equal {
             width: 80px;
             text-align: center;
@@ -155,20 +160,18 @@
                             <input type="file" name="documents[]" class="form-control" multiple>
                         </div>
 
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mt-4">
                             <label class="form-label">Select Agents</label>
-                            <div class="border rounded p-2">
+                            <select name="agents[]" id="agentsSelect" class="form-select" multiple required>
                                 @foreach ($agents as $agent)
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="agents[]"
-                                            value="{{ $agent->id }}" id="agent{{ $agent->id }}">
-                                        <label class="form-check-label" for="agent{{ $agent->id }}">
-                                            {{ $agent->company_name }} - {{ $agent->name }}
-                                        </label>
-                                    </div>
+                                    <option value="{{ $agent->id }}">
+                                        {{ $agent->company_name }} - {{ $agent->name }}
+                                    </option>
                                 @endforeach
-                            </div>
+                            </select>
                         </div>
+
+
 
                     </div>
 
@@ -237,7 +240,7 @@
 
     <!-- Edit Visa Modal -->
     <div class="modal fade" id="editVisaModal" tabindex="-1" aria-labelledby="editVisaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <form id="editVisaForm" method="POST" enctype="multipart/form-data">
                     @csrf
@@ -312,18 +315,15 @@
                             <!-- ===================== AGENTS ======================= -->
                             <div class="col-md-6 mb-3 mt-4">
                                 <label class="form-label">Select Agents</label>
-                                <div class="border rounded p-2" id="editAgentsWrapper">
+                                <select name="agents[]" id="editAgentsSelect" class="form-select" multiple required>
                                     @foreach ($agents as $agent)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="agents[]"
-                                                value="{{ $agent->id }}" id="editAgent{{ $agent->id }}">
-                                            <label class="form-check-label" for="editAgent{{ $agent->id }}">
-                                                {{ $agent->company_name }} - {{ $agent->name }}
-                                            </label>
-                                        </div>
+                                        <option value="{{ $agent->id }}">
+                                            {{ $agent->company_name }} - {{ $agent->name }}
+                                        </option>
                                     @endforeach
-                                </div>
+                                </select>
                             </div>
+
                         </div>
                         <!-- ===================== NOTE ======================= -->
                         <div class="col-md-12 mt-3">
@@ -344,9 +344,19 @@
 
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        $(document).ready(function() {
+            $('#agentsSelect').select2({
+                placeholder: "Search and select agents",
+                allowClear: true,
+                width: '100%',
+                closeOnSelect: false, // So user can select more without closing
+            });
+        });
         // Show custom visa type input
         document.getElementById('visaTypeSelect').addEventListener('change', function() {
             let customField = document.getElementById('customVisaTypeInput');
@@ -520,7 +530,11 @@
 
     <!-- ===================== JS for Edit Modal ======================= -->
     <script>
+        // Initialize Select2 if not already initialized
+
+
         document.addEventListener("DOMContentLoaded", function() {
+
 
             // Open Edit Modal
             $(document).on('click', '.editVisaBtn', function() {
@@ -537,6 +551,44 @@
                         let visa = response.visa; // extract visa from response
                         let countries = response.countries; //
                         let documents = response.documents; //
+                        // 1. Destroy old Select2 (if exists)
+                        if ($('#editAgentsSelect').hasClass("select2-hidden-accessible")) {
+                            $('#editAgentsSelect').select2('destroy');
+                        }
+
+                        // 2. Clear previous options and re-add ALL agents
+                        // This is necessary because the default Blade options might be missing, 
+                        // or Select2 requires a fresh list if the DOM was manipulated.
+                        $('#editAgentsSelect').empty();
+
+                        // Append ALL agents fetched from the server
+                        response.agents.forEach(agent => {
+                            $('#editAgentsSelect').append(
+                                `<option value="${agent.id}">${agent.company_name} - ${agent.name}</option>`
+                            );
+                        });
+
+                        // 3. Preselect existing agents
+                        // Ensure response.visa.agents is an array before calling .map()
+                        let selectedIds = (response.visa.agents || []).map(a => a.id
+                            .toString());
+
+                        // IMPORTANT: .val() requires string IDs for Select2 multiple selects
+                        $('#editAgentsSelect').val(selectedIds);
+
+                        // 4. Initialize Select2
+                        $('#editAgentsSelect').select2({
+                            placeholder: "Search and select agents",
+                            width: "100%",
+                            closeOnSelect: false,
+                            dropdownParent: $(
+                                    '#editVisaModal'
+                                    ) // Add this line if the dropdown hides behind the modal
+                        }).trigger(
+                            'change.select2'
+                            ); // Triggers Select2 to display the selected options
+
+
                         // Populate countries dropdown dynamically
                         let fromSelect = $('select[name="from_country"]');
                         let toSelect = $('select[name="to_country"]');
@@ -560,11 +612,6 @@
                         }
                         $('textarea[name="note"]').val(visa.note);
 
-                        // Populate agents
-                        $('#editAgentsWrapper input[type="checkbox"]').prop('checked', false);
-                        visa.agents.forEach(agent => {
-                            $('#editAgent' + agent.id).prop('checked', true);
-                        });
 
                         // Populate categories
                         $('#editVisaCategoryWrapper').html('');
@@ -691,6 +738,9 @@
                     }
                 });
             });
+
+
+
 
             // Toggle custom visa type input
             $(document).on('change', 'select[name="visa_type"]', function() {
@@ -828,54 +878,53 @@
 
         });
 
-      $(document).on('submit', '.deleteVisaForm', function(e){
-    e.preventDefault();
+        $(document).on('submit', '.deleteVisaForm', function(e) {
+            e.preventDefault();
 
-    let form = $(this);
-    let url = form.attr('action');
+            let form = $(this);
+            let url = form.attr('action');
 
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: form.serialize(),
-                success: function(response){
-                    if(response.success){
-                        Swal.fire(
-                            'Deleted!',
-                            response.message,
-                            'success'
-                        ).then(() => {
-                            location.reload(); // Or remove row dynamically
-                        });
-                    } else {
-                        Swal.fire(
-                            'Error!',
-                            response.message,
-                            'error'
-                        );
-                    }
-                },
-                error: function(xhr){
-                    Swal.fire(
-                        'Error!',
-                        'Failed to delete visa.',
-                        'error'
-                    );
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: form.serialize(),
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Deleted!',
+                                    response.message,
+                                    'success'
+                                ).then(() => {
+                                    location.reload(); // Or remove row dynamically
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    response.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire(
+                                'Error!',
+                                'Failed to delete visa.',
+                                'error'
+                            );
+                        }
+                    });
                 }
             });
-        }
-    });
-});
-
+        });
     </script>
 @endsection
