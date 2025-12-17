@@ -249,18 +249,59 @@
                                                 Point</button>
                                         </div>
                                     </div>
+                                    {{-- Inside the @foreach ($package->itineraries as $i => $itinerary) loop --}}
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-2">
+                                        <label>City</label>
+                                        <select name="itineraries[{{ $i }}][city]" class="form-select"
+                                            onchange="filterHotelsByCity(this, {{ $i }})">
+                                            <option value="">-- Select City --</option>
+                                            @php
+                                                // 1. Determine the city of the currently selected hotel (if any)
+                                                $currentHotelName = $itinerary->overnight_stay;
+                                                $selectedCity = '';
+
+                                                if ($currentHotelName) {
+                                                    // Find the Hotel model in the $hotels collection that matches the name
+                                                    $matchedHotel = $hotels->firstWhere(
+                                                        'hotel_name',
+                                                        $currentHotelName,
+                                                    );
+                                                    if ($matchedHotel) {
+                                                        $selectedCity = $matchedHotel->city;
+                                                    }
+                                                }
+
+                                                // 2. Get a list of all unique cities from the $hotels collection for the dropdown options
+                                                $uniqueCities = $hotels->pluck('city')->unique();
+
+                                            @endphp
+
+                                            @foreach ($uniqueCities as $city)
+                                                <option value="{{ $city }}"
+                                                    {{ $selectedCity == $city ? 'selected' : '' }}>
+                                                    {{ $city }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    {{-- 2. OVERNIGHT STAY DROPDOWN (Modified for filtering) --}}
+                                    {{-- 2. OVERNIGHT STAY DROPDOWN (Modified for filtering) --}}
+                                    <div class="col-md-2">
                                         <label>Overnight Stay</label>
                                         <select name="itineraries[{{ $i }}][overnight_stay]"
                                             class="form-select">
                                             <option value="">-- Select Hotel --</option>
-                                            @foreach ($hotels as $h)
+
+                                            {{-- Only display hotels matching the $selectedCity determined above --}}
+                                            @foreach ($hotels->where('city', $selectedCity) as $h)
                                                 <option value="{{ $h->hotel_name }}"
                                                     {{ $itinerary->overnight_stay == $h->hotel_name ? 'selected' : '' }}>
                                                     {{ $h->hotel_name }}
                                                 </option>
                                             @endforeach
+
                                         </select>
                                     </div>
 
@@ -463,6 +504,25 @@
 
     {{-- Scripts --}}
     <script>
+           // ======= HOTEL LIST (from backend) =======
+        // **THIS IS CAUSING THE BLADE PARSE ERROR**
+        const hotels = <?php
+        echo json_encode(
+            $hotels->map(
+                fn($h) => [
+                    'id' => $h->id,
+                    'hotel_name' => $h->hotel_name,
+                    'city' => $h->city,
+                ],
+            ),
+        );
+        ?>;
+
+        
+        // ======= DESTINATIONS (used for dropdowns) =======
+        const destinations = @json($destinations->map(fn($d) => ['id' => $d->id, 'name' => $d->name]));
+
+        
         // 1. JSON-encode the list of all available vehicles
         const vehicles = @json($vehicles);
 
@@ -514,6 +574,31 @@
             }
         }
 
+        function filterHotelsByCity(selectElement, index) {
+            const selectedCity = selectElement.value;
+            const hotelSelect = document.querySelector(
+                // Selects the correct 'Overnight Stay' dropdown for the current index
+                `#itinerary-${index} select[name="itineraries[${index}][overnight_stay]"]`
+            );
+
+            if (!hotelSelect) return;
+
+            // 1. Clears existing options
+            hotelSelect.innerHTML = '<option value="">-- Select Hotel --</option>';
+
+            if (selectedCity) {
+                // 2. Filters the global 'hotels' array by the selected city
+                const filteredHotels = hotels.filter(h => h.city === selectedCity);
+
+                // 3. Populates the hotel dropdown with the filtered list
+                filteredHotels.forEach(h => {
+                    const option = document.createElement('option');
+                    option.value = h.hotel_name;
+                    option.textContent = `${h.hotel_name}`;
+                    hotelSelect.appendChild(option);
+                });
+            }
+        }
 
 
         // 2. Call the function on page load to display details of the pre-selected vehicle
@@ -525,16 +610,7 @@
             }
         });
 
-        // ======= HOTEL LIST (from backend) =======
-        const hotels = @json(
-            $hotels->map(fn($h) => [
-                    'id' => $h->id,
-                    'hotel_name' => $h->hotel_name,
-                ]));
-
-        // ======= DESTINATIONS (used for dropdowns) =======
-        const destinations = @json($destinations->map(fn($d) => ['id' => $d->id, 'name' => $d->name]));
-
+     
         // ======= FETCH PROGRAM POINTS & HIGHLIGHTS BASED ON DESTINATION =======
         function fetchProgramPoints(select, index) {
             const destinationId = select.value;
@@ -612,9 +688,9 @@
                         </div>
                         <div class="col-md-3">
                             ${h.image ? `
-                                                                                                    <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
-                                                                                                    <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
-                                                                                                ` : ''}
+                                                                                                                <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
+                                                                                                                <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
+                                                                                                            ` : ''}
                             <input type="file" 
                                 name="itineraries[${index}][highlights][${highlightCounter}][images]" 
                                 class="form-control">
@@ -667,6 +743,7 @@
 
             const options = destinations.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
 
+
             wrapper.insertAdjacentHTML("beforeend", `
             <div class="row mb-2 align-items-center" id="${id}">
                 <div class="col-md-3">
@@ -691,8 +768,12 @@
             const wrapper = document.getElementById("itineraryWrapper");
             const id = `itinerary-${itineraryIndex}`;
             const destinationOptions = destinations.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-            const hotelOptions = hotels.map(h => `<option value="${h.hotel_name}">${h.hotel_name}</option>`).join('');
 
+
+            // Inside addItinerary() - (Lines 473 in your provided code)
+            // **THIS LINE IS THE PROBLEM:**
+           // Get unique cities, filter out null/empty strings
+            const cityOptions = uniqueCities.map(c => `<option value="${c}">${c}</option>`).join('');
             wrapper.insertAdjacentHTML("beforeend", `
             <div class="border p-3 mb-3 rounded" id="${id}">
                 <div class="row mb-2">
@@ -727,13 +808,20 @@
                             <button type="button" class="btn btn-sm btn-secondary mb-2" onclick="addProgramPoint(${itineraryIndex})">+ Add Program Point</button>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <label>Overnight Stay</label>
-                        <select name="itineraries[${itineraryIndex}][overnight_stay]" class="form-select">
-                            <option value="">-- Select Hotel --</option>
-                            ${hotelOptions}
+       <div class="col-md-2">
+                    <label>City</label>
+                    <select name="itineraries[${itineraryIndex}][city]" class="form-select" onchange="filterHotelsByCity(this, ${itineraryIndex})">
+                        <option value="">-- Select City --</option>
+                        ${cityOptions}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label>Overnight Stay</label>
+                    <select name="itineraries[${itineraryIndex}][overnight_stay]" class="form-select">
+                        <option value="">-- Select Hotel --</option>
                         </select>
-                    </div>
+                </div>
                     <div class="col-md-2">
                         <label>Meal Plan</label>
                         <input name="itineraries[${itineraryIndex}][meal_plan]" class="form-control">

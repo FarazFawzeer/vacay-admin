@@ -4,929 +4,685 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>{{ $package->heading ?? 'Tour Package PDF' }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-
+    <title>{{ $package->heading ?? 'Tour Package' }}</title>
     <style>
-        /* Vehicle Section */
-        .vehicle-details-section {
-            margin: 30px 0;
-            page-break-inside: avoid;
+        /* General Reset and Font for PDF */
+        @page {
+            /* Decreasing this pulls the border closer to the paper edge */
+            margin: 0.2in;
         }
 
-        .vehicle-details-section h2 {
-            font-size: 18pt;
-            font-weight: bold;
-            color: #0d4e6b;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-top: 10px;
-            padding-bottom: 10px;
-        }
+        .page-border {
+            position: fixed;
+            /* Setting these to a negative value relative to the page margin
+       brings the border even closer to the physical edge */
+            top: -0.1in;
+            left: -0.1in;
 
-        /* Vehicle Card */
-        .vehicle-card {
-            width: 100%;
+            /* We adjust the width/height to account for the negative offset */
+            width: calc(100% + 0.2in);
+            height: calc(100% + 0.2in);
 
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 30px;
-            page-break-inside: avoid;
-
-        }
-
-        .vehicle-image-container {
-            text-align: center;
-            margin-bottom: 15px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .vehicle-image {
-            max-width: 90%;
-            max-height: 400px;
-            height: auto;
-            display: block;
-            margin: 0 auto;
-            border-radius: 6px;
-        }
-
-        /* Sub Images */
-        /* Sub Images */
-        .sub-images {
-            width: 100%;
-            margin: 15px auto;
-            text-align: center;
-            padding: 0 20px;
-        }
-
-        .sub-images img {
-            display: inline-block;
-            width: 22%;
-            max-width: 150px;
-            height: auto;
-            aspect-ratio: 4/3;
-            object-fit: cover;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            margin: 5px 1%;
-            vertical-align: top;
+            border: 1px solid #313b5e;
             box-sizing: border-box;
+            z-index: -1000;
+            pointer-events: none;
         }
 
-        /* Vehicle Info */
-        .vehicle-info-list {
-            width: 85%;
-            margin: 15px auto 0;
-            border-top: 1px solid #e0e0e0;
-            padding-top: 25px;
-        }
-
-        .vehicle-info-list>div {
-            display: table;
-            width: 100%;
-            padding: 5px 0;
-            font-size: 11pt;
-            border-bottom: 1px solid #f5f5f5;
-        }
-
-        .vehicle-info-list>div strong {
-            display: table-cell;
-            width: 140px;
-            color: #0d4e6b;
-            font-weight: 600;
-            padding-right: 10px;
-        }
-
-        .vehicle-info-list>div span {
-            display: table-cell;
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            /* Recommended font for Dompdf to handle various characters */
+            margin: 0;
+            padding: 0;
+            font-size: 10pt;
             color: #333;
         }
 
-        .footer-logo {
-            text-align: center;
-        }
-
-        .footer-logo img {
-            width: 150px;
-            /* Adjust size as needed */
-            height: auto;
-            display: inline-block;
-        }
-
-        @media (max-width: 992px) {
-            .themes-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 576px) {
-            .themes-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* PDF Page Settings */
-        @page {
-            size: A4;
-        }
-
-        body::before {
-            content: "";
-            position: fixed;
-            top: 2mm;
-            left: 2mm;
-            right: 2mm;
-            bottom: 2mm;
-            border: 2px solid #0d4e6b;
-            /* light gray border */
-            z-index: -1;
-        }
-
-        @media print {
-            body {
-                margin: 0;
-                padding: 20px;
-            }
-
-            .no-print {
-                display: none !important;
-            }
-
-            .page-break {
-                page-break-before: always;
-            }
-        }
-
-
-        .theme-grid {
-            font-size: 1rem;
-            /* same as text-base */
-            color: #4b5563;
-            /* same as Tailwind's text-gray-600 */
-        }
-
-        .theme-grid .theme-icon {
-            width: 22px;
-            height: 22px;
-            object-fit: contain;
-        }
-
-        .theme-grid .d-flex {
-            gap: 8px;
-            /* mimic Tailwind's gap-2 */
-        }
-
-        .package-header {
-            color: white;
-            border-radius: 20px;
-            position: relative;
-            /* reduce this as needed */
-        }
-
-
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0) scale(1);
-            }
-
-            50% {
-                transform: translate(-20px, -20px) scale(1.05);
-            }
-        }
-
-        .header-content {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            max-width: 1000px;
-            margin: 0 auto;
-            /* Reduce top margin if needed */
-            margin-top: 0;
-        }
-
-        /* Country Badge */
-        .sri-lanka-badge {
-
-            color: #7db32d;
-            border-radius: 50px;
-            font-weight: 800;
-
-            text-transform: uppercase;
-            letter-spacing: 2px;
-
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Package Title */
-        .package-title {
-            font-size: 2rem;
-            font-weight: 800;
-            margin: 0 0 25px 0;
-            line-height: 1.2;
-            color: #313b5e;
-            /* Use solid color */
-            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            animation: fadeIn 0.8s ease 0.2s both;
-            background: none;
-            /* Remove gradient */
-            background-clip: unset;
-        }
-
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Duration Info */
-        .duration-info {
-            margin-bottom: 35px;
-            animation: fadeIn 0.8s ease 0.4s both;
-        }
-
-        .duration-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 1.1rem;
-
-            color: var(--taplox-heading-color);
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .duration-badge:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .duration-badge i {
-            font-size: 1.3rem;
-            color: #96c93e;
-        }
-
-        /* Route Display */
-        /* Route Display */
-        .route-display {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-
-            animation: fadeIn 0.8s ease 0.6s both;
-        }
-
-
-        .route-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #96c93e;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .route-label::before,
-        .route-label::after {
-            content: '';
-            width: 40px;
-            height: 2px;
-            background: #96c93e;
-        }
-
-        .route-label::after {
-            background: #96c93e;
-        }
-
-        .route-path {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 8px 15px;
-        }
-
-        .route-point {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            font-size: 1rem;
-            color: #1a202c;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-
-
-        .route-point i {
-            font-size: 0.9rem;
-            color: #8c8c8c;
-        }
-
-        .route-arrow {
-            color: #8c8c8c;
-            font-weight: bold;
-            font-size: 1.3rem;
-            opacity: 0.9;
-            text-shadow: 0 2px 8px rgba(150, 201, 62, 0.3);
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .package-header {
-                padding: 35px 25px;
-                border-radius: 16px;
-            }
-
-            .package-title {
-                font-size: 1.8rem;
-            }
-
-            .duration-badge {
-                padding: 12px 25px;
-                font-size: 0.95rem;
-            }
-
-            .route-display {
-                padding: 20px 15px;
-            }
-
-            .route-point {
-                font-size: 0.85rem;
-                padding: 6px 12px;
-            }
-
-            .route-arrow {
-                font-size: 1.1rem;
-            }
-
-            .sri-lanka-badge {
-
-                padding: 8px 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .package-header {
-                padding: 30px 20px;
-            }
-
-            .package-title {
-                font-size: 1.5rem;
-            }
-
-            .route-path {
-                gap: 5px 10px;
-            }
-
-            .route-point {
-                font-size: 0.8rem;
-                padding: 5px 10px;
-            }
-
-            .route-point i {
-                font-size: 0.75rem;
-            }
-        }
-
-        /* Hero Image */
-        .hero-image {
+        /* Layout Tables */
+        .layout-table {
             width: 100%;
-            height: 400px;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .layout-table td {
+            vertical-align: top;
+            padding: 0;
+        }
+
+        /* Day Number Styling */
+        .day-number-cell {
+            width: 60px;
+            font-size: 30pt;
+            font-weight: bold;
+            color: #313b5e;
+            line-height: 1;
+        }
+
+        /* Accommodation Row Styling */
+        .accommodation-table {
+            width: 100%;
+            border-top: 2px solid #313b5e;
+            margin-top: 20px;
+            padding-top: 10px;
+        }
+
+        .accommodation-table td {
+            width: 33.33%;
+            text-align: center;
+            padding: 10px 5px;
+        }
+
+        /* Ensure images don't stretch */
+        .itinerary-image {
+            width: 100%;
+            height: 350px;
             object-fit: cover;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            margin: 30px 0;
+            display: block;
+            margin: 15px 0;
+            border-radius: 6px;
         }
 
-
-
-        /* Description Section */
-        .description-section {
-            padding: 10px;
-            border-radius: 12px;
-
-
+        .content-wrapper {
+            margin: 0 auto;
+            width: 100%;
+            padding: 0;
         }
 
-        .description-section p {
-            text-align: justify;
-            color: #4a5568;
-            font-size: 1rem;
-            line-height: 1.8;
-        }
-
-        .pdf-center-wrapper {
-            display: flex;
-            justify-content: center;
-            /* horizontal center */
-            align-items: center;
-            /* vertical center */
-            min-height: 100vh;
-            /* full page height */
-            padding: 40px;
-            /* add some space from edges */
-            box-sizing: border-box;
-        }
-
-
-        /* Tour Summary Card */
-        .tour-summary-card {
-            background: linear-gradient(135deg, #eff5ff 0%, #e0f2fe 100%);
-            border-radius: 16px;
-            padding: 40px;
-            margin: 40px 0;
-        }
-
-        .tour-summary-card h2 {
-            font-size: 1.7rem;
-            font-weight: 700;
-            color: #0d4e6b;
+        /* --- Header Styles --- */
+        .package-header {
+            position: relative;
+            width: 100%;
+            padding: 20px 10px;
             margin-bottom: 20px;
         }
 
+        .package-header h1 {
+            text-align: center;
+            color: #313b5e;
+            margin-top: 60px;
+            font-size: 24px;
+            font-weight: bold;
+        }
 
-        .summary-description {
-            color: #4a5568;
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin: 25px 0;
+        .sri-lanka-badge {
+            font-size: 0.5rem;
+            color: #000;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Route Display */
+        .route-display {
+            display: inline-block;
+            /* Forces background to wrap tightly around text */
+            text-align: center;
+            margin: 20px auto;
+            /* 'auto' centers the inline-block element */
+            padding: 10px 20px;
+            /* Added more horizontal padding for better look */
+            background-color: #f8f8f8;
+            border-radius: 5px;
+            border: 1px solid #eee;
+            /* Optional: adds definition */
+        }
+
+        .route-label {
+            font-weight: bold;
+            color: #96c93e;
+            margin-bottom: 5px;
+            font-size: 10pt;
+        }
+
+        .route-path {
+            display: inline-block;
+            white-space: nowrap;
+            /* Keep the route on a single line if possible */
+        }
+
+        .route-point {
+            display: inline-block;
+            margin: 0 5px;
+            padding: 2px 8px;
+            font-size: 9pt;
+            vertical-align: middle;
+        }
+
+        .route-point img {
+            vertical-align: text-bottom;
+        }
+
+        .route-arrow {
+            display: inline-block;
+            color: #313b5e;
+            font-weight: bold;
+            margin: 0 3px;
+            vertical-align: middle;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        /* Description */
+        .description-section {
+            margin-bottom: 20px;
+            line-height: 1.5;
+            padding: 0 10px;
             text-align: justify;
         }
 
-        /* Destinations Section */
-        .destinations-section,
-        .themes-section {
-            margin: 30px 0;
+        /* Page Break */
+        .page-break {
+            page-break-after: always;
+        }
+
+        /* --- Summary Section --- */
+        .pdf-center-wrapper {
+            text-align: center;
+            /* Center the card */
+            margin: 0 10px;
+        }
+
+        .pdf-page-container {
+            width: 100%;
+            height: 1050px;
+            /* Approximate height of an A4 page */
+            display: table;
+        }
+
+        /* Cell that handles vertical centering */
+        .pdf-vertical-center {
+            display: table-cell;
+            vertical-align: middle;
+            width: 100%;
+        }
+
+        .tour-summary-card {
+            page-break-inside: avoid;
+            width: 90%;
+            margin: 0 auto;
+            padding: 30px;
+            border-radius: 16px;
+            /* Optional: for card look */
+            background-color: #e8f4ff;
+        }
+
+        /* Force vertical centering in PDF */
+        .pdf-full-page-wrapper {
+            display: table;
+            width: 100%;
+            height: 100%;
+            /* This might need to be a fixed height like 900px if your PDF engine is older */
+            min-height: 100vh;
+        }
+
+        .pdf-middle-content {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            /* Centers horizontal content */
+        }
+
+        /* Align the text back to left inside the centered card */
+        .tour-summary-card {
+            text-align: left;
+        }
+
+        .tour-summary-card h2 {
+            color: #313b5e;
+            font-size: 16pt;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .summary-description {
+            line-height: 1.5;
+            margin-bottom: 20px;
+            text-align: justify;
         }
 
         .section-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #1a202c;
+            color: #4a5568;
+            font-size: 12pt;
+            border-bottom: 2px solid #313b5e;
+            padding-bottom: 5px;
             margin-bottom: 15px;
-        }
-
-        .destinations-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: center;
+            font-weight: bold;
         }
 
         .destinations-list span {
-            font-size: 1rem;
-            color: #4a5568;
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px 0;
             font-weight: 500;
+            border-radius: 4px;
+            color: #4a5568;
+            font-size: 9pt;
+            white-space: nowrap;
         }
 
-        /* Themes Grid */
-        .themes-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+        .destinations-list .text-blue-600 {
+            color: #313b5e;
+            margin: 0 5px;
         }
 
-        .theme-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        /* Themes Grid (Simplified for Dompdf) */
+        .themes-section {
+            margin-top: 20px;
         }
 
-        .theme-item img {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
+        .theme-grid {
+            /* Using floats for a simple grid layout for Dompdf */
+            overflow: auto;
+            /* To contain floated elements */
+            margin-left: -5px;
+            /* Adjust for padding/margin */
+            margin-right: -5px;
         }
 
-        /* Itinerary Cards */
+        .col-12 {
+            width: 100%;
+            clear: both;
+        }
+
+        .col-md-6 {
+            width: 48%;
+            /* Roughly half width */
+            float: left;
+            padding: 0 5px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+
+        .d-flex {
+            display: block;
+            /* Treat as block in Dompdf */
+        }
+
+        .align-items-center {
+            vertical-align: middle;
+        }
+
+        .theme-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+
+        /* Clear floats after themes section */
+        .theme-grid::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* --- Itinerary Section --- */
         .itinerary-card {
 
-            border-radius: 16px;
-            padding: 40px;
-            margin: 30px 0;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 20px 10px;
 
         }
 
         .day-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .day-number {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #96c93e 0%, #7db32d 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 1.3rem;
-            margin-right: 20px;
-            box-shadow: 0 4px 10px rgba(150, 201, 62, 0.3);
-        }
-
-        .day-info {
-            margin-bottom: 0;
-            /* optional: remove extra space after the block */
-            padding: 0;
-            /* optional: remove padding */
-        }
-
-        .day-info h3 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 0;
-            line-height: 1.2;
-        }
-
-        .day-label {
-            font-size: 0.85rem;
-            color: #709929;
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        /* Itinerary Image */
-        .itinerary-image {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-            border-radius: 12px;
-            margin: 25px 0;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Program Points */
-        .program-section {
-            margin: 30px 0;
-        }
-
-        .program-section h4 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #1a202c;
-            margin-bottom: 20px;
-        }
-
-        .program-box {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 25px;
-        }
-
-        .program-point {
-            display: flex;
-            align-items: flex-start;
+            display: block;
+            /* Use block for vertical alignment in PDF */
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
             margin-bottom: 15px;
         }
 
-        .program-point::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: #1a202c;
-            border-radius: 50%;
+        .day-number {
+            font-size: 30pt;
+            font-weight: bold;
+            color: #313b5e;
+            float: left;
             margin-right: 15px;
-            margin-top: 8px;
-            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .day-info {
+            overflow: hidden;
+            /* Contains the rest of the text */
+        }
+
+        .day-info .day-label {
+            font-size: 10pt;
+            color: #555;
+            text-transform: uppercase;
+        }
+
+        .day-info h3 {
+            font-size: 16pt;
+            color: #313b5e;
+            margin: 0;
+        }
+
+        .itinerary-image {
+            width: 100%;
+            max-height: 350px;
+            object-fit: cover;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+        }
+
+        /* Program */
+        .program-section h4 {
+            color: #4a5568;
+            font-size: 12pt;
+            margin-bottom: 10px;
+        }
+
+        .program-box {
+            border: 1px solid #e0e0e0;
+            background-color: #f7f7f7;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .program-point {
+            padding: 5px 0;
+            border-bottom: 1px dashed #e0e0e0;
+            font-size: 10pt;
         }
 
         .program-point:last-child {
-            margin-bottom: 0;
-
+            border-bottom: none;
         }
 
-        /* Highlights Section */
+        /* Highlights */
         .highlights-section {
-            margin: 40px 0;
-            text-align: start;
-            padding-top: 30px;
+            margin: 20px 0;
+        }
+
+        .highlights-section .section-title {
+            border-bottom: 2px solid #313b5e;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 12pt;
         }
 
         .highlights-grid {
-            padding-top: 25px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-            justify-items: center;
-            align-items: start;
-            padding-bottom: 50px;
+            overflow: auto;
+            margin-left: -5px;
+            margin-right: -5px;
         }
 
-        /* Individual highlight item */
         .highlight-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            width: 31%;
+            /* Three items per row, slightly less for margin */
+            float: left;
+            padding: 0 5px;
+            box-sizing: border-box;
+            margin-bottom: 10px;
             text-align: center;
-            padding-bottom: 20px;
         }
 
         .highlight-item img {
             width: 100%;
-            max-width: 200px;
-            height: 130px;
+            height: 100px;
             object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
         }
 
         .highlight-item p {
-            font-size: 14px;
-            color: #555;
+            font-size: 8pt;
             margin: 0;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .highlights-grid::after {
+            content: "";
+            display: table;
+            clear: both;
         }
 
         /* Accommodation Box */
         .accommodation-box {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 25px;
-            margin: 30px 0;
+            overflow: auto;
+            border-top: 2px solid #313b5e;
+            padding-top: 15px;
+            margin-top: 20px;
         }
 
         .accommodation-item {
-            display: flex;
-            align-items: flex-start;
-            padding: 15px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .accommodation-item:last-child {
-            border-bottom: none;
+            width: 33.33%;
+            float: left;
+            box-sizing: border-box;
+            text-align: center;
         }
 
         .accommodation-icon {
-            width: 220px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-shrink: 0;
-        }
-
-        .accommodation-icon i {
-            font-size: 1.3rem;
-            color: #64748b;
-            width: 24px;
+            font-size: 10pt;
+            color: #313b5e;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
         .accommodation-icon span {
-            font-weight: 600;
-            color: #2d3748;
+            margin-left: 5px;
         }
 
         .accommodation-value {
-            flex: 1;
-            color: #1a202c;
-            font-weight: 500;
-            margin-left: 40px;
+            font-size: 10pt;
+            color: #555;
         }
 
+        .accommodation-box::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
 
-        /* Map Section */
+        /* --- Map Section --- */
         .map-page {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            /* vertical center */
-            align-items: center;
-            /* horizontal center */
-            min-height: 100vh;
-            /* fill page height */
-            margin: 0;
-            padding: 0 20px;
+            text-align: center;
+            margin: 20px 10px;
         }
 
-        /* Map image styling */
-        .map-page .map-image {
-            max-width: 90%;
-            /* fit page width */
-            max-height: 80vh;
-            /* fit page height */
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            display: block;
+        .map-page h3 {
+            color: #313b5e;
+            font-size: 18pt;
+            margin-bottom: 15px;
         }
 
-        /* Inclusions/Exclusions Lists */
+        .map-image {
+            width: 95%;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        /* --- Vehicle Section --- */
+        .vehicle-details-section {
+            margin: 20px 10px;
+        }
+
+        .vehicle-details-section h2 {
+            color: #313b5e;
+            font-size: 18pt;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #313b5e;
+            padding-bottom: 5px;
+        }
+
+        .vehicle-card {
+            border: 1px solid #dcdcdc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            overflow: auto;
+            /* Clear floats */
+        }
+
+        .vehicle-image-container {
+            width: 45%;
+            float: left;
+            margin-right: 15px;
+        }
+
+        .vehicle-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .sub-images {
+            overflow: auto;
+            margin-bottom: 10px;
+        }
+
+        .sub-images img {
+            width: 30%;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            float: left;
+            margin-right: 5%;
+        }
+
+        .sub-images img:last-child {
+            margin-right: 0;
+        }
+
+        .vehicle-info-list {
+            overflow: hidden;
+            /* Takes up remaining space */
+        }
+
+        .vehicle-info-list div {
+            margin-bottom: 5px;
+            font-size: 10pt;
+            line-height: 1.3;
+        }
+
+        /* Clear floats after vehicle card */
+        .vehicle-card::after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        /* --- Inclusions/Exclusions/Policy Section --- */
         .info-list-section {
-            background: white;
-            padding-left: 20px;
-            padding-right: 20px;
-            padding-bottom: 10px;
-            border-radius: 12px;
-            margin: 30px 0;
-
+            margin: 20px 10px;
+            padding: 8px;
         }
 
         .info-list-section h3 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #0d4e6b;
-            margin-bottom: 25px;
+            color: #313b5e;
+            font-size: 14pt;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
         }
 
         .info-list {
-            list-style: none;
-            padding: 0;
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 15px;
         }
 
         .info-list li {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            color: #4a5568;
+            position: relative;
+            margin-bottom: 5px;
+            padding-left: 15px;
+            line-height: 1.4;
+            font-size: 10pt;
         }
 
         .info-list li::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            background: #727373;
-            border-radius: 50%;
-            margin-right: 15px;
-            margin-top: 8px;
-            flex-shrink: 0;
+            content: "•";
+            color: #313b5e;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-left: -1em;
+            position: absolute;
+            left: 0;
         }
 
-        .note-text {
-            margin-top: 20px;
-            padding: 15px;
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            border-radius: 8px;
-            color: #78350f;
+        .info-list-section p {
+            font-size: 10pt;
+            line-height: 1.4;
         }
 
-        .note-text strong {
-            color: #92400e;
+        .list-disc li::before {
+            content: "—";
+            color: #313b5e;
         }
 
-        /* Footer Message */
+        /* --- Footer --- */
         .footer-message {
-            max-width: 800px;
-            margin: 60px auto;
-            padding: 40px;
+            margin: 40px 10px 20px;
+            padding: 15px;
             text-align: center;
-
+            font-size: 9pt;
+            line-height: 1.5;
+            color: #555;
         }
 
-        .footer-message p {
-            font-size: 1rem;
-            line-height: 1.8;
-            color: #4a5568;
-            margin-bottom: 20px;
+        .footer-message strong {
+            color: #313b5e;
         }
 
         .footer-message .thank-you {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #0d4e6b;
-            margin-top: 30px;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #313b5e;
+            margin-top: 15px;
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .package-header {
-                padding: 30px 20px;
-            }
-
-            .package-header h1 {
-                font-size: 1.8rem;
-            }
-
-            .hero-image {
-                height: 300px;
-            }
-
-            .tour-summary-card {
-                padding: 25px;
-            }
-
-            .itinerary-card {
-                padding: 25px;
-            }
-
-            .day-number {
-                width: 50px;
-                height: 50px;
-                font-size: 1.1rem;
-            }
-
-            .accommodation-icon {
-                width: 140px;
-                gap: 10px;
-            }
-
-            .highlights-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 5px;
-                justify-items: center;
-                align-items: start;
-            }
-
-
-            .map-image {
-                width: 100%;
-                max-width: 100%;
-            }
-        }
-
-        /* Utility Classes */
-        .mb-30 {
-            margin-bottom: 30px;
-        }
-
-        .mt-30 {
-            margin-top: 30px;
-        }
-
-        .text-center {
+        .footer-logo {
             text-align: center;
+            margin-bottom: 20px;
         }
 
-        .font-bold {
-            font-weight: 700;
+        .footer-logo img {
+            height: 200px;
+            width: 250px;
         }
     </style>
 </head>
 
 <body>
-    {!! $slot ?? '' !!}
-
-    <!-- Or you can paste your HTML content directly here -->
+    <div class="page-border"></div>
     <div class="card-body">
         <div class="row mb-3">
+
+
             <div class="content-wrapper">
 
-                <!-- Package Header -->
-                <!-- Package Header for PDF -->
                 <div class="package-header" style="position: relative; width: 100%; padding: 20px 10px;">
 
-                    <!-- Top-left: Company Logo -->
                     <div style="position: absolute; top: 20px; left: 20px;">
-                        <img src="{{ public_path('images/vacayguider.png') }}" alt="VacayGuider Logo"
+                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/vacayguider.png'))) }}"
                             style="height: 50px;">
                     </div>
 
-                    <!-- Top-right: Country Badge -->
-                    <div style="position: absolute; top: 25px; right: 20px; font-size: 0.5rem; color: #000; text-align: center;font-weight: 600;"
-                        class="sri-lanka-badge">
-                        <img src="{{ public_path('images/srilanka.png') }}" alt="Sri Lanka Flag"
-                            style="height: 30px; display:block; margin-bottom: 5px;">
-                        <span>{{ $package->country_name ?? 'Sri Lanka' }}</span>
+                    <div style="position: absolute; top: 25px; right: 20px;" class="sri-lanka-badge">
+                        <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/srilanka.png'))) }}"
+                            alt="Sri Lanka Flag" style="height: 30px; display:block; margin-bottom: 5px;">
+
                     </div>
 
-                    <!-- Main Heading (centered) -->
-                    <h1 style="text-align: center; color: #313b5e; margin-top: 60px; font-size: 24px;">
+                    <h1>
                         {{ $package->heading }}
                     </h1>
 
-                    <!-- Tour Route -->
                     @php
                         $cityList = [];
                         foreach ($tourSummaries as $summary) {
@@ -943,33 +699,37 @@
                         $cityList = array_values(array_unique($cityList));
                     @endphp
 
-                    <div class="route-display">
-                        <div class="route-label">Tour Route</div>
-                        <div class="route-path">
-                            <span class="route-point">
+                    <div style="text-align: center; width: 100%; margin-top: 20px; margin-bottom: 10px;">
 
-                                <img src="{{ public_path('images/plane-departure.svg') }}" alt="Plane Departure"
-                                    width="16" height="16">
-                                Airport
-                            </span>
-                            <span class="route-arrow">→</span>
+                        <div class="route-display"
+                            style="display: inline-block; background-color: #f8f8f8; padding: 12px 25px; border-radius: 8px; ">
 
-                            @foreach ($cityList as $index => $city)
-                                <span class="route-point">{{ $city }}</span>
-                                @if ($index < count($cityList) - 1)
-                                    <span class="route-arrow">→</span>
+                            <div class="route-label"
+                                style="font-weight: bold; color: #64748b; font-size: 10pt; margin-bottom: 5px; text-transform: uppercase;">
+                                Route
+                            </div>
+
+                            <div class="route-path" style="font-size: 12pt; color: #313b5e;">
+                                <span class="route-point">Airport</span>
+                                <span class="route-arrow" style="color: #2563eb; margin: 0 5px;">→</span>
+
+                                @foreach ($cityList as $index => $city)
+                                    <span class="route-point" style="font-weight: 500;">{{ $city }}</span>
+                                    @if ($index < count($cityList) - 1)
+                                        <span class="route-arrow" style="color: #2563eb; margin: 0 5px;">→</span>
+                                    @endif
+                                @endforeach
+
+                                @if (!empty($cityList))
+                                    <span class="route-arrow" style="color: #2563eb; margin: 0 5px;">→</span>
                                 @endif
-                            @endforeach
 
-                            <span class="route-point">
-                                Airport
-                                <img src="{{ public_path('images/plane-departure.svg') }}" alt="Plane Departure"
-                                    width="16" height="16">
-                            </span>
+                                <span class="route-point">Airport</span>
+                            </div>
+
                         </div>
                     </div>
                 </div>
-
 
                 @php
                     $defaultImage = public_path('images/no-image.jpg');
@@ -982,10 +742,8 @@
                     $imageUrl = "data:$mimeType;base64,$imageData";
                 @endphp
 
-                <img src="{{ $imageUrl }}" alt="{{ $package->place }}" class="hero-image">
+                <img src="{{ $imageUrl }}" alt="{{ $package->place ?? 'Tour Destination' }}" class="hero-image">
 
-
-                <!-- Description Section -->
                 @if (!empty($package->description))
                     <div class="description-section">
                         <p>{{ $package->description }}</p>
@@ -993,56 +751,50 @@
                 @endif
 
                 <div class="page-break"></div>
-                <div class="pdf-center-wrapper">
-                    <div class="tour-summary-card" id="summary-section">
-                        <div class="d-flex align-items-center mb-4">
-                            <h2 class="mb-0 me-3 text-center">Tour Summary for {{ $package->days ?? 0 }} Days,
-                                {{ $package->nights ?? 0 }} Nights</h2>
 
-                        </div>
+                <div class="pdf-full-page-wrapper">
+                    <div class="pdf-middle-content">
 
+                        <div class="tour-summary-card" id="summary-section">
+                            <div class="d-flex align-items-center mb-4">
+                                <h2>Tour Summary for {{ $package->days ?? 0 }} Days,
+                                    {{ $package->nights ?? 0 }} Nights</h2>
+                            </div>
 
-                        <p class="summary-description">{{ $package->summary_description }}</p>
+                            <p class="summary-description">{{ $package->summary_description }}</p>
 
-
-                        <div class="destinations-section">
-                            <h3 class="section-title">Destinations</h3>
-                            <div class="destinations-list">
-                                @php
-                                    $cityList = [];
-                                    foreach ($tourSummaries as $summary) {
-                                        if ($summary->package_id == $package->id) {
-                                            $cities = explode(',', $summary->city);
-                                            foreach ($cities as $city) {
-                                                $trimmed = trim($city);
-                                                if (!empty($trimmed)) {
-                                                    $cityList[] = $trimmed;
+                            <div class="destinations-section">
+                                <h3 class="section-title">Destinations</h3>
+                                <div class="destinations-list">
+                                    @php
+                                        $cityList = [];
+                                        foreach ($tourSummaries as $summary) {
+                                            if ($summary->package_id == $package->id) {
+                                                $cities = explode(',', $summary->city);
+                                                foreach ($cities as $city) {
+                                                    $trimmed = trim($city);
+                                                    if (!empty($trimmed)) {
+                                                        $cityList[] = $trimmed;
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                    $cityList = array_values(array_unique($cityList));
-                                @endphp
+                                        $cityList = array_values(array_unique($cityList));
+                                    @endphp
 
-                                @foreach ($cityList as $index => $city)
-                                    <span>{{ $city }}</span>
-                                    @if ($index < count($cityList) - 1)
-                                        <span class="text-blue-600">→</span>
-                                    @endif
-                                @endforeach
+                                    @foreach ($cityList as $index => $city)
+                                        <span>{{ $city }}</span>
+                                        @if ($index < count($cityList) - 1)
+                                            <span style="color: #2563eb;">→</span>
+                                        @endif
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
 
-
-                        <!-- Themes -->
-
-
-                        <div class="themes-section">
-                            <h3 class="section-title">Themes</h3>
-                            <div class="themes-grid">
+                            <div class="themes-section">
+                                <h3 class="section-title">Themes</h3>
                                 @php
                                     $themeList = [];
-
                                     foreach ($tourSummaries as $summary) {
                                         if ($summary->package_id == $package->id && !empty($summary->theme)) {
                                             $themes = explode(',', $summary->theme);
@@ -1054,70 +806,66 @@
                                             }
                                         }
                                     }
-
                                     $themeList = array_values(array_unique($themeList));
+                                    $themeIcons = [
+                                        'adventure' => 'https://d2xmwf00c85p5s.cloudfront.net/t5_0222b300ec.png',
+                                        'beach' => 'https://d2xmwf00c85p5s.cloudfront.net/t2_a48d3a8dae.png',
+                                        'city' => 'https://d2xmwf00c85p5s.cloudfront.net/2855998_b5bcbf5bea.png',
+                                        'history' => 'https://d2xmwf00c85p5s.cloudfront.net/t6_005fa7fb20.png',
+                                        'culture' => 'https://d2xmwf00c85p5s.cloudfront.net/t1_bfc05a4601.png',
+                                    ];
                                 @endphp
 
                                 @if (!empty($themeList))
-                                    <div class="row ms-2 text-secondary theme-grid">
-                                        @foreach ($themeList as $theme)
-                                            @php
-                                                // Define theme icons with keywords and their URLs
-                                                $themeIcons = [
-                                                    'adventure' =>
-                                                        'https://d2xmwf00c85p5s.cloudfront.net/t5_0222b300ec.png',
-                                                    'beach' =>
-                                                        'https://d2xmwf00c85p5s.cloudfront.net/t2_a48d3a8dae.png',
-                                                    'city' =>
-                                                        'https://d2xmwf00c85p5s.cloudfront.net/2855998_b5bcbf5bea.png',
-                                                    'history' =>
-                                                        'https://d2xmwf00c85p5s.cloudfront.net/t6_005fa7fb20.png',
-                                                    'culture' =>
-                                                        'https://d2xmwf00c85p5s.cloudfront.net/t1_bfc05a4601.png',
-                                                ];
-
-                                                // Default icon
-                                                $iconUrl = 'https://d2xmwf00c85p5s.cloudfront.net/t5_0222b300ec.png';
-
-                                                // Match theme to icon
-                                                foreach ($themeIcons as $key => $url) {
-                                                    if (str_contains(strtolower($theme), $key)) {
-                                                        $iconUrl = $url;
-                                                        break;
-                                                    }
-                                                }
-                                            @endphp
-
-                                            <div class="col-12 col-md-6 col-lg-4 mb-3">
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <img src="{{ $iconUrl }}" alt="{{ $theme }} icon"
-                                                        class="theme-icon me-2">
-                                                    <span>{{ $theme }}</span>
-                                                </div>
-                                            </div>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        @foreach (array_chunk($themeList, 2) as $chunk)
+                                            <tr>
+                                                @foreach ($chunk as $theme)
+                                                    @php
+                                                        $iconUrl =
+                                                            'https://d2xmwf00c85p5s.cloudfront.net/t5_0222b300ec.png';
+                                                        foreach ($themeIcons as $key => $url) {
+                                                            if (str_contains(strtolower($theme), $key)) {
+                                                                $iconUrl = $url;
+                                                                break;
+                                                            }
+                                                        }
+                                                    @endphp
+                                                    <td style="width: 50%; padding: 10px 0;">
+                                                        <img src="{{ $iconUrl }}"
+                                                            style="height: 20px; vertical-align: middle; margin-right: 8px;">
+                                                        <span
+                                                            style="vertical-align: middle;">{{ $theme }}</span>
+                                                    </td>
+                                                @endforeach
+                                            </tr>
                                         @endforeach
-                                    </div>
+                                    </table>
                                 @endif
                             </div>
                         </div>
 
                     </div>
                 </div>
+                <div style="page-break-before: always;"></div>
+                @foreach ($package->detailItineraries as $index => $itinerary)
+                    <div class="itinerary-card" style="page-break-after: always;">
 
-
-
-
-
-                <!-- Itineraries -->
-                @foreach ($package->detailItineraries as $itinerary)
-                    <div class="itinerary-card page-break">
-                        <div class="day-header">
-                            <div class="day-number">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</div>
-                            <div class="day-info">
-                                <div class="day-label">Day {{ $index + 1 }}</div>
-                                <h3>{{ $itinerary->title ?? 'Day Activity' }}</h3>
-                            </div>
-                        </div>
+                        <table class="layout-table">
+                            <tr>
+                                <td class="day-number-cell">
+                                    {{ str_pad($itinerary->day ?? $index + 1, 2, '0', STR_PAD_LEFT) }}
+                                </td>
+                                <td style="padding-left: 15px;">
+                                    <div style="font-size: 10pt; color: #555; text-transform: uppercase;">
+                                        Day {{ $itinerary->day ?? $index + 1 }}
+                                    </div>
+                                    <h3 style="font-size: 16pt; color: #313b5e; margin: 0;">
+                                        {{ $itinerary->title ?? 'Day Activity' }}
+                                    </h3>
+                                </td>
+                            </tr>
+                        </table>
 
                         <p class="summary-description">{{ $itinerary->description ?? '-' }}</p>
 
@@ -1127,140 +875,175 @@
                                 ? public_path('storage/' . ltrim($itinerary->pictures, '/'))
                                 : $defaultImage;
 
+                            // Simple logic for image
+                            if (!file_exists($coverPath)) {
+                                $coverPath = $defaultImage;
+                            }
                             $coverData = base64_encode(file_get_contents($coverPath));
                             $coverMime = mime_content_type($coverPath);
-                            $coverImage = "data:$coverMime;base64,$coverData";
                         @endphp
 
-                        <img src="{{ $coverImage }}" alt="{{ $itinerary->place_name }}" class="itinerary-image">
-
-
-
-                        <!-- Program -->
+                        <img src="data:{{ $coverMime }};base64,{{ $coverData }}" class="itinerary-image">
 
                         <div class="program-section">
-                            <h4>Day {{ $index + 1 }} Program</h4>
-                            <div class="program-box">
-                                @foreach (collect($itinerary->program_points)->take(4) as $point)
-                                    <div class="program-point">{{ trim($point) }}</div>
-                                @endforeach
-                            </div>
-                        </div>
-
-
-
-                        <!-- Highlights -->
-                        @if ($package->hilight_show_hide == 1 && $itinerary->highlights->isNotEmpty())
-                            <!-- Force new page before highlights -->
-                            <div style="page-break-before: always;"></div>
-
-                            <div class="highlights-section">
-                                <h3 class="section-title text-start">{{ $itinerary->place_name }} Highlights</h3>
-
-                                <div class="highlights-grid ">
-                                    @foreach ($itinerary->highlights->take(6) as $highlight)
-                                        @php
-                                            $defaultImage = public_path('images/no-image.jpg');
-                                            $images = [];
-
-                                            if (!empty($highlight->images)) {
-                                                if (is_array($highlight->images)) {
-                                                    $images = $highlight->images;
-                                                } else {
-                                                    $decoded = @json_decode($highlight->images, true);
-                                                    if (is_array($decoded) && count($decoded) > 0) {
-                                                        $images = $decoded;
-                                                    } else {
-                                                        $images = [$highlight->images];
-                                                    }
-                                                }
-                                            }
-
-                                            $imageUrls = collect($images)
-                                                ->map(function ($img) use ($defaultImage) {
-                                                    $path = $img
-                                                        ? public_path('storage/' . ltrim($img, '/'))
-                                                        : $defaultImage;
-
-                                                    if (!file_exists($path)) {
-                                                        $path = $defaultImage;
-                                                    }
-
-                                                    $data = base64_encode(file_get_contents($path));
-                                                    $mime = mime_content_type($path);
-                                                    return "data:$mime;base64,$data";
-                                                })
-                                                ->all();
-                                        @endphp
-
-                                        <div class="highlight-item">
-                                            <img src="{{ $imageUrls[0] ?? '' }}"
-                                                alt="{{ $highlight->highlight_places ?? 'Highlight' }}">
-                                            <p>{{ $highlight->highlight_places ?? 'Highlight' }}</p>
-                                        </div>
+                            <h4 style="margin-bottom: 10px; color: #4a5568;">Day {{ $itinerary->day ?? $index + 1 }}
+                                Program</h4>
+                            <div class="program-box" style="padding: 10px; border-radius: 4px;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    @foreach (collect($itinerary->program_points)->take(4) as $point)
+                                        <tr>
+                                            <td
+                                                style="vertical-align: top; width: 15px; padding: 5px 0; color: #313b5e; font-weight: bold;">
+                                                •</td>
+                                            <td style="padding: 5px 0; font-size: 10pt; line-height: 1.4;">
+                                                {{ trim($point) }}
+                                            </td>
+                                        </tr>
                                     @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        @if ($package->hilight_show_hide == 0)
-                            <div style="page-break-before: always;"></div>
-                        @endif
-                        <!-- Accommodation -->
-                        <div class="accommodation-box">
-
-
-                            <div class="accommodation-item">
-                                <div class="accommodation-icon">
-                                    <i class="fas fa-hotel"></i><span>Accommodation</span>
-                                </div>
-                                <div class="accommodation-value">{{ $itinerary->overnight_stay ?? 'Not specified' }}
-                                </div>
-                            </div>
-                            <div class="accommodation-item">
-                                <div class="accommodation-icon">
-                                    <i class="fas fa-utensils"></i><span>Meal Plan</span>
-                                </div>
-                                <div class="accommodation-value">{{ $itinerary->meal_plan ?? 'None' }}</div>
-                            </div>
-                            <div class="accommodation-item">
-                                <div class="accommodation-icon">
-                                    <i class="far fa-clock"></i><span>Travel Time</span>
-                                </div>
-                                <div class="accommodation-value">{{ $itinerary->approximate_travel_time ?? 'N/A' }}
-                                </div>
+                                </table>
                             </div>
                         </div>
 
+                        <table class="accommodation-table">
+                            <tr>
+                                <td>
+                                    <div style="font-weight: bold; color: #313b5e; font-size: 9pt;">Accommodation</div>
+                                    <div style="color: #555; font-size: 9pt;">
+                                        {{ $itinerary->overnight_stay ?? 'Not specified' }}</div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: bold; color: #313b5e; font-size: 9pt;">Meal Plan</div>
+                                    <div style="color: #555; font-size: 9pt;">{{ $itinerary->meal_plan ?? 'None' }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: bold; color: #313b5e; font-size: 9pt;">Travel Time</div>
+                                    <div style="color: #555; font-size: 9pt;">
+                                        {{ $itinerary->approximate_travel_time ?? 'N/A' }}</div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
+
+                    @if ($package->hilight_show_hide == 1 && $itinerary->highlights->isNotEmpty())
+                        <div class="highlights-section" style="padding: 20px;">
+                            <h3 class="section-title"
+                                style="margin-bottom: 15px; font-family: sans-serif; text-align: center;">
+                                {{ $itinerary->place_name ?? 'Destination' }} Highlights
+                            </h3>
+                            <table
+                                style="width: 100%; border-collapse: separate; border-spacing: 15px; table-layout: fixed;">
+                                {{-- Chunking into 2 items per row for a 2-column layout --}}
+                                @foreach ($itinerary->highlights->take(6)->chunk(2) as $row)
+                                    <tr>
+                                        @foreach ($row as $highlight)
+                                            @php
+                                                $base64Image = null;
+                                                $imagePath = null;
+
+                                                if (is_array($highlight->images) && !empty($highlight->images)) {
+                                                    $imagePath = $highlight->images[0];
+                                                } elseif (is_string($highlight->images)) {
+                                                    $imagePath = $highlight->images;
+                                                }
+
+                                                $fullPath = $imagePath
+                                                    ? storage_path('app/public/' . ltrim($imagePath, '/'))
+                                                    : null;
+
+                                                try {
+                                                    if ($fullPath && file_exists($fullPath) && is_file($fullPath)) {
+                                                        $extension = pathinfo($fullPath, PATHINFO_EXTENSION);
+                                                        $imageData = base64_encode(file_get_contents($fullPath));
+                                                        $base64Image =
+                                                            'data:image/' . $extension . ';base64,' . $imageData;
+                                                    } else {
+                                                        $placeholder = public_path('images/no-image.jpg');
+                                                        if (file_exists($placeholder)) {
+                                                            $imageData = base64_encode(file_get_contents($placeholder));
+                                                            $base64Image = 'data:image/jpeg;base64,' . $imageData;
+                                                        }
+                                                    }
+                                                } catch (\Exception $e) {
+                                                    $base64Image = null;
+                                                }
+                                            @endphp
+
+                                            {{-- Set width to 50% for 2 columns --}}
+                                            <td style="width: 50%; text-align: center; vertical-align: top;">
+                                                {{-- Increased height from 110px to 180px for a "bigger" look --}}
+                                                <div
+                                                    style="width: 100%; height: 180px; margin-bottom: 8px; overflow: hidden;">
+                                                    @if ($base64Image)
+                                                        <img src="{{ $base64Image }}"
+                                                            style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px;">
+                                                    @else
+                                                        <div
+                                                            style="width: 100%; height: 180px; background: #f0f0f0; border-radius: 6px; border: 1px solid #ddd;">
+                                                            <span
+                                                                style="font-size: 8pt; color: #999; line-height: 180px;">No
+                                                                Image</span>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <p
+                                                    style="font-size: 10pt; font-weight: bold; color: #333; margin: 0; padding-top: 5px;">
+                                                    {{ $highlight->highlight_places }}
+                                                </p>
+                                            </td>
+                                        @endforeach
+
+                                        {{-- Fill remaining <td> if row has only 1 item --}}
+                                        @if (count($row) < 2)
+                                            <td style="width: 50%;"></td>
+                                        @endif
+                                    </tr>
+                                @endforeach
+                            </table>
+                        </div>
+                    @endif
                 @endforeach
 
-
-                <!-- Map Section -->
                 @if (!empty($package->map_image))
                     <div style="page-break-before: always;"></div>
+
                     @php
                         $defaultMapImage = public_path('assets/img/default-map.jpg');
                         $mapPath = $package->map_image
                             ? public_path('storage/' . ltrim($package->map_image, '/'))
                             : $defaultMapImage;
 
-                        $mapData = base64_encode(file_get_contents($mapPath));
-                        $mapMime = mime_content_type($mapPath);
-                        $mapImage = "data:$mapMime;base64,$mapData";
+                        // Ensure we don't crash if the default map is also missing
+$mapData = '';
+                        if (file_exists($mapPath)) {
+                            $mapData = base64_encode(file_get_contents($mapPath));
+                            $mapMime = mime_content_type($mapPath);
+                        } elseif (file_exists($defaultMapImage)) {
+                            $mapData = base64_encode(file_get_contents($defaultMapImage));
+                            $mapMime = mime_content_type($defaultMapImage);
+                        }
+
+                        $mapImage = $mapData ? "data:$mapMime;base64,$mapData" : null;
                     @endphp
 
-                    <div class="map-page">
-                        <h3>Tour Map</h3>
-                        <img src="{{ $mapImage }}" alt="Tour Route Map" class="map-image">
-                    </div>
+                    @if ($mapImage)
+                        {{-- Use 'page-break-inside: avoid' to keep heading and image together --}}
+                        <div class="map-page" style="page-break-inside: avoid; width: 100%; text-align: center;">
+                            <h3 style="margin-top: 0; margin-bottom: 15px;">Tour Map</h3>
+
+                            <div style="width: 100%; text-align: center;">
+                                <img src="{{ $mapImage }}" alt="Tour Route Map"
+                                    style="width: 100%; max-width: 700px; max-height: 800px; object-fit: contain; display: block; margin: 0 auto;">
+                            </div>
+                        </div>
+                    @endif
                 @endif
 
 
                 @if ($package->packageVehicles && $package->packageVehicles->isNotEmpty())
                     <div style="page-break-before: always;"></div>
                     <div class="vehicle-details-section">
-                        <h2>Vehicle Details</h2>
+                        <h2 style="text-align: center; color: #313b5e; margin-bottom: 20px;">Vehicle Details</h2>
 
                         @foreach ($package->packageVehicles as $vehicle)
                             @php
@@ -1282,7 +1065,7 @@
                                         ? $vehicle->sub_image
                                         : json_decode($vehicle->sub_image, true);
 
-                                    foreach ($subImagesArray as $subImg) {
+                                    foreach ((array) $subImagesArray as $subImg) {
                                         $subImgPath = public_path('storage/' . ltrim($subImg, '/'));
                                         if (file_exists($subImgPath)) {
                                             $subImgData = base64_encode(file_get_contents($subImgPath));
@@ -1293,67 +1076,110 @@
                                 }
                             @endphp
 
-                            <div class="vehicle-card">
-                                <!-- Main Image -->
-                                <div class="vehicle-image-container">
-                                    <img src="{{ $vehicleImageUrl }}"
-                                        alt="{{ $vehicle->make ?? 'Vehicle' }} {{ $vehicle->model ?? '' }}"
-                                        class="vehicle-image">
-                                </div>
+                            <table
+                                style="width: 100%; border-radius: 8px; margin-bottom: 30px; padding: 20px; border-collapse: collapse;">
+                                <tr>
+                                    <td style="text-align: center; padding-bottom: 5px;">
+                                        <img src="{{ $vehicleImageUrl }}"
+                                            style="width: 100%; height: 400px; object-fit: cover; border-radius: 8px; display: block; margin: 0 auto;">
+                                    </td>
+                                </tr>
 
-                                <!-- Sub Images -->
                                 @if (!empty($subImages))
-                                    <div class="sub-images">
-                                        @foreach ($subImages as $subImageUrl)
-                                            <img src="{{ $subImageUrl }}" alt="Vehicle image">
-                                        @endforeach
-                                    </div>
+                                    <tr>
+                                        <td style="padding-bottom: 20px;">
+                                            <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                                                <tr>
+                                                    @foreach ($subImages as $subImageUrl)
+                                                        <td style="padding: 0 5px;">
+                                                            <img src="{{ $subImageUrl }}"
+                                                                style="width: 150px; height: 150px; object-fit: cover; border-radius: 4px;">
+                                                        </td>
+                                                    @endforeach
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
                                 @endif
 
-                                <!-- Vehicle Info -->
-                                <div class="vehicle-info-list">
-                                    @php
-                                        $info = [
-                                            'Name' => $vehicle->name ?? 'Not specified',
-                                            'Make' => $vehicle->make ?? 'Not specified',
-                                            'Model' => $vehicle->model ?? 'Not specified',
-                                            'Seats Available' => $vehicle->seats ?? 'Not specified',
-                                            'Max Capacity' =>
-                                                ($vehicle->max_seating_capacity ?? 'Not specified') . ' passengers',
-                                            'Condition' => ucfirst($vehicle->condition ?? 'Not specified'),
-                                        ];
-                                    @endphp
-
-                                    @foreach ($info as $label => $value)
-                                        <div>
-                                            <strong>{{ $label }}:</strong>
-                                            <span>{{ $value }}</span>
+                                <tr>
+                                    <td style="padding-top: 20px;">
+                                        <div
+                                            style="font-size: 16pt; color: #313b5e; font-weight: bold; text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 8px; margin-bottom: 15px;">
+                                            {{ $vehicle->name ?? 'Vehicle Specifications' }}
                                         </div>
-                                    @endforeach
-                                </div>
-                            </div>
+
+                                        <table
+                                            style="width: 100%; border-collapse: collapse; background-color: #f9fbfd; border-radius: 8px;">
+                                            <tr>
+                                                <td
+                                                    style="width: 50%; padding: 15px; vertical-align: top; border-right: 1px solid #eef2f6;">
+                                                    <table style="width: 100%; font-size: 10.5pt; line-height: 2;">
+                                                        <tr>
+                                                            <td style="color: #64748b; width: 40%;">Make</td>
+                                                            <td style="color: #1e293b; font-weight: bold;">:
+                                                                {{ $vehicle->make ?? 'N/A' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="color: #64748b;">Model</td>
+                                                            <td style="color: #1e293b; font-weight: bold;">:
+                                                                {{ $vehicle->model ?? 'N/A' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="color: #64748b;">Condition</td>
+                                                            <td style="color: #1e293b; font-weight: bold;">:
+                                                                {{ ucfirst($vehicle->condition ?? 'N/A') }}</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+
+                                                <td style="width: 50%; padding: 15px; vertical-align: top;">
+                                                    <table style="width: 100%; font-size: 10.5pt; line-height: 2;">
+                                                        <tr>
+                                                            <td style="color: #64748b; width: 50%;">Seats Available
+                                                            </td>
+                                                            <td style="color: #1e293b; font-weight: bold;">:
+                                                                {{ $vehicle->seats ?? 'N/A' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="color: #64748b;">Max Capacity</td>
+                                                            <td style="color: #1e293b; font-weight: bold;">:
+                                                                {{ $vehicle->max_seating_capacity ?? 'N/A' }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="color: #64748b;">Air Conditioned</td>
+                                                            <td style="color: #1e293b; font-weight: bold;">: Yes</td>
+                                                        </tr>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
                         @endforeach
                     </div>
                 @endif
 
-                <!-- Inclusions -->
+
                 @if ($packageInclusions->isNotEmpty())
-                <div class="info-list-section page-break">
-                    @foreach ($packageInclusions as $inclusion)
-                        @php
-                            // Decode points safely
-                            $points = $inclusion->points;
 
-                            if (is_string($points)) {
-                                $decoded = json_decode($points, true);
-                                $points = is_array($decoded) ? $decoded : [$points]; // Wrap single string in array
-                            }
+                    <div class="info-list-section ">
+                        @foreach ($packageInclusions as $inclusion)
+                            <div style="page-break-before: always;"></div>
+                            @php
+                                // Decode points safely
+                                $points = $inclusion->points;
 
-                            // Ensure points is always an array
-                            $points = $points ?? [];
-                        @endphp
+                                if (is_string($points)) {
+                                    $decoded = json_decode($points, true);
+                                    $points = is_array($decoded) ? $decoded : [$points]; // Wrap single string in array
+                                }
 
-                        
+                                // Ensure points is always an array
+                                $points = $points ?? [];
+                            @endphp
+
                             <h3>{{ ucfirst($inclusion->heading) }}</h3>
                             <ul class="info-list">
                                 @foreach ($points as $point)
@@ -1366,12 +1192,12 @@
                                     <strong style="color: #000;">Note :</strong> {!! $inclusion->note !!}
                                 </p>
                             @endif
-                 
-                    @endforeach
-                           </div>
+                        @endforeach
+                    </div>
                 @else
+                    <div style="page-break-before: always;"></div>
                     {{-- Fallback Hardcoded Content --}}
-                    <div class="info-list-section page-break">
+                    <div class="info-list-section ">
                         <h3>Tour Inclusions</h3>
                         <ul class="info-list">
                             <li>Airport pick up and drop off</li>
@@ -1414,7 +1240,7 @@
                             <strong>In case of cancellation:</strong> The following cancellation charges will be
                             applicable.
                         </p>
-                        <ul class="list-disc pl-6 space-y-2">
+                        <ul class="info-list list-disc">
                             <li>No Show: Zero refund.</li>
                             <li>Cancellations made prior to 30 days from the scheduled start of a tour: 80% of total
                                 tour fee will be refunded.</li>
@@ -1422,7 +1248,7 @@
                     </div>
                 @endif
 
-                <!-- Footer -->
+                <div style="page-break-before: always;"></div>
                 <div class="footer-message">
                     <p>
                         At <strong>VacayGuider</strong>, the journey doesn't end when the trip does — it lingers
@@ -1440,7 +1266,8 @@
 
 
                 <div class="footer-logo">
-                    <img src="{{ public_path('images/vacayguider.png') }}" alt="VacayGuider Logo">
+                    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/vacayguider.png'))) }}"
+                        alt="VacayGuider Logo">
                 </div>
 
             </div>

@@ -44,6 +44,7 @@
                             <option value="special">Special</option>
                             <option value="city">City</option>
                             <option value="tailor">Tailor Made</option>
+                            <option value="custom">Custom</option>
                         </select>
                     </div>
 
@@ -148,12 +149,12 @@
 
                     <div class="col-md-4 mb-3">
                         <div class="form-check mt-4">
-                             <label class="form-check-label" for="hilight_show_hide">
+                            <label class="form-check-label" for="hilight_show_hide">
                                 Highlight Show
                             </label>
                             <input class="form-check-input" type="checkbox" name="hilight_show_hide"
                                 id="hilight_show_hide" value="1">
-                           
+
                         </div>
                     </div>
                 </div>
@@ -311,16 +312,25 @@
 
     {{-- Scripts --}}
     <script>
-        const hotels = @json(
-            $hotels->map(fn($h) => [
+        // Define hotelCities just like hotels and vehicles
+        const hotelCities = @json($hotelCities);
+        const hotels = <?php
+        echo json_encode(
+            $hotels->map(
+                fn($h) => [
                     'id' => $h->id,
                     'hotel_name' => $h->hotel_name,
-                ]));
-    </script>
+                    'city' => $h->city,
+                ],
+            ),
+        );
+        ?>;
 
-
-    <script>
         const vehicles = @json($vehicles);
+        // Build options dynamically outside the function for reuse
+        const destinationOptions = @json($destinations->map(fn($d) => ['id' => $d->id, 'name' => $d->name]));
+        const optionsHtml = destinationOptions.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+        const cityOptionsHtml = hotelCities.map(city => `<option value="${city}">${city}</option>`).join('');
 
         function populateVehicleDetails() {
             const select = document.getElementById('vehicleSelect');
@@ -373,7 +383,38 @@
                 subImagesSection.style.display = 'none';
             }
         }
+        // Filter and populate hotel select box based on city
+        function populateHotels(citySelectElement) {
+            // 1. Get the selected city value
+            const selectedCity = citySelectElement.value;
 
+            // 2. Identify the corresponding hotel select element
+            // The data-target-hotel-select attribute holds the *name* of the hotel select.
+            // We need to find the element by its *name* attribute.
+            const hotelSelectName = citySelectElement.getAttribute('data-target-hotel-select');
+            // Find the hotel select that has the corresponding *name* attribute
+            const hotelSelectElement = document.querySelector(`select[name="${hotelSelectName}"]`);
+
+            // Ensure the element exists before proceeding
+            if (!hotelSelectElement) return;
+
+            // 3. Clear the current hotel options
+            hotelSelectElement.innerHTML = '<option value="">-- Select Hotel --</option>';
+
+            if (!selectedCity) return; // Stop if no city is selected
+
+            // 4. Filter the global 'hotels' array based on the selected city
+            // Assuming each hotel object in your 'hotels' array has a 'city' property (you might need to adjust your PHP to include it)
+            const filteredHotels = hotels.filter(h => h.city === selectedCity);
+
+            // 5. Populate the hotel select with filtered options
+            filteredHotels.forEach(hotel => {
+                const option = document.createElement('option');
+                option.value = hotel.hotel_name;
+                option.textContent = hotel.hotel_name;
+                hotelSelectElement.appendChild(option);
+            });
+        }
 
         function fetchProgramPoints(select, index) {
             const destinationId = select.value;
@@ -433,7 +474,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                                                                 <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                                                                                             <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>
@@ -492,6 +533,8 @@
             const destinationOptions = @json($destinations->map(fn($d) => ['id' => $d->id, 'name' => $d->name]));
 
             const optionsHtml = destinationOptions.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+            // This uses the newly defined JS variable 'hotelCities'
+            const cityOptionsHtml = hotelCities.map(city => `<option value="${city}">${city}</option>`).join('');
 
             wrapper.insertAdjacentHTML("beforeend", `
         <div class="border p-3 mb-3 rounded" id="${id}">
@@ -528,11 +571,19 @@
                         <button type="button" class="btn btn-sm btn-secondary mb-2" onclick="addProgramPoint(${itineraryIndex})">+ Add Program Point</button>
                     </div>
                 </div>
-                <div class="col-md-4">
+        <div class="col-md-2">
+                    <label>Hotel City</label>
+                    <select name="itineraries[${itineraryIndex}][overnight_city]" 
+                            class="form-select itinerary-city-select" 
+                            data-target-hotel-select="itineraries[${itineraryIndex}][overnight_stay]">
+                        <option value="">-- Select City --</option>
+                        ${cityOptionsHtml}
+                    </select>
+                </div>
+                <div class="col-md-2">
                     <label>Overnight Stay</label>
-                    <select name="itineraries[${itineraryIndex}][overnight_stay]" class="form-select">
+                    <select name="itineraries[${itineraryIndex}][overnight_stay]" class="form-select itinerary-hotel-select">
                         <option value="">-- Select Hotel --</option>
-                        ${hotels.map(h => `<option value="${h.hotel_name}">${h.hotel_name}</option>`).join('')}
                     </select>
                 </div>
                 <div class="col-md-2">
@@ -636,6 +687,21 @@
 
             if (e.target.classList.contains('remove-point')) {
                 e.target.closest('.d-flex').remove();
+            }
+        });
+
+        document.addEventListener('change', function(e) {
+            // Check if the changed element has the class for itinerary city select
+            if (e.target.classList.contains('itinerary-city-select')) {
+                populateHotels(e.target);
+            }
+        });
+
+        // Initial population for any existing city selects on page load (if any)
+        document.querySelectorAll('.itinerary-city-select').forEach(select => {
+            // Only populate if a value is already selected (e.g., on edit page)
+            if (select.value) {
+                populateHotels(select);
             }
         });
     </script>

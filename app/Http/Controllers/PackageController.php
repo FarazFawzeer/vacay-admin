@@ -16,13 +16,14 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\VehicleDetail;
 use App\Models\PackageVehicle;
-use Spatie\LaravelPdf\Facades\Pdf; // 👈 Make sure to use the Spatie facade
 use Spatie\LaravelPdf\Enums\Format;
 use Spatie\Browsershot\Browsershot;
 use Illuminate\Support\Facades\View; // Need to import View
 use Illuminate\Support\Facades\File;
 use App\Models\Inclusion;
 use App\Models\PackageInclusion;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class PackageController extends Controller
 {
@@ -71,8 +72,8 @@ class PackageController extends Controller
         $vehicles = VehicleDetail::where('status', 1)->get(['id', 'name', 'make', 'model', 'seats', 'air_conditioned', 'condition', 'vehicle_image', 'sub_image', 'type']);
 
         $inclusions = Inclusion::whereIn('type', ['inclusion', 'exclusion', 'cancellation'])->get();
-
-        return view('tour.create', compact('destinations', 'hotels', 'vehicles', 'inclusions'));
+        $hotelCities = Hotel::select('city')->distinct()->pluck('city');
+        return view('tour.create', compact('destinations', 'hotels', 'vehicles', 'inclusions', 'hotelCities'));
     }
 
     public function store(Request $request)
@@ -611,52 +612,61 @@ class PackageController extends Controller
     }
 
 
-    public function downloadPackagePdf($id)
+    public function fetchHotelsByCity(Request $request)
     {
-        $package = Package::with(['detailItineraries.highlights', 'packageVehicles', 'packageInclusions'])->findOrFail($id);
+        $city = $request->input('city');
+
+        if (!$city) {
+            return response()->json([]);
+        }
+
+        // Fetch only the hotels in the selected city
+        $hotels = Hotel::where('city', $city)->get(['id', 'hotel_name']);
+
+        return response()->json($hotels);
+    }
+
+    public function downloadPackagePdf(Request $request, $id)
+    {
+        ini_set('memory_limit', '512M');
+        
+        $section = $request->get('section', 'full');
+
+        $package = Package::with([
+            'detailItineraries.highlights',
+            'packageVehicles',
+            'packageInclusions'
+        ])->findOrFail($id);
+
         $tourSummaries = TourSummary::where('package_id', $id)->get();
 
-        // 🔹 Decode itinerary program_points and highlight images
-        $package->detailItineraries->map(function ($itinerary) {
-            if (is_string($itinerary->program_points) && str_starts_with($itinerary->program_points, '[')) {
-                $itinerary->program_points = json_decode($itinerary->program_points, true) ?? [];
-            }
+        // Decode JSON safely (your existing logic)
+        $package->detailItineraries->each(function ($itinerary) {
+            $itinerary->program_points = is_string($itinerary->program_points)
+                ? json_decode($itinerary->program_points, true)
+                : $itinerary->program_points;
 
-            $itinerary->highlights->map(function ($highlight) {
+            $itinerary->highlights->each(function ($highlight) {
                 if (is_string($highlight->images) && str_starts_with($highlight->images, '[')) {
-                    $highlight->images = json_decode($highlight->images, true) ?? [];
+                    $highlight->images = json_decode($highlight->images, true);
                 }
-                return $highlight;
             });
-
-            return $itinerary;
         });
 
-
-
-        // 🔹 Render Blade to HTML
-        $htmlContent = View::make('tour.pdf.package', [
+        $pdf = Pdf::loadView('tour.pdf.package-master', [
             'package' => $package,
             'tourSummaries' => $tourSummaries,
             'packageInclusions' => $package->packageInclusions,
-            'slot' => '',
-        ])->render();
+            'section' => $section,
+        ])->setPaper('A4', 'portrait')
+            ->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'DejaVu Sans',
+            ]);
 
-        // 🔹 Generate PDF in-memory
-        $pdfBinary = Browsershot::html($htmlContent)
-            ->showBackground()
-            ->margins(2, 2, 2, 2, 'mm')
-            ->format('A4')
-            ->landscape(false)
-            ->delay(1000)
-            ->timeout(60000)
-            ->pdf(); // 👈 returns PDF binary (not a saved file)
+        $fileName = Str::slug($package->heading) . '-' . $section . '.pdf';
 
-        $pdfFileName = $package->heading . '.pdf';
-
-        // 🔹 Return directly as download
-        return response($pdfBinary)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="' . $pdfFileName . '"');
+        return $pdf->download($fileName);
     }
 }

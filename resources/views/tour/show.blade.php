@@ -983,18 +983,98 @@
     @include('layouts.partials.page-title', ['title' => 'Tour Packages', 'subtitle' => 'View Details'])
 
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center" style="position: relative; z-index: 10;">
-            <h5 class="card-title mb-0">{{ $package->heading }}</h5>
+        <div class="card-header d-flex justify-content-between align-items-center">
+            {{-- TITLE --}}
+            <h5 class="card-title mb-0">
+                {{ $package->heading }}
+            </h5>
 
-            <div class="d-flex gap-2">
+            {{-- ACTION BUTTONS --}}
+            <div class="d-flex align-items-center gap-2">
+
                 <a href="{{ route('admin.packages.index') }}" class="btn btn-secondary btn-sm">
                     Back to List
                 </a>
-                <a href="{{ route('admin.package.pdf', $package->id) }}" class="btn btn-primary btn-sm" target="_blank">
-                    Generate PDF
-                </a>
+
+             <div class="dropdown">
+    <button class="btn btn-primary btn-sm dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+        Generate PDF
+    </button>
+
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+            <a class="dropdown-item"
+               target="_blank"
+               href="{{ route('admin.package.pdf', [$package->id, 'section' => 'full']) }}">
+                Full Package
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item"
+               target="_blank"
+               href="{{ route('admin.package.pdf', [$package->id, 'section' => 'header']) }}">
+                Header & Cover
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item"
+               target="_blank"
+               href="{{ route('admin.package.pdf', [$package->id, 'section' => 'summary']) }}">
+                Tour Summary
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item"
+               target="_blank"
+               href="{{ route('admin.package.pdf', [$package->id, 'section' => 'itinerary']) }}">
+                Itinerary
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item"
+               target="_blank"
+               href="{{ route('admin.package.pdf', [$package->id, 'section' => 'hilights']) }}">
+                Highlights
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item"
+               target="_blank"
+               href="{{ route('admin.package.pdf', [$package->id, 'section' => 'map']) }}">
+                Tour Map
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item"
+               target="_blank"
+               href="{{ route('admin.package.pdf', [$package->id, 'section' => 'vehicle']) }}">
+                Vehicles
+            </a>
+        </li>
+
+        <li>
+            <a class="dropdown-item"
+               target="_blank"
+               href="{{ route('admin.package.pdf', [$package->id, 'section' => 'inclusion']) }}">
+                Inclusions
+            </a>
+        </li>
+    </ul>
+</div>
+
+
             </div>
         </div>
+
 
 
         <div class="card-body">
@@ -1070,7 +1150,7 @@
                     @php
                         $defaultImage = asset('images/no-image.jpg');
                         $imageUrl = $package->picture
-                            ? asset('storage/' . ltrim($package->picture, '/'))
+                            ? asset('admin/storage/' . ltrim($package->picture, '/'))
                             : $defaultImage;
                     @endphp
 
@@ -1206,7 +1286,7 @@
                             <div class="day-header">
                                 <div class="day-number">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</div>
                                 <div class="day-info">
-                                    <div class="day-label">Day {{ $index + 1 }}</div>
+                                    <div class="day-label">Day {{ $itinerary->day ?? '-' }}</div>
                                     <h3>{{ $itinerary->title ?? 'Day Activity' }}</h3>
                                 </div>
                             </div>
@@ -1216,7 +1296,7 @@
                             @php
                                 $defaultImage = asset('images/no-image.jpg');
                                 $coverImage = $itinerary->pictures
-                                    ? asset('storage/' . ltrim($itinerary->pictures, '/'))
+                                    ? asset('admin/storage/' . ltrim($itinerary->pictures, '/'))
                                     : $defaultImage;
                             @endphp
 
@@ -1264,7 +1344,7 @@
                                                 $imageUrls = collect($images)
                                                     ->map(function ($img) use ($defaultImage) {
                                                         return $img
-                                                            ? asset('storage/' . ltrim($img, '/'))
+                                                            ? asset('admin/storage/' . ltrim($img, '/'))
                                                             : $defaultImage;
                                                     })
                                                     ->all();
@@ -1313,7 +1393,7 @@
                         @php
                             $defaultMapImage = asset('assets/img/default-map.jpg');
                             $mapImage = $package->map_image
-                                ? asset('storage/' . ltrim($package->map_image, '/'))
+                                ? asset('admin/storage/' . ltrim($package->map_image, '/'))
                                 : $defaultMapImage;
                         @endphp
 
@@ -1333,7 +1413,7 @@
                                     @php
                                         $defaultVehicleImage = asset('images/no-vehicle.jpg');
                                         $vehicleImage = $vehicle->vehicle_image
-                                            ? asset('storage/' . ltrim($vehicle->vehicle_image, '/'))
+                                            ? asset('admin/storage/' . ltrim($vehicle->vehicle_image, '/'))
                                             : $defaultVehicleImage;
 
                                         $subImages = [];
@@ -1356,7 +1436,7 @@
                                             @if (!empty($subImages) && is_array($subImages))
                                                 <div class="sub-images">
                                                     @foreach (array_slice($subImages, 0, 4) as $index => $subImg)
-                                                        <img src="{{ asset('storage/' . ltrim($subImg, '/')) }}"
+                                                        <img src="{{ asset('admin/storage/' . ltrim($subImg, '/')) }}"
                                                             alt="Vehicle view {{ $index + 1 }}" loading="lazy">
                                                     @endforeach
                                                 </div>

@@ -77,6 +77,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('packages/status/{package}', [PackageController::class, 'toggleStatus'])->name('admin.packages.toggleStatus');
     Route::get('packages/{id}', [PackageController::class, 'show'])->name('packages.show');
     Route::get('/package/{id}/pdf', [PackageController::class, 'downloadPackagePdf'])->name('package.pdf');
+    // Define this route, accessible via POST or GET
+    Route::get('/fetch-hotels-by-city', [PackageController::class, 'fetchHotelsByCity'])->name('fetch.hotels.by.city');
 
 
 
