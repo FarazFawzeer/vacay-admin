@@ -667,14 +667,17 @@
             <div class="content-wrapper">
                 @if (!empty($package->map_image))
 
-                    @php
+                   @php
                         $defaultMapImage = public_path('assets/img/default-map.jpg');
+
                         $mapPath = $package->map_image
-                            ? public_path('storage/' . ltrim($package->map_image, '/'))
+                            ? storage_path('app/public/' . ltrim($package->map_image, '/'))
                             : $defaultMapImage;
 
-                        // Ensure we don't crash if the default map is also missing
+                        // Ensure we don't crash if both images are missing
 $mapData = '';
+                        $mapMime = null;
+
                         if (file_exists($mapPath)) {
                             $mapData = base64_encode(file_get_contents($mapPath));
                             $mapMime = mime_content_type($mapPath);
@@ -683,7 +686,7 @@ $mapData = '';
                             $mapMime = mime_content_type($defaultMapImage);
                         }
 
-                        $mapImage = $mapData ? "data:$mapMime;base64,$mapData" : null;
+                        $mapImage = $mapData && $mapMime ? "data:$mapMime;base64,$mapData" : null;
                     @endphp
 
                     @if ($mapImage)

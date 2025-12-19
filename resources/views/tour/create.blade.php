@@ -351,7 +351,7 @@
 
                 // Show main image
                 if (vehicle.vehicle_image) {
-                    imageElement.src = `/storage/${vehicle.vehicle_image}`;
+                    imageElement.src = `/admin/storage/${vehicle.vehicle_image}`;
                     imageElement.style.display = 'block';
                 } else {
                     imageElement.style.display = 'none';
@@ -363,7 +363,7 @@
                         subImagesContainer.innerHTML = '';
                         vehicle.sub_image.forEach(img => {
                             subImagesContainer.insertAdjacentHTML('beforeend', `
-                        <img src="/storage/${img}" 
+                        <img src="/admin/storage/${img}" 
                              class="rounded border" 
                              style="width:100px;height:100px;object-fit:cover;">
                     `);
@@ -474,7 +474,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                                                                                             <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                                                                                             <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>

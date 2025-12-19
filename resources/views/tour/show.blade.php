@@ -1487,8 +1487,9 @@
 
                     <!-- Inclusions -->
                     @if ($packageInclusions->isNotEmpty())
+                       <div class="info-list-section page-break">
                         @foreach ($packageInclusions as $inclusion)
-                            <div class="info-list-section page-break">
+                         
                                 <h3>{{ ucfirst($inclusion->heading) }}</h3>
                                 <ul class="info-list">
                                     @foreach ($inclusion->points as $point)
@@ -1501,8 +1502,9 @@
                                         <strong style="color: #000;">Note :</strong> {!! $inclusion->note !!}
                                     </p>
                                 @endif
-                            </div>
+                       
                         @endforeach
+                             </div>
                     @else
                         <div class="info-list-section page-break">
                             <h3>Tour Inclusions</h3>

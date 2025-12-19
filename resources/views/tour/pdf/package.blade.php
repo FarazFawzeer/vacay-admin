@@ -733,9 +733,14 @@
 
                 @php
                     $defaultImage = public_path('images/no-image.jpg');
+
                     $imagePath = $package->picture
-                        ? public_path('storage/' . ltrim($package->picture, '/'))
+                        ? storage_path('app/public/' . ltrim($package->picture, '/'))
                         : $defaultImage;
+
+                    if (!file_exists($imagePath)) {
+                        $imagePath = $defaultImage;
+                    }
 
                     $imageData = base64_encode(file_get_contents($imagePath));
                     $mimeType = mime_content_type($imagePath);
@@ -743,6 +748,7 @@
                 @endphp
 
                 <img src="{{ $imageUrl }}" alt="{{ $package->place ?? 'Tour Destination' }}" class="hero-image">
+
 
                 @if (!empty($package->description))
                     <div class="description-section">
@@ -871,19 +877,22 @@
 
                         @php
                             $defaultImage = public_path('images/no-image.jpg');
+
                             $coverPath = $itinerary->pictures
-                                ? public_path('storage/' . ltrim($itinerary->pictures, '/'))
+                                ? storage_path('app/public/' . ltrim($itinerary->pictures, '/'))
                                 : $defaultImage;
 
-                            // Simple logic for image
+                            // Ensure file exists
                             if (!file_exists($coverPath)) {
                                 $coverPath = $defaultImage;
                             }
+
                             $coverData = base64_encode(file_get_contents($coverPath));
                             $coverMime = mime_content_type($coverPath);
                         @endphp
 
                         <img src="data:{{ $coverMime }};base64,{{ $coverData }}" class="itinerary-image">
+
 
                         <div class="program-section">
                             <h4 style="margin-bottom: 10px; color: #4a5568;">Day {{ $itinerary->day ?? $index + 1 }}
@@ -1009,12 +1018,15 @@
 
                     @php
                         $defaultMapImage = public_path('assets/img/default-map.jpg');
+
                         $mapPath = $package->map_image
-                            ? public_path('storage/' . ltrim($package->map_image, '/'))
+                            ? storage_path('app/public/' . ltrim($package->map_image, '/'))
                             : $defaultMapImage;
 
-                        // Ensure we don't crash if the default map is also missing
+                        // Ensure we don't crash if both images are missing
 $mapData = '';
+                        $mapMime = null;
+
                         if (file_exists($mapPath)) {
                             $mapData = base64_encode(file_get_contents($mapPath));
                             $mapMime = mime_content_type($mapPath);
@@ -1023,8 +1035,9 @@ $mapData = '';
                             $mapMime = mime_content_type($defaultMapImage);
                         }
 
-                        $mapImage = $mapData ? "data:$mapMime;base64,$mapData" : null;
+                        $mapImage = $mapData && $mapMime ? "data:$mapMime;base64,$mapData" : null;
                     @endphp
+
 
                     @if ($mapImage)
                         {{-- Use 'page-break-inside: avoid' to keep heading and image together --}}
@@ -1048,9 +1061,15 @@ $mapData = '';
                         @foreach ($package->packageVehicles as $vehicle)
                             @php
                                 $defaultVehicleImage = public_path('images/no-vehicle.jpg');
+
+                                // MAIN VEHICLE IMAGE
                                 $vehicleImagePath = $vehicle->vehicle_image
-                                    ? public_path('storage/' . ltrim($vehicle->vehicle_image, '/'))
+                                    ? storage_path('app/public/' . ltrim($vehicle->vehicle_image, '/'))
                                     : $defaultVehicleImage;
+
+                                if (!file_exists($vehicleImagePath)) {
+                                    $vehicleImagePath = $defaultVehicleImage;
+                                }
 
                                 $vehicleImageUrl = '';
                                 if (file_exists($vehicleImagePath)) {
@@ -1059,22 +1078,28 @@ $mapData = '';
                                     $vehicleImageUrl = "data:$vehicleImageMime;base64,$vehicleImageData";
                                 }
 
+                                // SUB IMAGES
                                 $subImages = [];
+
                                 if (!empty($vehicle->sub_image)) {
                                     $subImagesArray = is_array($vehicle->sub_image)
                                         ? $vehicle->sub_image
                                         : json_decode($vehicle->sub_image, true);
 
                                     foreach ((array) $subImagesArray as $subImg) {
-                                        $subImgPath = public_path('storage/' . ltrim($subImg, '/'));
-                                        if (file_exists($subImgPath)) {
-                                            $subImgData = base64_encode(file_get_contents($subImgPath));
-                                            $subImgMime = mime_content_type($subImgPath);
-                                            $subImages[] = "data:$subImgMime;base64,$subImgData";
+                                        $subImgPath = storage_path('app/public/' . ltrim($subImg, '/'));
+
+                                        if (!file_exists($subImgPath)) {
+                                            continue;
                                         }
+
+                                        $subImgData = base64_encode(file_get_contents($subImgPath));
+                                        $subImgMime = mime_content_type($subImgPath);
+                                        $subImages[] = "data:$subImgMime;base64,$subImgData";
                                     }
                                 }
                             @endphp
+
 
                             <table
                                 style="width: 100%; border-radius: 8px; margin-bottom: 30px; padding: 20px; border-collapse: collapse;">
@@ -1163,10 +1188,10 @@ $mapData = '';
 
 
                 @if ($packageInclusions->isNotEmpty())
-
+         <div style="page-break-before: always;"></div>
                     <div class="info-list-section ">
                         @foreach ($packageInclusions as $inclusion)
-                            <div style="page-break-before: always;"></div>
+                   
                             @php
                                 // Decode points safely
                                 $points = $inclusion->points;

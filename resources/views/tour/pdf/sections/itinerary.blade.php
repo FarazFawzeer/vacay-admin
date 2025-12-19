@@ -665,7 +665,7 @@
 
 
             <div class="content-wrapper">
-    @foreach ($package->detailItineraries as $index => $itinerary)
+                @foreach ($package->detailItineraries as $index => $itinerary)
                     <div class="itinerary-card" style="page-break-after: always;">
 
                         <table class="layout-table">
@@ -688,14 +688,16 @@
 
                         @php
                             $defaultImage = public_path('images/no-image.jpg');
+
                             $coverPath = $itinerary->pictures
-                                ? public_path('storage/' . ltrim($itinerary->pictures, '/'))
+                                ? storage_path('app/public/' . ltrim($itinerary->pictures, '/'))
                                 : $defaultImage;
 
-                            // Simple logic for image
+                            // Ensure file exists
                             if (!file_exists($coverPath)) {
                                 $coverPath = $defaultImage;
                             }
+
                             $coverData = base64_encode(file_get_contents($coverPath));
                             $coverMime = mime_content_type($coverPath);
                         @endphp
@@ -743,7 +745,7 @@
                     </div>
 
                     @if ($package->hilight_show_hide == 1 && $itinerary->highlights->isNotEmpty())
-                        <div class="highlights-section" style="padding: 20px;">
+                        <div class="highlights-section" style="padding: 20px;page-break-after: always;">
                             <h3 class="section-title"
                                 style="margin-bottom: 15px; font-family: sans-serif; text-align: center;">
                                 {{ $itinerary->place_name ?? 'Destination' }} Highlights

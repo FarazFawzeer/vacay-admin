@@ -115,7 +115,7 @@
                         <label class="form-label">Main Picture</label>
                         <input type="file" name="main_picture" class="form-control">
                         @if ($package->picture)
-                            <img src="{{ asset('storage/' . $package->picture) }}" width="120" class="mt-2 rounded">
+                            <img src="{{ asset('admin/storage/' . $package->picture) }}" width="120" class="mt-2 rounded">
                         @endif
                     </div>
 
@@ -123,7 +123,7 @@
                         <label class="form-label">Map Image</label>
                         <input type="file" name="map_image" class="form-control">
                         @if ($package->map_image)
-                            <img src="{{ asset('storage/' . $package->map_image) }}" width="120"
+                            <img src="{{ asset('admin/storage/' . $package->map_image) }}" width="120"
                                 class="mt-2 rounded">
                         @endif
                     </div>
@@ -204,7 +204,7 @@
                                         <input type="file" name="itineraries[{{ $i }}][pictures]"
                                             class="form-control">
                                         @if ($itinerary->pictures)
-                                            <img src="{{ asset('storage/' . $itinerary->pictures) }}" width="100"
+                                            <img src="{{ asset('admin/storage/' . $itinerary->pictures) }}" width="100"
                                                 class="mt-2 rounded">
                                         @endif
                                     </div>
@@ -343,7 +343,7 @@
                                                     <input type="hidden"
                                                         name="itineraries[{{ $i }}][highlights][{{ $hIndex }}][existing_image]"
                                                         value="{{ $highlight->images }}">
-                                                    <img src="{{ asset('storage/' . $highlight->images) }}"
+                                                    <img src="{{ asset('admin/storage/' . $highlight->images) }}"
                                                         width="80" class="mt-2 rounded">
                                                 @endif
 
@@ -504,7 +504,7 @@
 
     {{-- Scripts --}}
     <script>
-           // ======= HOTEL LIST (from backend) =======
+        // ======= HOTEL LIST (from backend) =======
         // **THIS IS CAUSING THE BLADE PARSE ERROR**
         const hotels = <?php
         echo json_encode(
@@ -518,11 +518,19 @@
         );
         ?>;
 
-        
+        const uniqueCities = [...new Set(
+            hotels
+            .map(h => h.city)
+            .filter(city => city && city.trim() !== '')
+        )];
+
+
+
+
         // ======= DESTINATIONS (used for dropdowns) =======
         const destinations = @json($destinations->map(fn($d) => ['id' => $d->id, 'name' => $d->name]));
 
-        
+
         // 1. JSON-encode the list of all available vehicles
         const vehicles = @json($vehicles);
 
@@ -545,7 +553,7 @@
 
                 // Main image
                 if (vehicle.vehicle_image) {
-                    imageElement.src = `/storage/${vehicle.vehicle_image}`;
+                    imageElement.src = `/admin/storage/${vehicle.vehicle_image}`;
                     imageElement.style.display = 'block';
                 } else {
                     imageElement.style.display = 'none';
@@ -557,7 +565,7 @@
                     subImagesContainer.innerHTML = '';
                     vehicle.sub_image.forEach(img => {
                         subImagesContainer.insertAdjacentHTML('beforeend', `
-                    <img src="/storage/${img}" class="rounded border" style="width:100px;height:100px;object-fit:cover;">
+                    <img src="/admin/storage/${img}" class="rounded border" style="width:100px;height:100px;object-fit:cover;">
                 `);
                     });
                     subImagesSection.style.display = 'block';
@@ -610,7 +618,7 @@
             }
         });
 
-     
+
         // ======= FETCH PROGRAM POINTS & HIGHLIGHTS BASED ON DESTINATION =======
         function fetchProgramPoints(select, index) {
             const destinationId = select.value;
@@ -688,9 +696,9 @@
                         </div>
                         <div class="col-md-3">
                             ${h.image ? `
-                                                                                                                <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
-                                                                                                                <img src="/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
-                                                                                                            ` : ''}
+                                                                                                                    <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
+                                                                                                                    <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
+                                                                                                                ` : ''}
                             <input type="file" 
                                 name="itineraries[${index}][highlights][${highlightCounter}][images]" 
                                 class="form-control">
@@ -772,7 +780,7 @@
 
             // Inside addItinerary() - (Lines 473 in your provided code)
             // **THIS LINE IS THE PROBLEM:**
-           // Get unique cities, filter out null/empty strings
+            // Get unique cities, filter out null/empty strings
             const cityOptions = uniqueCities.map(c => `<option value="${c}">${c}</option>`).join('');
             wrapper.insertAdjacentHTML("beforeend", `
             <div class="border p-3 mb-3 rounded" id="${id}">

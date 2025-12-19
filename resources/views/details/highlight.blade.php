@@ -116,7 +116,7 @@
                                     <td>{{ $highlight->description ?? '-' }}</td>
                                     <td>
                                         @if ($highlight->image)
-                                            <img src="{{ asset('storage/' . $highlight->image) }}"
+                                            <img src="{{ asset('admin/storage/' . $highlight->image) }}"
                                                 alt="{{ $highlight->place_name }}" width="80">
                                         @else
                                             -

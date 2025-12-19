@@ -670,11 +670,17 @@
                         <h2 style="text-align: center; color: #313b5e; margin-bottom: 20px;">Vehicle Details</h2>
 
                         @foreach ($package->packageVehicles as $vehicle)
-                            @php
+                          @php
                                 $defaultVehicleImage = public_path('images/no-vehicle.jpg');
+
+                                // MAIN VEHICLE IMAGE
                                 $vehicleImagePath = $vehicle->vehicle_image
-                                    ? public_path('storage/' . ltrim($vehicle->vehicle_image, '/'))
+                                    ? storage_path('app/public/' . ltrim($vehicle->vehicle_image, '/'))
                                     : $defaultVehicleImage;
+
+                                if (!file_exists($vehicleImagePath)) {
+                                    $vehicleImagePath = $defaultVehicleImage;
+                                }
 
                                 $vehicleImageUrl = '';
                                 if (file_exists($vehicleImagePath)) {
@@ -683,23 +689,27 @@
                                     $vehicleImageUrl = "data:$vehicleImageMime;base64,$vehicleImageData";
                                 }
 
+                                // SUB IMAGES
                                 $subImages = [];
+
                                 if (!empty($vehicle->sub_image)) {
                                     $subImagesArray = is_array($vehicle->sub_image)
                                         ? $vehicle->sub_image
                                         : json_decode($vehicle->sub_image, true);
 
                                     foreach ((array) $subImagesArray as $subImg) {
-                                        $subImgPath = public_path('storage/' . ltrim($subImg, '/'));
-                                        if (file_exists($subImgPath)) {
-                                            $subImgData = base64_encode(file_get_contents($subImgPath));
-                                            $subImgMime = mime_content_type($subImgPath);
-                                            $subImages[] = "data:$subImgMime;base64,$subImgData";
+                                        $subImgPath = storage_path('app/public/' . ltrim($subImg, '/'));
+
+                                        if (!file_exists($subImgPath)) {
+                                            continue;
                                         }
+
+                                        $subImgData = base64_encode(file_get_contents($subImgPath));
+                                        $subImgMime = mime_content_type($subImgPath);
+                                        $subImages[] = "data:$subImgMime;base64,$subImgData";
                                     }
                                 }
                             @endphp
-
                             <table
                                 style="width: 100%; border-radius: 8px; margin-bottom: 30px; padding: 20px; border-collapse: collapse;">
                                 <tr>

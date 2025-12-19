@@ -732,11 +732,16 @@
                     </div>
                 </div>
 
-                @php
+      @php
                     $defaultImage = public_path('images/no-image.jpg');
+
                     $imagePath = $package->picture
-                        ? public_path('storage/' . ltrim($package->picture, '/'))
+                        ? storage_path('app/public/' . ltrim($package->picture, '/'))
                         : $defaultImage;
+
+                    if (!file_exists($imagePath)) {
+                        $imagePath = $defaultImage;
+                    }
 
                     $imageData = base64_encode(file_get_contents($imagePath));
                     $mimeType = mime_content_type($imagePath);
