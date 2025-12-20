@@ -46,9 +46,13 @@ class PackageController extends Controller
 
         $packages = $query->paginate(10)->appends($request->all()); // ✅ keep filters with pagination
 
+        $first20TourIds = Package::orderBy('id')->take(20)->pluck('id')->toArray();
+
+
         if ($request->ajax()) {
-            return view('tour.table', compact('packages'))->render();
+            return view('tour.table', compact('packages', 'first20TourIds'))->render();
         }
+
 
         $types = Package::select('type')->distinct()->pluck('type');
         $categories = Package::select('tour_category')->distinct()->pluck('tour_category');
@@ -60,7 +64,9 @@ class PackageController extends Controller
             'status' => $request->status,
         ];
 
-        return view('tour.view', compact('packages', 'types', 'categories', 'currentFilters'));
+
+
+        return view('tour.view', compact('packages', 'types', 'categories', 'currentFilters', 'first20TourIds'));
         // Make sure to pass 'currentFilters'
     }
 
@@ -532,18 +538,16 @@ class PackageController extends Controller
 
     public function toggleStatus(Request $request, Package $package)
     {
-        $request->validate([
-            'status' => 'required|boolean',
-        ]);
-
-        $package->status = $request->status;
+        $package->status = !$package->status;
         $package->save();
 
         return response()->json([
             'success' => true,
-            'message' => $request->status ? 'Package published' : 'Package unpublished'
+            'new_status' => $package->status,
+            'message' => 'Status updated successfully'
         ]);
     }
+
 
 
     public function show($id)
@@ -629,7 +633,7 @@ class PackageController extends Controller
     public function downloadPackagePdf(Request $request, $id)
     {
         ini_set('memory_limit', '512M');
-        
+
         $section = $request->get('section', 'full');
 
         $package = Package::with([

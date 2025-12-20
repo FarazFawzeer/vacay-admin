@@ -30,6 +30,7 @@
         <div class="card-header">
             <h5 class="card-title">Tour Package List</h5>
             <p class="card-subtitle">All tour packages in your system.</p>
+            <p><span class="fw-bold">Note:</span> The highlighted rows are the first 20 tours and can only be edited, deleted, or have status changed by Super Admin. Other users can view them but cannot modify them.</p>
         </div>
 
         <div class="card-body">
@@ -50,37 +51,41 @@
             <!-- Filters -->
             <!-- Filters -->
             <div class="row mb-3 justify-content-end">
-        <div class="col-md-3">
-        <label for="filterType" class="form-label">Type</label>
-        <select id="filterType" class="form-select">
-            <option value="">All</option>
-            @foreach ($types as $type)
-                <option value="{{ $type }}" {{ ($currentFilters['type'] ?? '') === $type ? 'selected' : '' }}>
-                    {{ ucfirst($type) }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+                <div class="col-md-3">
+                    <label for="filterType" class="form-label">Type</label>
+                    <select id="filterType" class="form-select">
+                        <option value="">All</option>
+                        @foreach ($types as $type)
+                            <option value="{{ $type }}"
+                                {{ ($currentFilters['type'] ?? '') === $type ? 'selected' : '' }}>
+                                {{ ucfirst($type) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
-    <div class="col-md-3">
-        <label for="filterCategory" class="form-label">Category</label>
-        <select id="filterCategory" class="form-select">
-            <option value="">All</option>
-            @foreach ($categories as $category)
-                <option value="{{ $category }}" {{ ($currentFilters['category'] ?? '') === $category ? 'selected' : '' }}>
-                    {{ ucfirst($category) }}
-                </option>
-            @endforeach
-        </select>
-    </div>
-    <div class="col-md-3">
-        <label for="filterStatus" class="form-label">Status</label>
-        <select id="filterStatus" class="form-select">
-            <option value="">All</option>
-            <option value="active" {{ ($currentFilters['status'] ?? '') === 'active' ? 'selected' : '' }}>Published</option>
-            <option value="inactive" {{ ($currentFilters['status'] ?? '') === 'inactive' ? 'selected' : '' }}>Unpublished</option>
-        </select>
-    </div>
+                <div class="col-md-3">
+                    <label for="filterCategory" class="form-label">Category</label>
+                    <select id="filterCategory" class="form-select">
+                        <option value="">All</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category }}"
+                                {{ ($currentFilters['category'] ?? '') === $category ? 'selected' : '' }}>
+                                {{ ucfirst($category) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="filterStatus" class="form-label">Status</label>
+                    <select id="filterStatus" class="form-select">
+                        <option value="">All</option>
+                        <option value="active" {{ ($currentFilters['status'] ?? '') === 'active' ? 'selected' : '' }}>
+                            Published</option>
+                        <option value="inactive" {{ ($currentFilters['status'] ?? '') === 'inactive' ? 'selected' : '' }}>
+                            Unpublished</option>
+                    </select>
+                </div>
             </div>
 
 
@@ -197,6 +202,53 @@
                     });
                 });
             }
+
+            function attachStatusEvents() {
+    document.querySelectorAll('.toggle-status').forEach(button => {
+        button.addEventListener('click', function() {
+            const packageId = this.dataset.id;
+            const currentStatus = this.dataset.status;
+
+            fetch("{{ url('admin/packages/toggle-status') }}/" + packageId, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: currentStatus }),
+                credentials: 'same-origin'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    // Optionally update the row visually
+                    const statusBadge = document.querySelector(`#package-${packageId} td:nth-child(9) span`);
+                    if (data.new_status) {
+                        statusBadge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Published';
+                        statusBadge.className = 'badge rounded-pill bg-success bg-opacity-10 text-success border border-success';
+                        button.classList.remove('btn-outline-warning');
+                        button.classList.add('btn-outline-success');
+                        button.dataset.status = 1;
+                    } else {
+                        statusBadge.innerHTML = '<i class="bi bi-x-circle-fill me-1"></i>Unpublished';
+                        statusBadge.className = 'badge rounded-pill bg-secondary bg-opacity-10 text-secondary border border-secondary';
+                        button.classList.remove('btn-outline-success');
+                        button.classList.add('btn-outline-warning');
+                        button.dataset.status = 0;
+                    }
+                    Swal.fire('Updated!', data.message, 'success');
+                } else {
+                    Swal.fire('Error!', data.message || 'Something went wrong!', 'error');
+                }
+            })
+            .catch(() => Swal.fire('Error!', 'Something went wrong!', 'error'));
+        });
+    });
+}
+
+
+attachStatusEvents();
 
             attachDeleteEvents();
         });

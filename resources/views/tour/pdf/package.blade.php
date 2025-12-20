@@ -860,7 +860,7 @@
                         <table class="layout-table">
                             <tr>
                                 <td class="day-number-cell">
-                                    {{ str_pad($itinerary->day ?? $index + 1, 2, '0', STR_PAD_LEFT) }}
+                             {{ $loop->iteration }}
                                 </td>
                                 <td style="padding-left: 15px;">
                                     <div style="font-size: 10pt; color: #555; text-transform: uppercase;">

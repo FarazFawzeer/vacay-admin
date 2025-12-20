@@ -1284,7 +1284,7 @@
                     @foreach ($package->detailItineraries as $itinerary)
                         <div class="itinerary-card page-break">
                             <div class="day-header">
-                                <div class="day-number">{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</div>
+                                <div class="day-number">{{ $loop->iteration }}</div>
                                 <div class="day-info">
                                     <div class="day-label">Day {{ $itinerary->day ?? '-' }}</div>
                                     <h3>{{ $itinerary->title ?? 'Day Activity' }}</h3>
