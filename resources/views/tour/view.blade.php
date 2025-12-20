@@ -128,6 +128,7 @@
                     .then(data => {
                         document.getElementById('packageTable').innerHTML = data;
                         attachDeleteEvents();
+                           attachStatusEvents(); 
                     });
             }
 
