@@ -7,210 +7,180 @@
     ])
 
     <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Tour Booking Details</h5>
-        </div>
         <div class="card-body">
             <div id="invoiceContent"
-                style="max-width:900px; margin:0 auto; font-family:'Segoe UI', sans-serif; background:#fff; box-shadow:0 0 20px rgba(0,0,0,0.1);">
+                style="max-width:900px; margin:0 auto; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color:#333; background:#fff; padding:20px;">
 
-                {{-- HEADER SECTION --}}
-                <div style="padding:40px; border-bottom:2px solid #e0e0e0;">
-                    <div style="text-align:center; margin-bottom:30px;">
-                        <img src="{{ asset('images/vacayguider.png') }}" alt="Company Logo"
-                            style="height:120px; object-fit:contain;">
-                    </div>
+                {{-- HEADER --}}
+                <table style="width:100%; border-bottom:2px solid #333; padding-bottom:20px; margin-bottom:30px;">
+                    <tr>
+                        <td style="vertical-align: top;">
+                            <img src="{{ asset('images/vacayguider.png') }}" alt="Logo" style="height:80px;">
+                            <div style="margin-top:15px; font-size:12px; line-height:1.4; color:#666;">
+                                <strong>Vacay Guider (Pvt) Ltd.</strong><br>
+                                22/14 C Asarappa Rd, Negombo 11400<br>
+                                +94 114 272 372 | info@vacayguider.com
+                            </div>
+                        </td>
+                        <td style="text-align:right; vertical-align: top;">
+                            @php
+                                $statusColors = [
+                                    'quotation' => 'secondary',
+                                    'accepted' => 'primary',
+                                    'invoiced' => 'info',
+                                    'partially_paid' => 'warning',
+                                    'paid' => 'success',
+                                    'cancelled' => 'danger',
+                                ];
+                                $badgeClass = $statusColors[$booking->status] ?? 'secondary';
+                            @endphp
+                            <h1
+                                style="margin:0; font-size:24px; font-weight:300; letter-spacing:2px; text-transform:uppercase;">
+                                {{ strtoupper($booking->status) }}
+                            </h1>
+                            <table style="margin-left:auto; margin-top:10px; font-size:13px; border-collapse:collapse;">
+                                <tr>
+                                    <td style="padding:2px 10px; text-align:left; color:#888;">Ref:</td>
+                                    <td style="padding:2px 10px; font-weight:bold;">
+                                        {{ $booking->booking_ref_no }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:2px 10px; text-align:left; color:#888;">Date:</td>
+                                    <td style="padding:2px 10px;">
+                                        {{ $booking->invoice_date?->format('d/m/Y') ?? $booking->created_at->format('d/m/Y') }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:2px 10px; text-align:left; color:#888;">Currency:</td>
+                                    <td style="padding:2px 10px;">{{ $booking->currency }}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
 
-                    <table style="width:100%; border:none; margin-top:10px;">
+                {{-- CLIENT & TOUR INFO --}}
+                <table style="width:100%; margin-bottom:40px; font-size:13px;">
+                    <tr>
+                        <td style="width:50%; vertical-align:top;">
+                            <h4
+                                style="text-transform:uppercase; font-size:11px; color:#888; margin-bottom:10px; letter-spacing:1px;">
+                                Client Information
+                            </h4>
+                            <div style="font-size:15px; font-weight:bold; margin-bottom:5px;">
+                                {{ $booking->customer->name ?? 'N/A' }}
+                            </div>
+                            <div style="color:#555;">{{ $booking->customer->email ?? 'N/A' }}</div>
+                            <div style="color:#555;">{{ $booking->customer->contact ?? 'N/A' }}</div>
+                        </td>
+                        <td style="width:50%; vertical-align:top; border-left:1px solid #eee; padding-left:30px;">
+                            <h4
+                                style="text-transform:uppercase; font-size:11px; color:#888; margin-bottom:10px; letter-spacing:1px;">
+                                Tour Information
+                            </h4>
+                            <div style="margin-bottom:3px;"><strong>Package:</strong>
+                                {{ $booking->package->heading ?? 'N/A' }}</div>
+                            <div style="margin-bottom:3px;"><strong>Reference:</strong>
+                                {{ $booking->package->tour_ref_no ?? 'N/A' }}</div>
+                            <div style="margin-bottom:3px;">
+                                <strong>Duration:</strong> {{ $booking->travel_date?->format('d M Y') ?? 'N/A' }} to
+                                {{ $booking->travel_end_date?->format('d M Y') ?? 'N/A' }}
+                            </div>
+                            <div style="margin-bottom:3px;">
+                                <strong>Pax:</strong> {{ $booking->adults }} Adults, {{ $booking->children }} Children,
+                                {{ $booking->infants }} Infants
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                {{-- PRICE TABLE --}}
+                <table style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:14px;">
+                    <thead>
+                        <tr style="background:#f9f9f9; border-top:1px solid #333; border-bottom:1px solid #333;">
+                            <th style="padding:12px; text-align:left; text-transform:uppercase; font-size:11px;">Description
+                            </th>
+                            <th style="padding:12px; text-align:right; text-transform:uppercase; font-size:11px;">Total
+                                ({{ $booking->currency }})</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         <tr>
-                            <td style="vertical-align:top; width:60%;">
-                                <h4 style="margin:0 0 12px 0; font-size:15px; font-weight:600; color:#2c3e50;">
-                                    COMPANY DETAILS</h4>
-                                <p style="margin:5px 0; font-size:14px;"><strong>Name:</strong> Vacay Guider</p>
-                                <p style="margin:5px 0; font-size:14px;"><strong>Address:</strong> 123 Business Street</p>
-                                <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> +94 114 272 372</p>
-                                <p style="margin:5px 0; font-size:14px;"><strong>Email:</strong> info@vacayguider.com</p>
+                            <td style="padding:15px 12px; border-bottom:1px solid #eee;">
+                                <strong>Travel Package Arrangement</strong><br>
+                                <small style="color:#888;">Comprehensive tour package including accommodation and
+                                    transport.</small>
                             </td>
-                            <td style="vertical-align:top; text-align:right; width:40%;">
-                                @php
-                                    // Map status to badge color
-                                    $statusColors = [
-                                        'quotation' => 'secondary', // gray
-                                        'invoiced' => 'primary', // blue
-                                        'confirmed' => 'success', // green
-                                        'completed' => 'info', // teal
-                                        'cancelled' => 'danger', // red
-                                    ];
+                            <td style="padding:15px 12px; text-align:right; border-bottom:1px solid #eee;">
+                                {{ number_format($booking->package_price, 2) }}
+                            </td>
+                        </tr>
+                        @if ($booking->tax > 0)
+                            <tr>
+                                <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
+                                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">
+                                    {{ number_format($booking->tax, 2) }}</td>
+                            </tr>
+                        @endif
+                        @if ($booking->discount > 0)
+                            <tr>
+                                <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">
+                                    Discount Applied</td>
+                                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">
+                                    ({{ number_format($booking->discount, 2) }})</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
 
-                                    $badgeClass = $statusColors[$booking->status] ?? 'secondary';
-                                @endphp
-
-                                <div style="margin-bottom:5px;">
-                                    <h2 class="badge bg-{{ $badgeClass }}"
-                                        style="display:inline-block; margin:0; font-size:14px; border-radius:4px; font-weight:700; padding:3px 6px;">
-                                        {{ strtoupper($booking->status) }}
-                                    </h2>
-                                </div>
-                                <p style="margin:2px 0; font-size:13px;">
-                                    <strong>Number:</strong> {{ $booking->invoice_number ?? $booking->id }}
-                                </p>
-                                <p style="margin:2px 0; font-size:13px;">
-                                    {{ $booking->invoice_date ? $booking->invoice_date->format('d/m/Y') : $booking->created_at->format('d/m/Y') }}
-                                </p>
+                {{-- TOTAL / ADVANCE / BALANCE --}}
+                @php
+                    $advancePaid = $booking->advance_paid ?? 0;
+                    $balance = $booking->total_price - $advancePaid;
+                @endphp
+                <div style="width:40%; margin-left:auto;">
+                    <table style="width:100%; font-size:14px; border-collapse:collapse;">
+                        <tr>
+                            <td style="padding:8px 0; color:#888;">Subtotal:</td>
+                            <td style="padding:8px 0; text-align:right;">{{ number_format($booking->total_price, 2) }}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:8px 0; color:#888;">Advance Paid:</td>
+                            <td style="padding:8px 0; text-align:right; color:#1a7f37;">{{ number_format($advancePaid, 2) }}
+                            </td>
+                        </tr>
+                        <tr style="border-top:1px solid #333;">
+                            <td style="padding:12px 0; font-weight:bold; font-size:16px;">Balance Due:</td>
+                            <td style="padding:12px 0; text-align:right; font-weight:bold; font-size:18px; color:#000;">
+                                {{ $booking->currency }} {{ number_format($balance, 2) }}
                             </td>
                         </tr>
                     </table>
+                </div>
 
-                    {{-- CUSTOMER DETAILS --}}
-                    <div style="margin-top:20px;">
-                        <h4 style="margin:0 0 12px 0; font-size:15px; font-weight:600; color:#2c3e50;">CUSTOMER DETAILS</h4>
-                        <p style="margin:5px 0; font-size:14px;"><strong>Name:</strong>
-                            {{ $booking->customer->name ?? 'N/A' }}</p>
-                        <p style="margin:5px 0; font-size:14px;"><strong>Email:</strong>
-                            {{ $booking->customer->email ?? 'N/A' }}</p>
-                        <p style="margin:5px 0; font-size:14px;"><strong>Contact:</strong>
-                            {{ $booking->customer->contact ?? 'N/A' }}</p>
+                {{-- SPECIAL REQUIREMENTS --}}
+                @if ($booking->special_requirements)
+                    <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
+                        <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes
+                        </h4>
+                        <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">
+                            {{ $booking->special_requirements }}
+                        </div>
                     </div>
-                </div>
-
-                {{-- PACKAGE DETAILS --}}
-                <div style="padding:40px;">
-                    <h3 style="margin:0 0 15px 0; font-size:17px; font-weight:600; color:#2c3e50;">
-                        Package Details
-                    </h3>
-
-                    <div style="background:#f8f9fa; padding:20px; border-radius:6px; margin-bottom:15px;">
-                        <table style="width:100%; border-collapse:collapse;">
-                            <tr>
-                                <td style="width:50%; vertical-align:top; padding-right:15px;">
-                                    <p style="margin:8px 0; font-size:14px; color:#333;">
-                                        <strong>Tour Package:</strong> {{ $booking->package->heading ?? 'N/A' }}
-                                    </p>
-                                    <p style="margin:8px 0; font-size:14px; color:#333;">
-                                        <strong>Reference No:</strong> {{ $booking->package->tour_ref_no ?? 'N/A' }}
-                                    </p>
-                                    <p style="margin:8px 0; font-size:14px; color:#333;">
-                                        <strong>Travel Dates:</strong>
-                                        {{ $booking->travel_date?->format('d M Y') ?? 'N/A' }} –
-                                        {{ $booking->travel_end_date?->format('d M Y') ?? 'N/A' }}
-                                    </p>
-                                </td>
-                                <td style="width:50%; vertical-align:top; padding-left:15px;">
-                                    <p style="margin:8px 0; font-size:14px; color:#333;">
-                                        <strong>Passengers:</strong>
-                                        {{ $booking->adults }} Adult(s)
-                                        @if ($booking->children > 0)
-                                            , {{ $booking->children }} Child(ren)
-                                        @endif
-                                        @if ($booking->infants > 0)
-                                            , {{ $booking->infants }} Infant(s)
-                                        @endif
-                                    </p>
-                                    <p style="margin:8px 0; font-size:14px; color:#333;">
-                                        <strong>Payment Status:</strong> {{ ucfirst($booking->payment_status) }}
-                                    </p>
-                                    @if ($booking->special_requirements)
-                                        <p style="margin:8px 0; font-size:14px; color:#333;">
-                                            <strong>Special Requirements:</strong> {{ $booking->special_requirements }}
-                                        </p>
-                                    @endif
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-
-                {{-- PRICE BREAKDOWN --}}
-                <div style="padding:0 40px 40px 40px;">
-                    <h3
-                        style="margin:0 0 10px 0; font-size:16px; font-weight:600; color:#2c3e50;
-                        border-bottom:2px solid #2c3e50; padding-bottom:6px;">
-                        Price Breakdown
-                    </h3>
-
-                    <table style="width:100%; border-collapse:collapse; background:#fff; border:1px solid #ddd;">
-                        <thead>
-                            <tr style="background:#f4f6f8;">
-                                <th
-                                    style="padding:8px 12px; text-align:left; font-size:13px; font-weight:600;
-                                    color:#2c3e50; border-bottom:1px solid #ddd;">
-                                    Description</th>
-                                <th
-                                    style="padding:8px 12px; text-align:right; font-size:13px; font-weight:600;
-                                    color:#2c3e50; border-bottom:1px solid #ddd; width:180px;">
-                                    Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #eee;">
-                                    Package Price
-                                </td>
-                                <td
-                                    style="padding:8px 12px; text-align:right; font-size:13px; color:#333;
-                                    border-bottom:1px solid #eee;">
-                                    {{ $booking->currency }} {{ number_format($booking->package_price, 2) }}
-                                </td>
-                            </tr>
-
-                            @if ($booking->tax > 0)
-                                <tr>
-                                    <td style="padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #eee;">
-                                        Additional Charges
-                                    </td>
-                                    <td
-                                        style="padding:8px 12px; text-align:right; font-size:13px; color:#333;
-                                        border-bottom:1px solid #eee;">
-                                        {{ $booking->currency }} {{ number_format($booking->tax, 2) }}
-                                    </td>
-                                </tr>
-                            @endif
-
-                            @if ($booking->discount > 0)
-                                <tr>
-                                    <td style="padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #eee;">
-                                        Discount
-                                    </td>
-                                    <td
-                                        style="padding:8px 12px; text-align:right; font-size:13px; color:#dc3545;
-                                        border-bottom:1px solid #eee;">
-                                        - {{ $booking->currency }} {{ number_format($booking->discount, 2) }}
-                                    </td>
-                                </tr>
-                            @endif
-
-                            <tr style="background:#2c3e50;">
-                                <td style="padding:10px 12px; font-size:14px; font-weight:700; color:white;">
-                                    TOTAL AMOUNT
-                                </td>
-                                <td
-                                    style="padding:10px 12px; text-align:right; font-size:15px; font-weight:700; color:white;">
-                                    {{ $booking->currency }} {{ number_format($booking->total_price, 2) }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                @endif
 
                 {{-- FOOTER --}}
-                <div style="padding:30px 40px; background:#f8f9fa; border-top:2px solid #e0e0e0; text-align:center;">
-                    <h4 style="margin:0 0 10px 0; font-size:18px; color:#2c3e50; font-weight:600;">
-                        Thank You for Your Business!
-                    </h4>
-                    <p style="margin:8px 0; font-size:14px; color:#666;">
-                        We look forward to serving you and making your travel experience memorable.
-                    </p>
-                    <p style="margin:8px 0; font-size:14px; color:#666;">
-                        For any questions or assistance, please contact us.
-                    </p>
-                    <p style="margin:5px 0; font-size:13px; color:#888;">
-                        Email: info@vacayguider.com | Phone: +94 114 272 372 | Website: www.vacayguider.com
-                    </p>
+                <div
+                    style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
+                    <p style="margin-bottom:5px;">This is a computer-generated document. No signature is required.</p>
+                    <p><strong>Vacay Guider</strong> | www.vacayguider.com | Thank you for your business.</p>
                 </div>
             </div>
 
-
         </div>
+
+        {{-- ACTION BUTTONS --}}
         <div class="d-flex justify-content-end align-items-center gap-2 mt-4  p-4">
             <a href="{{ route('admin.tour-bookings.index') }}" class="btn btn-secondary" style="width:120px;">Back</a>
             <button type="button" class="btn btn-primary" style="width:150px;" onclick="generatePdf()">Generate
@@ -248,6 +218,5 @@
                     alert("Failed to generate PDF. Please try again.");
                 });
         }
-
     </script>
-    @endsection
+@endsection

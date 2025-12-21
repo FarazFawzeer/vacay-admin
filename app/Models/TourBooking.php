@@ -27,19 +27,21 @@ class TourBooking extends Model
         'invoice_number',
         'invoice_date',
         'amount_paid',
+        'advance_paid', // ✅ added
         'payment_status',
         'payment_method',
         'status',
         'created_by'
     ];
 
+
     protected $casts = [
-    'travel_date' => 'date',
-    'travel_end_date' => 'date',
-    'invoice_date' => 'datetime',
-    'created_at' => 'datetime',
-    'updated_at' => 'datetime',
-];
+        'travel_date' => 'date',
+        'travel_end_date' => 'date',
+        'invoice_date' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 
     public function package()
     {
@@ -49,5 +51,10 @@ class TourBooking extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function getBalanceAmountAttribute()
+    {
+        return $this->total_price - $this->advance_paid;
     }
 }

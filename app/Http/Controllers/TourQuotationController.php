@@ -71,7 +71,8 @@ class TourQuotationController extends Controller
             'additional_charges' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'currency' => 'required|string|max:5',
-            'status' => 'required|in:quotation,invoiced,confirmed,completed,cancelled',
+            'status' => 'required',
+            'advance_paid' => 'nullable|numeric|min:0',
         ]);
 
         // Calculate total
@@ -93,6 +94,17 @@ class TourQuotationController extends Controller
         $nextNumber = $lastBooking ? $lastBooking->invoice_number + 1 : 1;
         $invoiceNumber = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
+        $advancePaid = $request->advance_paid ?? 0;
+
+        if ($advancePaid <= 0) {
+            $paymentStatus = 'pending';
+        } elseif ($advancePaid < $totalPrice) {
+            $paymentStatus = 'partial';
+        } else {
+            $paymentStatus = 'paid';
+        }
+
+
         // Create booking
         $booking = TourBooking::create([
             'package_id' => $request->package_id,
@@ -105,8 +117,11 @@ class TourQuotationController extends Controller
             'infants' => $request->infants ?? 0,
             'package_price' => $request->package_price,
             'discount' => $request->discount ?? 0,
-            'tax' => $request->additional_charges ?? 0, // stored in tax column as additional charges
+            'tax' => $request->additional_charges ?? 0,
             'total_price' => $totalPrice,
+            'advance_paid' => $advancePaid,
+            'amount_paid' => $advancePaid,
+            'payment_status' => $paymentStatus,
             'currency' => $request->currency,
             'special_requirements' => $request->special_requirements,
             'invoice_number' => $invoiceNumber,
@@ -114,6 +129,7 @@ class TourQuotationController extends Controller
             'status' => $request->status,
             'created_by' => auth()->id(),
         ]);
+
 
         return redirect()->back()->with('success', ucfirst($request->status) . ' saved successfully!');
     }
@@ -130,7 +146,6 @@ class TourQuotationController extends Controller
         ]);
     }
 
-
     public function update(Request $request, TourBooking $booking)
     {
         $request->validate([
@@ -145,14 +160,27 @@ class TourQuotationController extends Controller
             'additional_charges' => 'nullable|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',
             'currency' => 'required|string|max:5',
-            'status' => 'required|in:quotation,invoiced,confirmed,completed,cancelled',
-            'payment_status' => 'required|in:pending,partial,paid',
+            'status' => 'required',
+            'advance_paid' => 'nullable|numeric|min:0',
             'special_requirements' => 'nullable|string|max:1000',
         ]);
 
         // Recalculate total price
         $totalPrice = ($request->package_price + ($request->additional_charges ?? 0)) - ($request->discount ?? 0);
 
+        // Determine advance paid
+        $advancePaid = $request->advance_paid ?? 0;
+
+        // Determine payment status based on advance
+        if ($advancePaid <= 0) {
+            $paymentStatus = 'pending';
+        } elseif ($advancePaid < $totalPrice) {
+            $paymentStatus = 'partial';
+        } else {
+            $paymentStatus = 'paid';
+        }
+
+        // Update booking
         $booking->update([
             'customer_id' => $request->customer_id,
             'package_id' => $request->package_id,
@@ -162,20 +190,22 @@ class TourQuotationController extends Controller
             'children' => $request->children ?? 0,
             'infants' => $request->infants ?? 0,
             'package_price' => $request->package_price,
-            'tax' => $request->additional_charges ?? 0, // stored in tax column
+            'tax' => $request->additional_charges ?? 0,
             'discount' => $request->discount ?? 0,
             'total_price' => $totalPrice,
+            'advance_paid' => $advancePaid,
+            'amount_paid' => $advancePaid, // same as store logic
+            'payment_status' => $paymentStatus,
             'currency' => $request->currency,
             'status' => $request->status,
-            'payment_status' => $request->payment_status,
             'special_requirements' => $request->special_requirements,
-            // Optionally, you can track who updated it
-            //'updated_by' => auth()->id(),
+            //'updated_by' => auth()->id(), // optional
         ]);
 
         return redirect()->route('admin.tour-bookings.edit', $booking)
             ->with('success', ucfirst($request->status) . ' updated successfully!');
     }
+
 
 
     public function show($id)
@@ -187,7 +217,7 @@ class TourQuotationController extends Controller
 
     public function updateStatus(Request $request, TourBooking $booking)
     {
-        $request->validate(['status' => 'required|in:quotation,invoiced,confirmed,completed,cancelled']);
+        $request->validate(['status' => 'required']);
         $booking->status = $request->status;
         $booking->save();
 
@@ -212,22 +242,41 @@ class TourQuotationController extends Controller
         <html lang="en">
         <head>
             <meta charset="UTF-8">
-           <style>
+            <style>
 @page {
-    margin: 2mm 2mm; /* top/bottom, left/right */
+    margin: 10mm; /* Increased slightly for safety */
 }
+
 body {
     margin: 0;
     padding: 0;
 }
-.invoice-container {
-    padding: 1mm 1mm; /* inner padding for layout */
+
+.invoice-wrapper {
+    width: 100%;
+    /* Remove horizontal padding here if it causes overflow */
+    padding-top: 2mm;
+    padding-bottom: 2mm;
 }
-</style>
+
+.invoice-container {
+    border: 2px solid #333;
+    padding: 10px;
+    
+    /* CRITICAL FIXES */
+    width: 98%;           /* Give it a tiny bit of "breathing room" */
+    margin: 0 auto;       /* Center it so both sides are safe */
+    box-sizing: border-box; 
+    overflow: hidden;     /* Prevents internal content from stretching the box */
+}
+
+            </style>
         </head>
         <body>
-            <div class="invoice-container">
+          <div class="invoice-wrapper">
+    <div class="invoice-container">
                 ' . $content . '
+            </div>
             </div>
         </body>
         </html>';

@@ -68,12 +68,14 @@
                     <select id="filterStatus" class="form-select">
                         <option value="">All</option>
                         <option value="quotation">Quotation</option>
+                        <option value="accepted">Accepted</option>
                         <option value="invoiced">Invoiced</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="completed">Completed</option>
+                        <option value="partially_paid">Partially Paid</option>
+                        <option value="paid">Paid</option>
                         <option value="cancelled">Cancelled</option>
                     </select>
                 </div>
+
                 <div class="col-md-3">
                     <label for="searchBooking" class="form-label">Booking ID</label>
                     <input type="text" id="searchBooking" class="form-control" placeholder="Search Booking ID">
@@ -156,20 +158,20 @@
                             if (data.success) {
                                 const btn = document.getElementById(
                                     `statusDropdown${bookingId}`);
-                                btn.textContent = newStatus.charAt(0).toUpperCase() + newStatus
-                                    .slice(1);
+                                // Display status with proper formatting
+                                btn.textContent = newStatus.split('_').map(w => w.charAt(0)
+                                    .toUpperCase() + w.slice(1)).join(' ');
+                                // Update button color
                                 btn.className =
                                     'btn btn-sm status-dropdown-btn dropdown-toggle ' + (
                                         newStatus === 'quotation' ? 'btn-secondary' :
+                                        newStatus === 'accepted' ? 'btn-primary' :
                                         newStatus === 'invoiced' ? 'btn-info' :
-                                        newStatus === 'confirmed' ? 'btn-primary' :
-                                        newStatus === 'completed' ? 'btn-success' :
+                                        newStatus === 'partially_paid' ? 'btn-warning' :
+                                        newStatus === 'paid' ? 'btn-success' :
                                         newStatus === 'cancelled' ? 'btn-danger' :
                                         'btn-secondary'
                                     );
-
-                                // Optional: small toast/alert
-                                // alert('Status updated successfully!');
                             } else {
                                 alert('Failed to update status.');
                             }

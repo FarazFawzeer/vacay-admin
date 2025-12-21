@@ -75,11 +75,11 @@
 
                 {{-- Travel Details --}}
                 <div class="row mb-3">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="travel_start_date" class="form-label">Travel Start Date</label>
                         <input type="date" name="travel_start_date" id="travel_start_date" class="form-control" required>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="travel_end_date" class="form-label">Travel End Date</label>
                         <input type="date" name="travel_end_date" id="travel_end_date" class="form-control" required>
                         <div id="travel_end_date_error" class="text-danger mt-1"></div>
@@ -104,57 +104,75 @@
                         <select name="currency" id="currency" class="form-select">
                             <option value="USD">USD</option>
                             <option value="LKR">LKR</option>
+                            <option value="EUR">EUR</option>
+
                         </select>
                     </div>
                 </div>
 
+
+
+
+
+                {{-- Pricing --}}
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <label for="package_price" class="form-label">Package Price</label>
+                        <input type="number" name="package_price" id="package_price" class="form-control" step="0.01"
+                            value="0" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="additional_charges" class="form-label">Additional Charges</label>
+                        <input type="number" name="additional_charges" id="additional_charges" class="form-control"
+                            step="0.01" value="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="discount" class="form-label">Discount</label>
+                        <input type="number" name="discount" id="discount" class="form-control" step="0.01"
+                            value="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="total_price" class="form-label">Total Price</label>
+                        <input type="number" name="total_price" id="total_price" class="form-control" step="0.01"
+                            readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="advance_paid" class="form-label">Advance Paid</label>
+                        <input type="number" name="advance_paid" id="advance_paid" class="form-control" step="0.01"
+                            value="0">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label for="balance_amount" class="form-label">Balance Amount</label>
+                        <input type="number" id="balance_amount" class="form-control" step="0.01" readonly>
+                    </div>
+                </div>
+
+
+
                 {{-- Status --}}
                 <div class="row mb-3">
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <label for="status" class="form-label">Status</label>
                         <select name="status" id="status" class="form-select" required>
                             <option value="quotation" selected>Quotation</option>
-                            <option value="invoiced">Invoice</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="completed">Completed</option>
+                            <option value="accepted">Accepted</option>
+                            <option value="invoiced">Invoiced</option>
+                            <option value="partially_paid">Partially Paid</option>
+                            <option value="paid">Paid</option>
                             <option value="cancelled">Cancelled</option>
                         </select>
+
                     </div>
 
 
-                    <div class="col-md-3">
+                    <div class="col-md-6">
                         <label for="payment_status" class="form-label">Payment Status</label>
                         <select name="payment_status" id="payment_status" class="form-select" required>
                             <option value="pending">Pending</option>
                             <option value="partial">Partial</option>
                             <option value="paid">Paid</option>
                         </select>
-                    </div>
-                </div>
-
-
-
-                {{-- Pricing --}}
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <label for="package_price" class="form-label">Package Price</label>
-                        <input type="number" name="package_price" id="package_price" class="form-control"
-                            step="0.01" required>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="additional_charges" class="form-label">Additional Charges</label>
-                        <input type="number" name="additional_charges" id="additional_charges" class="form-control"
-                            step="0.01" value="0">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="discount" class="form-label">Discount</label>
-                        <input type="number" name="discount" id="discount" class="form-control" step="0.01"
-                            value="0">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="total_price" class="form-label">Total Price</label>
-                        <input type="number" name="total_price" id="total_price" class="form-control" step="0.01"
-                            readonly>
                     </div>
                 </div>
 
@@ -256,17 +274,25 @@
         const additionalCharges = document.getElementById('additional_charges');
         const discount = document.getElementById('discount');
         const totalPrice = document.getElementById('total_price');
+        const advancePaid = document.getElementById('advance_paid');
+        const balanceAmount = document.getElementById('balance_amount');
+
 
         function calculateTotal() {
             const price = parseFloat(packagePrice.value) || 0;
             const addCharges = parseFloat(additionalCharges.value) || 0;
             const disc = parseFloat(discount.value) || 0;
-            totalPrice.value = (price + addCharges) - disc;
+            const advance = parseFloat(advancePaid.value) || 0;
+
+            const total = (price + addCharges) - disc;
+            totalPrice.value = total.toFixed(2);
+            balanceAmount.value = Math.max(0, total - advance).toFixed(2);
         }
 
         packagePrice.addEventListener('input', calculateTotal);
         additionalCharges.addEventListener('input', calculateTotal);
         discount.addEventListener('input', calculateTotal);
+        advancePaid.addEventListener('input', calculateTotal);
 
         function previewQuotation() {
             const customerSelect = document.getElementById('customer_id');
@@ -280,9 +306,18 @@
             const children = document.getElementById('children').value;
             const infants = document.getElementById('infants').value;
             const currency = document.getElementById('currency').value;
-            const discountVal = parseFloat(document.getElementById('discount').value) || 0;
-            const addChargesVal = parseFloat(document.getElementById('additional_charges').value) || 0;
             const specialReq = document.getElementById('special_requirements').value;
+
+            // Get numeric values from inputs (only declare once)
+            const packagePriceVal = parseFloat(document.getElementById('package_price').value) || 0;
+            const addChargesVal = parseFloat(document.getElementById('additional_charges').value) || 0;
+            const discountVal = parseFloat(document.getElementById('discount').value) || 0;
+            const advancePaidVal = parseFloat(document.getElementById('advance_paid').value) || 0;
+
+            // Calculate totals
+            const totalPriceVal = Math.max(0, (packagePriceVal + addChargesVal) - discountVal);
+            const balanceVal = Math.max(0, totalPriceVal - advancePaidVal);
+
             const status = statusSelect.value;
 
             const customerOption = customerSelect.options[customerSelect.selectedIndex];
@@ -292,143 +327,153 @@
 
             const packageOption = packageSelect.options[packageSelect.selectedIndex];
             const packageName = packageOption.text;
-            const packagePriceVal = parseFloat(packageOption.dataset.price) || 0;
-            const packageRef = packageOption.dataset['tour-ref'];
+            const packageRef = packageOption.dataset.tourRef;
 
-            const totalPriceVal = (packagePriceVal + addChargesVal) - discountVal;
-
-            const invoiceNumber = String(Math.floor(Math.random() * 9000 + 1)).padStart(4, '0');
+            const invoiceNumber = String(Math.floor(Math.random() * 9000 + 1000)).padStart(4, '0');
             const currentDate = new Date().toLocaleDateString('en-GB');
+
+            // Badge for status
             let badgeText = '';
-let badgeColor = '';
+            let badgeColor = '';
+            switch (status) {
+                case 'quotation':
+                    badgeText = 'QUOTATION';
+                    badgeColor = '#6c757d'; // gray
+                    break;
+                case 'accepted':
+                    badgeText = 'ACCEPTED';
+                    badgeColor = '#0d6efd'; // blue
+                    break;
+                case 'invoiced':
+                    badgeText = 'INVOICED';
+                    badgeColor = '#6610f2'; // purple
+                    break;
+                case 'partially_paid':
+                    badgeText = 'PARTIALLY PAID';
+                    badgeColor = '#ffc107'; // yellow
+                    break;
+                case 'paid':
+                    badgeText = 'PAID';
+                    badgeColor = '#198754'; // green
+                    break;
+                case 'cancelled':
+                    badgeText = 'CANCELLED';
+                    badgeColor = '#dc3545'; // red
+                    break;
+                default:
+                    badgeText = 'QUOTATION';
+                    badgeColor = '#6c757d';
+            }
 
-switch(status) {
-    case 'quotation':
-        badgeText = 'QUOTATION';
-        badgeColor = '#6c757d'; // gray
-        break;
-    case 'invoiced':
-        badgeText = 'INVOICE';
-        badgeColor = '#0d6efd'; // blue
-        break;
-    case 'confirmed':
-        badgeText = 'CONFIRMED';
-        badgeColor = '#198754'; // green
-        break;
-    case 'completed':
-        badgeText = 'COMPLETED';
-        badgeColor = '#20c997'; // teal
-        break;
-    case 'cancelled':
-        badgeText = 'CANCELLED';
-        badgeColor = '#dc3545'; // red
-        break;
-    default:
-        badgeText = 'QUOTATION';
-        badgeColor = '#6c757d';
-}
-
+            // Generate HTML for preview
             const html = `
-        <div style="max-width:900px; margin:0 auto; font-family:'Segoe UI', sans-serif; background:#fff; box-shadow:0 0 20px rgba(0,0,0,0.1);">
-            <div style="padding:40px; border-bottom:2px solid #e0e0e0;">
-                <div style="text-align:center; margin-bottom:30px;">
-                    <img src="{{ asset('images/vacayguider.png') }}" alt="Company Logo" style=" height:120px; object-fit:contain;">
-                </div>
-                <table style="width:100%; border:none; margin-top:10px;">
-    <tr>
-        <td style="vertical-align:top; width:60%;">
-            <h4 style="margin:0 0 12px 0; font-size:15px; font-weight:600; color:#2c3e50;">COMPANY DETAILS</h4>
-            <p style="margin:5px 0; font-size:14px;"><strong>Name:</strong> Vacay Guider</p>
-            <p style="margin:5px 0; font-size:14px;"><strong>Address:</strong> 123 Business Street</p>
-            <p style="margin:5px 0; font-size:14px;"><strong>Phone:</strong> +94 114 272 372</p>
-            <p style="margin:5px 0; font-size:14px;"><strong>Email:</strong> info@vacayguider.com</p>
-        </td>
-        <td style="vertical-align:top; text-align:right; width:40%;">
-            <div style="  margin-bottom:5px;">
-                  <h2 style="background:${badgeColor}; display:inline-block; margin:0; font-size:14px; border-radius:4px; font-weight:700; color:white; padding:3px 6px;">${badgeText}</h2>
-            </div>
-            <p style="margin:2px 0; font-size:13px;"><strong>Number:</strong> ${invoiceNumber}</p>
-            <p style="margin:2px 0; font-size:13px;"><strong>Date:</strong> ${currentDate}</p>
-        </td>
-    </tr>
-</table>
-                <div style="margin-top:20px;">
-                    <h4 style="margin:0 0 12px 0; font-size:15px; font-weight:600; color:#2c3e50;">CUSTOMER DETAILS</h4>
-                    <p style="margin:5px 0; font-size:14px;"><strong>Name:</strong> ${customerName}</p>
-                    <p style="margin:5px 0; font-size:14px;"><strong>Email:</strong> ${customerEmail}</p>
-                    <p style="margin:5px 0; font-size:14px;"><strong>Contact:</strong> ${customerPhone}</p>
-                </div>
-            </div>
-
-            <div style="padding-right:40px; padding-left:40px;padding-top:40px">
-                <h3 style="margin:0 0 15px 0; font-size:17px; font-weight:600; color:#2c3e50; padding-bottom:8px;">Package Details</h3>
-                <div style="background:#f8f9fa; padding:20px; border-radius:6px; margin-bottom:15px;">
-                  <div style="background:#f8f9fa;  border-radius:6px; margin-bottom:15px;">
-    <table style="width:100%; border-collapse:collapse;">
+<div style="max-width:800px; margin:0 auto; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color:#333; background:#fff; padding:20px;">
+    <table style="width:100%; border-bottom:2px solid #333; padding-bottom:20px; margin-bottom:30px;">
         <tr>
-            <td style="width:50%; vertical-align:top; padding-right:15px;">
-                <p style="margin:8px 0; font-size:14px; color:#333;"><strong>Tour Package:</strong> ${packageName}</p>
-                <p style="margin:8px 0; font-size:14px; color:#333;"><strong>Reference No:</strong> ${packageRef}</p>
-                <p style="margin:8px 0; font-size:14px; color:#333;"><strong>Travel Dates:</strong> ${travelStart || 'Not specified'} to ${travelEnd || 'Not specified'}</p>
+            <td style="vertical-align: top;">
+                <img src="{{ asset('images/vacayguider.png') }}" alt="Logo" style="height:80px;">
+                <div style="margin-top:15px; font-size:12px; line-height:1.4; color:#666;">
+                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
+                    22/14 C Asarappa Rd, Negombo 11400<br>
+                    +94 114 272 372 | info@vacayguider.com
+                </div>
             </td>
-
-            <td style="width:50%; vertical-align:top; padding-left:15px;">
-                <p style="margin:8px 0; font-size:14px; color:#333;"><strong>Passengers:</strong> ${adults} Adult(s)${children > 0 ? ', '+children+' Child(ren)' : ''}${infants > 0 ? ', '+infants+' Infant(s)' : ''}</p>
-                <p style="margin:8px 0; font-size:14px; color:#333;"><strong>Payment Status:</strong> ${paymentStatus.toUpperCase()}</p>
-                ${specialReq ? `<p style="margin:8px 0; font-size:14px; color:#333; white-space: pre-wrap;"><strong>Special Requirements:</strong> ${specialReq}</p>` : ''}
+            <td style="text-align:right; vertical-align: top;">
+                <h1 style="margin:0; font-size:24px; font-weight:300; letter-spacing:2px; text-transform:uppercase;">${badgeText}</h1>
+                <table style="margin-left:auto; margin-top:10px; font-size:13px; border-collapse:collapse;">
+                    <tr>
+                        <td style="padding:2px 10px; text-align:left; color:#888;">Reference:</td>
+                        <td style="padding:2px 10px; font-weight:bold;">-</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:2px 10px; text-align:left; color:#888;">Date:</td>
+                        <td style="padding:2px 10px;">${currentDate}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:2px 10px; text-align:left; color:#888;">Currency:</td>
+                        <td style="padding:2px 10px;">${currency}</td>
+                    </tr>
+                </table>
             </td>
         </tr>
     </table>
-</div>
 
-</div>
-                </div>
-  <div style="padding-right:40px; padding-left:40px;padding-bottom:40px">
-               <h3 style="margin:0 0 10px 0; font-size:16px; font-weight:600; color:#2c3e50; border-bottom:2px solid #2c3e50; padding-bottom:6px;">
-    Price Breakdown
-</h3>
-
-<table style="width:100%; border-collapse:collapse; background:#fff; border:1px solid #ddd;">
-    <thead>
-        <tr style="background:#f4f6f8;">
-            <th style="padding:8px 12px; text-align:left; font-size:13px; font-weight:600; color:#2c3e50; border-bottom:1px solid #ddd;">Description</th>
-            <th style="padding:8px 12px; text-align:right; font-size:13px; font-weight:600; color:#2c3e50; border-bottom:1px solid #ddd; width:180px;">Amount</th>
-        </tr>
-    </thead>
-    <tbody>
+    <table style="width:100%; margin-bottom:40px; font-size:13px;">
         <tr>
-            <td style="padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #eee;">Package Price</td>
-            <td style="padding:8px 12px; text-align:right; font-size:13px; color:#333; border-bottom:1px solid #eee;">${currency} ${packagePriceVal.toFixed(2)}</td>
+            <td style="width:50%; vertical-align:top;">
+                <h4 style="text-transform:uppercase; font-size:11px; color:#888; margin-bottom:10px; letter-spacing:1px;">Client Information</h4>
+                <div style="font-size:15px; font-weight:bold; margin-bottom:5px;">${customerName}</div>
+                <div style="color:#555;">${customerEmail}</div>
+                <div style="color:#555;">${customerPhone}</div>
+            </td>
+            <td style="width:50%; vertical-align:top; border-left:1px solid #eee; padding-left:30px;">
+                <h4 style="text-transform:uppercase; font-size:11px; color:#888; margin-bottom:10px; letter-spacing:1px;">Tour Information</h4>
+                <div style="margin-bottom:3px;"><strong>Package:</strong> ${packageName}</div>
+                <div style="margin-bottom:3px;"><strong>Reference:</strong> ${packageRef}</div>
+                <div style="margin-bottom:3px;"><strong>Duration:</strong> ${travelStart} to ${travelEnd}</div>
+                <div style="margin-bottom:3px;"><strong>Pax:</strong> ${adults} Adults, ${children} Children</div>
+            </td>
         </tr>
+    </table>
 
-        ${addChargesVal > 0 ? `
-                        <tr>
-                            <td style="padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #eee;">Additional Charges</td>
-                            <td style="padding:8px 12px; text-align:right; font-size:13px; color:#333; border-bottom:1px solid #eee;">${currency} ${addChargesVal.toFixed(2)}</td>
-                        </tr>` : ''}
+    <table style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:14px;">
+        <thead>
+            <tr style="background:#f9f9f9; border-top:1px solid #333; border-bottom:1px solid #333;">
+                <th style="padding:12px; text-align:left; text-transform:uppercase; font-size:11px;">Description</th>
+                <th style="padding:12px; text-align:right; text-transform:uppercase; font-size:11px;">Total (${currency})</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding:15px 12px; border-bottom:1px solid #eee;">
+                    <strong>Travel Package Arrangement</strong><br>
+                    <small style="color:#888;">Comprehensive tour package including accommodation and transport.</small>
+                </td>
+                <td style="padding:15px 12px; text-align:right; border-bottom:1px solid #eee; vertical-align:top;">
+                    ${packagePriceVal.toFixed(2)}
+                </td>
+            </tr>
+            ${addChargesVal > 0 ? `
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
+                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
+                    </tr>` : ''}
+            ${discountVal > 0 ? `
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
+                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
+                    </tr>` : ''}
+        </tbody>
+    </table>
 
-        ${discountVal > 0 ? `
-                        <tr>
-                            <td style="padding:8px 12px; font-size:13px; color:#333; border-bottom:1px solid #eee;">Discount</td>
-                            <td style="padding:8px 12px; text-align:right; font-size:13px; color:#dc3545; border-bottom:1px solid #eee;">- ${currency} ${discountVal.toFixed(2)}</td>
-                        </tr>` : ''}
+    <div style="width:40%; margin-left:auto;">
+        <table style="width:100%; font-size:14px; border-collapse:collapse;">
+            <tr>
+                <td style="padding:8px 0; color:#888;">Subtotal:</td>
+                <td style="padding:8px 0; text-align:right;">${totalPriceVal.toFixed(2)}</td>
+            </tr>
+            <tr>
+                <td style="padding:8px 0; color:#888;">Advance Paid:</td>
+                <td style="padding:8px 0; text-align:right; color:#1a7f37;">${advancePaidVal.toFixed(2)}</td>
+            </tr>
+            <tr style="border-top:1px solid #333;">
+                <td style="padding:12px 0; font-weight:bold; font-size:16px;">Balance Due:</td>
+                <td style="padding:12px 0; text-align:right; font-weight:bold; font-size:18px; color:#000;">${currency} ${balanceVal.toFixed(2)}</td>
+            </tr>
+        </table>
+    </div>
 
-        <tr style="background:#2c3e50;">
-            <td style="padding:10px 12px; font-size:14px; font-weight:700; color:white;">TOTAL AMOUNT</td>
-            <td style="padding:10px 12px; text-align:right; font-size:15px; font-weight:700; color:white;">${currency} ${totalPriceVal.toFixed(2)}</td>
-        </tr>
-    </tbody>
-</table>
-           
-            </div>
-<div style="page-break-before: always;"></div>
-            <div style="padding: 30px 40px; background: #f8f9fa; border-top: 2px solid #e0e0e0; text-align: center;">
-                <h4 style="margin: 0 0 10px 0; font-size: 18px; color: #2c3e50; font-weight: 600;">Thank You for Your Business!</h4>
-                <p style="margin: 8px 0; font-size: 14px; color: #666;">We look forward to serving you and making your travel experience memorable.</p>
-                <p style="margin: 8px 0; font-size: 14px; color: #666;">For any questions or assistance, please contact us.</p>
-                <p style="margin: 5px 0; font-size: 13px; color: #888;">Email: info@vacayguider.com | Phone: +94 114 272 372 | Website: www.vacayguider.com.com</p>
-            </div>
-        </div>`;
+    ${specialReq ? `
+            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
+                <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
+                <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
+            </div>` : ''}
+
+    <div style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
+        <p style="margin-bottom:5px;">This is a computer-generated document. No signature is required.</p>
+        <p><strong>Vacay Guider</strong> | www.vacayguider.com | Thank you for your business.</p>
+    </div>
+</div>`;
 
             document.getElementById('quotationPreviewBody').innerHTML = html;
             new bootstrap.Modal(document.getElementById('quotationPreviewModal')).show();
