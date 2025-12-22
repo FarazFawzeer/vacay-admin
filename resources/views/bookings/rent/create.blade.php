@@ -67,43 +67,58 @@
                         <input type="datetime-local" name="end_datetime" id="end_datetime" class="form-control" required>
                     </div>
 
-                    <div class="col-md-3 mb-3">
-                          <label class="form-label">Currency</label>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Currency</label>
                         <select name="currency" id="currency" class="form-control" required>
                             <option value="LKR">LKR</option>
                             <option value="USD">USD</option>
+                            <option value="EUR">USD</option>
                         </select>
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
                         <label class="form-label">Base Price</label>
-                        <input type="number" step="0.01" name="price" id="price" class="form-control calc"
-                            required>
+                        <input type="number" step="0.01" value="0" name="price" id="price"
+                            class="form-control calc" required>
                     </div>
 
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
                         <label class="form-label">Additional Charges</label>
-                        <input type="number" step="0.01" name="additional_price" id="additional_price"
+                        <input type="number" step="0.01" value="0" name="additional_price" id="additional_price"
                             class="form-control calc">
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-2 mb-3">
                         <label class="form-label">Discount</label>
-                        <input type="number" step="0.01" name="discount" id="discount" class="form-control calc">
+                        <input type="number" step="0.01" name="discount" id="discount" value="0"
+                            class="form-control calc">
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-2 mb-3">
                         <label class="form-label">Total Price</label>
                         <input type="number" step="0.01" name="total_price" id="total_price" class="form-control"
-                            readonly required>
+                            value="0" readonly required>
                     </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Advance Paid</label>
+                        <input type="number" step="0.01" name="advance_paid" id="advance_paid" class="form-control calc"
+                            value="0">
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Balance Amount</label>
+                        <input type="number" step="0.01" id="balance_amount" class="form-control" readonly>
+                    </div>
+
 
                     <!-- Status / Payment -->
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Booking Status</label>
                         <select name="status" id="status" class="form-select" required>
-                            <option value="quotation">Quotation</option>
-                            <option value="invoice">Invoice</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="Quotation">Quotation</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="Ivoiced">Invoiced</option>
+                            <option value="Partially Paid">Partially Paid</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Cancelled">Cancelled</option>
                         </select>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -123,10 +138,11 @@
                 </div>
 
                 <div class="text-end gap-2 d-flex justify-content-end">
-                       <a href="{{ route('admin.rent-vehicle-bookings.index') }}" class="btn btn-light" style="width:130px;">Back</a>
+                    <a href="{{ route('admin.rent-vehicle-bookings.index') }}" class="btn btn-light"
+                        style="width:130px;">Back</a>
                     <button type="button" class="btn btn-secondary" onclick="previewBooking()"
                         style="width:130px;">Preview</button>
-                    <button type="submit" class="btn btn-primary" style="width:130px;">Save Booking</button>
+                    <button type="submit" class="btn btn-primary" style="width:130px;">Save</button>
                 </div>
             </form>
         </div>
@@ -136,14 +152,16 @@
     <div class="modal fade" id="bookingPreviewModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header  text-white">
                     <h5 class="modal-title">Rent Vehicle Booking Preview</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="bookingPreviewBody"></div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success" onclick="generatePdf()">Generate PDF</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        style="width:130px;">Close</button>
+                    <button type="button" class="btn btn-success" onclick="generatePdf()" style="width:130px;">Generate
+                        PDF</button>
                 </div>
             </div>
         </div>
@@ -153,20 +171,36 @@
 @section('scripts')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+
             const priceInput = document.getElementById("price");
             const additionalInput = document.getElementById("additional_price");
             const discountInput = document.getElementById("discount");
             const totalInput = document.getElementById("total_price");
 
-            function calculateTotal() {
+            const advanceInput = document.getElementById("advance_paid");
+            const balanceInput = document.getElementById("balance_amount");
+
+            function calculateAmounts() {
                 const price = parseFloat(priceInput.value) || 0;
                 const add = parseFloat(additionalInput.value) || 0;
                 const discount = parseFloat(discountInput.value) || 0;
-                totalInput.value = (price + add) - discount;
+                const advance = parseFloat(advanceInput.value) || 0;
+
+                const total = (price + add) - discount;
+                const balance = total - advance;
+
+                totalInput.value = total.toFixed(2);
+                balanceInput.value = balance > 0 ? balance.toFixed(2) : '0.00';
             }
 
-            [priceInput, additionalInput, discountInput].forEach(el => el.addEventListener('input',
-                calculateTotal));
+            [
+                priceInput,
+                additionalInput,
+                discountInput,
+                advanceInput
+            ].forEach(el => el.addEventListener('input', calculateAmounts));
+
+            calculateAmounts();
         });
 
         function getImageUrl(imagePath) {
@@ -180,164 +214,198 @@
             const customerSelect = document.getElementById('customer_id');
             const vehicleSelect = document.getElementById('vehicle_id');
 
-            const customerName = customerSelect.options[customerSelect.selectedIndex].text;
-            const customerEmail = customerSelect.options[customerSelect.selectedIndex].dataset.email;
-            const customerPhone = customerSelect.options[customerSelect.selectedIndex].dataset.phone;
+            const customerOption = customerSelect.options[customerSelect.selectedIndex];
+            const vehicleOption = vehicleSelect.options[vehicleSelect.selectedIndex];
 
-            const vehicleName = vehicleSelect.options[vehicleSelect.selectedIndex].text;
+            const customerName = customerOption.text;
+            const customerEmail = customerOption.dataset.email;
+            const customerPhone = customerOption.dataset.phone;
 
-            // Get images array
+            const vehicleName = vehicleOption.text;
+
+            // Images
             let images = [];
-            const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
-            if (selectedOption && selectedOption.dataset.images) {
+            if (vehicleOption.dataset.images) {
                 try {
-                    images = JSON.parse(selectedOption.dataset.images);
+                    images = JSON.parse(vehicleOption.dataset.images);
                 } catch (e) {
-                    console.error("Invalid vehicle images JSON", e);
                     images = [];
                 }
             }
 
-            const mainImage = images.length ? getImageUrl(images[0]) : "https://via.placeholder.com/280x180?text=No+Image";
+            const mainImage = images.length ?
+                getImageUrl(images[0]) :
+                "https://via.placeholder.com/300x200?text=No+Image";
+
             const thumbnails = images.slice(1).map(img =>
-                `<img src="${getImageUrl(img)}" style="width:60px;height:45px;object-fit:cover;margin:0 3px;border-radius:3px;border:1px solid #ddd;">`
-                ).join("");
+                `<img src="${getImageUrl(img)}" style="width:55px;height:40px;object-fit:cover;margin-right:5px;border-radius:3px;border:1px solid #ddd;">`
+            ).join('');
 
-            const startDatetime = document.getElementById('start_datetime').value || 'N/A';
-            const endDatetime = document.getElementById('end_datetime').value || 'N/A';
+            // Dates
+            const startDatetime = document.getElementById('start_datetime').value || '-';
+            const endDatetime = document.getElementById('end_datetime').value || '-';
 
-            const price = parseFloat(document.getElementById('price').value || 0);
-            const addCharges = parseFloat(document.getElementById('additional_price').value || 0);
-            const discount = parseFloat(document.getElementById('discount').value || 0);
-            const total = price + addCharges - discount;
+            // Prices
+            const price = parseFloat(document.getElementById('price').value) || 0;
+            const addCharges = parseFloat(document.getElementById('additional_price').value) || 0;
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const advancePaid = parseFloat(document.getElementById('advance_paid').value) || 0;
+
+            const total = Math.max(0, (price + addCharges) - discount);
+            const balance = Math.max(0, total - advancePaid);
 
             const currency = document.getElementById('currency').value || 'LKR';
-            const paymentStatus = document.getElementById('payment_status').value.toUpperCase();
+            const paymentStatus = document.getElementById('payment_status').value;
             const status = document.getElementById('status').value;
             const note = document.getElementById('notes').value;
 
-            const invoiceNo = document.getElementById('invoice_no').value;
-            const invoiceDate = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-
-            const badgeColors = {
-                quotation: '#6c757d',
-                invoice: '#0d6efd',
-                confirmed: '#198754',
-                completed: '#20c997',
-                cancelled: '#dc3545'
-            };
-            const badgeColor = badgeColors[status] || '#6c757d';
+            const invoiceNo = document.getElementById('invoice_no').value || '-';
+            const invoiceDate = new Date().toLocaleDateString('en-GB');
 
             const html = `
-<div style="max-width:800px; margin:0 auto; font-family:Arial, sans-serif; background:#fff; padding:40px; border:1px solid #ddd;">
-    <!-- Company Logo & Details -->
-    <div style="text-align:center; margin-bottom:30px; padding-bottom:20px; border-bottom:2px solid #333;">
-        <div style="margin-bottom:15px;">
-            <img src="{{ asset('images/vacayguider.png') }}" alt="Company Logo" style="max-width:150px; height:auto;" onerror="this.style.display='none'">
-        </div>
-        <p style="margin:5px 0; color:#666; font-size:14px;">123 Business Street, City, State 12345</p>
-        <p style="margin:5px 0; color:#666; font-size:14px;">Phone:  +94 114 272 372 | Email: info@vacayguider.com</p>
-        <p style="margin:5px 0; color:#666; font-size:14px;">Website: www.vacayguider.com</p>
-    </div>
+<div style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
 
-    <!-- Invoice Header -->
-    <div style="text-align:center; margin-bottom:30px;">
-        <h2 style="margin:0 0 10px 0; font-size:24px; color:#333;">RENT INVOICE</h2>
-        <span style="background:${badgeColor}; color:white; padding:5px 15px; border-radius:3px; font-size:12px; font-weight:bold;">${status.toUpperCase()}</span>
-    </div>
-
-    <!-- Customer & Invoice Info -->
-    <table style="width:100%; margin-bottom:30px; border-collapse: collapse;border: none;">
+    <!-- Header -->
+    <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
         <tr>
-            <td style="vertical-align: top; width:50%; padding-right:15px;">
-                <h3 style="margin:0 0 10px 0; font-size:14px; color:#333; font-weight:bold; text-transform:uppercase;">Bill To:</h3>
-                <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Name:</strong> ${customerName}</p>
-                <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Email:</strong> ${customerEmail}</p>
-                <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Phone:</strong> ${customerPhone}</p>
+            <td>
+                <img src="{{ asset('images/vacayguider.png') }}" style="height:80px;">
+                <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
+                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
+                    Negombo, Sri Lanka<br>
+                    +94 114 272 372 | info@vacayguider.com
+                </div>
             </td>
-            <td style="vertical-align: top; width:50%; padding-left:15px; text-align:right;">
-                <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Invoice No:</strong> ${invoiceNo}</p>
-                <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Invoice Date:</strong> ${invoiceDate}</p>
-                <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Payment Status:</strong> 
-                    <span style="color:${badgeColor}; font-weight:bold;">${paymentStatus}</span>
-                </p>
+            <td style="text-align:right;">
+                <h1 style="margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">${status}</h1>
+                <table style="margin-left:auto;margin-top:10px;font-size:13px;">
+                    <tr>
+                        <td style="color:#888;padding:2px 10px;">Invoice No</td>
+                        <td>${invoiceNo}</td>
+                    </tr>
+                    <tr>
+                        <td style="color:#888;padding:2px 10px;">Date</td>
+                        <td>${invoiceDate}</td>
+                    </tr>
+                   
+                </table>
             </td>
         </tr>
     </table>
 
-    <!-- Vehicle Details -->
-    <div style="width:100%; text-align:center; margin:30px 0;">
-        <table style="max-width:600px; width:100%; margin:0 auto; background:#f9f9f9; border-radius:5px; border-collapse:collapse;">
+    <!-- Customer & Booking Info -->
+    <table style="width:100%;margin-bottom:35px;font-size:13px;">
+        <tr>
+            <td style="width:50%;vertical-align:top;">
+                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Client Information</h4>
+                <div style="font-size:15px;font-weight:bold;">${customerName}</div>
+                <div>${customerEmail}</div>
+                <div>${customerPhone}</div>
+            </td>
+            <td style="width:50%;vertical-align:top;border-left:1px solid #eee;padding-left:25px;">
+                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Booking Details</h4>
+                <div><strong>Vehicle:</strong> ${vehicleName}</div>
+                <div><strong>Pickup:</strong> ${startDatetime}</div>
+                <div><strong>Drop-off:</strong> ${endDatetime}</div>
+                <div><strong>Status:</strong> ${status}</div>
+                <div><strong>Payment:</strong> ${paymentStatus}</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Vehicle Preview -->
+   <table style="width:100%;margin-bottom:30px; border-collapse:collapse;">
+    <tr>
+          <!-- Vehicle Info -->
+        <td style="vertical-align:top; padding-right:15px;">
+            <h3 style="margin-top:0;">${vehicleName}</h3>
+            <p style="color:#666;font-size:13px;">${note || ''}</p>
+        </td>
+
+        <!-- Main Image -->
+        <td style="width:300px; vertical-align:top;">
+            <img src="${mainImage}" style="width:300px;height:200px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+        </td>
+
+        <!-- Sub Images -->
+        <td style="width:260px; vertical-align:top; padding-left:10px;">
+          ${images.length > 1 ? (function() {
+    let html = '<table style="width:100%; border-collapse:collapse;">';
+    const subImages = images.slice(1,5); // max 4 sub-images
+    for (let i = 0; i < subImages.length; i++) {
+        if (i % 2 === 0) html += '<tr>';
+        html += `<td style="padding:2px;">
+                        <img src="${getImageUrl(subImages[i])}" style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+                     </td>`;
+        if (i % 2 === 1) html += '</tr>';
+    }
+    if (subImages.length % 2 !== 0) html += '<td></td></tr>'; // close last row if odd
+    html += '</table>';
+    return html;
+})() : ''}
+        </td>
+
+      
+    </tr>
+</table>
+
+
+    <!-- Charges -->
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:30px;">
+        <thead>
+            <tr style="background:#f9f9f9;border-top:1px solid #333;border-bottom:1px solid #333;">
+                <th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;">Description</th>
+                <th style="padding:12px;text-align:right;font-size:11px;text-transform:uppercase;">Amount (${currency})</th>
+            </tr>
+        </thead>
+        <tbody>
             <tr>
-                <td style="padding:20px;">
-                    <h3 style="margin:0 0 15px 0; font-size:16px; color:#333; font-weight:bold; text-align:center;">Vehicle Details</h3>
-                    <table style="width:100%; border-collapse:collapse;">
-                        <tr>
-                            <td style="width:280px; vertical-align:top; text-align:center; padding-right:15px;">
-                                <img src="${mainImage}" style="width:280px; height:auto; max-height:180px; object-fit:cover; border-radius:5px; border:1px solid #ddd;" alt="Vehicle">
-                                <div style="margin-top:8px;">${thumbnails}</div>
-                            </td>
-                            <td style="vertical-align:top; text-align:left; padding-left:15px;">
-                                <p style="margin:0 0 10px 0; font-size:18px; color:#333; font-weight:bold;">${vehicleName}</p>
-                                <p style="margin:8px 0; color:#666; font-size:14px;"><strong>Start Date/Time:</strong> ${startDatetime}</p>
-                                <p style="margin:8px 0; color:#666; font-size:14px;"><strong>End Date/Time:</strong> ${endDatetime}</p>
-                            </td>
-                        </tr>
-                    </table>
+                <td style="padding:14px;border-bottom:1px solid #eee;">Base Rental Charge</td>
+                <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${price.toFixed(2)}</td>
+            </tr>
+            ${addCharges > 0 ? `
+                    <tr>
+                        <td style="padding:14px;border-bottom:1px solid #eee;">Additional Charges</td>
+                        <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${addCharges.toFixed(2)}</td>
+                    </tr>` : ''}
+            ${discount > 0 ? `
+                    <tr>
+                        <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
+                        <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">(${discount.toFixed(2)})</td>
+                    </tr>` : ''}
+        </tbody>
+    </table>
+
+    <!-- Totals -->
+    <div style="width:40%;margin-left:auto;">
+        <table style="width:100%;font-size:14px;">
+            <tr>
+                <td style="padding:8px 0;color:#888;">Subtotal</td>
+                <td style="padding:8px 0;text-align:right;">${total.toFixed(2)}</td>
+            </tr>
+            <tr>
+                <td style="padding:8px 0;color:#888;">Advance Paid</td>
+                <td style="padding:8px 0;text-align:right;color:#198754;">${advancePaid.toFixed(2)}</td>
+            </tr>
+            <tr style="border-top:1px solid #333;">
+                <td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance Due</td>
+                <td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">
+                    ${currency} ${balance.toFixed(2)}
                 </td>
             </tr>
         </table>
     </div>
 
-    <!-- Pricing Table -->
-    <table style="width:100%; border-collapse:collapse; margin-bottom:20px;page-break-before: always;">
-        <thead>
-            <tr style="background:#333; color:white;">
-                <th style="padding:12px; text-align:left; font-size:14px; font-weight:600;">Description</th>
-                <th style="padding:12px; text-align:right; font-size:14px; font-weight:600;">Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr style="border-bottom:1px solid #ddd;">
-                <td style="padding:12px; font-size:14px; color:#666;">Base Rental Price</td>
-                <td style="padding:12px; text-align:right; font-size:14px; color:#666;">${currency} ${price.toFixed(2)}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #ddd;">
-                <td style="padding:12px; font-size:14px; color:#666;">Additional Charges</td>
-                <td style="padding:12px; text-align:right; font-size:14px; color:#666;">${currency} ${addCharges.toFixed(2)}</td>
-            </tr>
-            <tr style="border-bottom:1px solid #ddd;">
-                <td style="padding:12px; font-size:14px; color:#666;">Discount</td>
-                <td style="padding:12px; text-align:right; font-size:14px; color:#28a745;">- ${currency} ${discount.toFixed(2)}</td>
-            </tr>
-            <tr style="background:#f0f0f0;">
-                <td style="padding:15px 12px; font-size:16px; color:#333; font-weight:bold;">TOTAL AMOUNT</td>
-                <td style="padding:15px 12px; text-align:right; font-size:18px; color:#333; font-weight:bold;">${currency} ${total.toFixed(2)}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- Notes -->
-    ${note ? `<div style="margin-bottom:20px; padding:15px; background:#fffbea; border-left:4px solid #ffc107;">
-            <p style="margin:0; font-size:14px; color:#666;"><strong>Note:</strong> ${note}</p>
-        </div>` : ''}
-
-    <!-- Footer -->
-    <div style="margin-top:40px; padding-top:20px; border-top:1px solid #ddd; text-align:center;">
-        <p style="margin:5px 0; color:#999; font-size:12px;">Thank you for your business!</p>
-        <p style="margin:5px 0; color:#999; font-size:12px;">For questions about this invoice, please contact us at info@vacayguider.com</p>
+    <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
+        This is a system generated invoice. No signature required.<br>
+        <strong>Vacay Guider</strong> | www.vacayguider.com
     </div>
-</div>
-`;
+
+</div>`;
 
             document.getElementById('bookingPreviewBody').innerHTML = html;
             new bootstrap.Modal(document.getElementById('bookingPreviewModal')).show();
         }
-
 
 
         // PDF Generation

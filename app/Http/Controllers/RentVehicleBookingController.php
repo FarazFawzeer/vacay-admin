@@ -69,44 +69,63 @@ class RentVehicleBookingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'customer_id'     => 'required|exists:customers,id',
-            'vehicle_id'      => 'required|exists:vehicle_details,id',
-            'start_datetime'  => 'required|date',
-            'end_datetime'    => 'required|date|after_or_equal:start_datetime',
-            'price'           => 'required|numeric|min:0',
+            'customer_id'      => 'required|exists:customers,id',
+            'vehicle_id'       => 'required|exists:vehicle_details,id',
+            'start_datetime'   => 'required|date',
+            'end_datetime'     => 'required|date|after_or_equal:start_datetime',
+            'price'            => 'required|numeric|min:0',
             'additional_price' => 'nullable|numeric|min:0',
-            'discount'        => 'nullable|numeric|min:0',
-            'tax'             => 'nullable|numeric|min:0',
-            'currency'        => 'required|string|max:5',
-            'status'          => 'required',
-            'payment_status'  => 'required',
+            'discount'         => 'nullable|numeric|min:0',
+            'tax'              => 'nullable|numeric|min:0',
+            'advance_paid'     => 'nullable|numeric|min:0',
+            'currency'         => 'required|string|max:5',
+            'status'           => 'required',
+            'payment_status'   => 'required',
+            'payment_method'   => 'nullable|string|max:50',
+            'notes'            => 'nullable|string',
         ]);
 
-        $total = $request->price + ($request->additional_price ?? 0) + ($request->tax ?? 0) - ($request->discount ?? 0);
+        // ✅ Calculate total amount
+        $total = $request->price
+            + ($request->additional_price ?? 0)
+            + ($request->tax ?? 0)
+            - ($request->discount ?? 0);
 
-        $last = RentVehicleBooking::latest()->first();
-        $invNo = 'RV-' . str_pad(($last?->inv_no && preg_match('/RV-(\d+)/', $last->inv_no, $m) ? intval($m[1]) + 1 : 1), 4, '0', STR_PAD_LEFT);
+        // ✅ Generate Invoice Number (RV-0001 format)
+        $lastBooking = RentVehicleBooking::latest()->first();
+        $nextNumber = 1;
 
+        if ($lastBooking && preg_match('/RV-(\d+)/', $lastBooking->inv_no, $matches)) {
+            $nextNumber = (int) $matches[1] + 1;
+        }
+
+        $invNo = 'RV-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+        // ✅ Store booking
         RentVehicleBooking::create([
-            'inv_no'         => $invNo,
-            'customer_id'    => $request->customer_id,
-            'vehicle_id'     => $request->vehicle_id,
-            'start_datetime' => $request->start_datetime,
-            'end_datetime'   => $request->end_datetime,
-            'price'          => $request->price,
+            'inv_no'           => $invNo,
+            'customer_id'      => $request->customer_id,
+            'vehicle_id'       => $request->vehicle_id,
+            'start_datetime'   => $request->start_datetime,
+            'end_datetime'     => $request->end_datetime,
+            'price'            => $request->price,
             'additional_price' => $request->additional_price ?? 0,
-            'discount'       => $request->discount ?? 0,
-            'tax'            => $request->tax ?? 0,
-            'total_price'    => $total,
-            'notes'          => $request->notes,
-            'currency'       => $request->currency,
-            'status'         => $request->status,
-            'payment_status' => $request->payment_status,
-            'payment_method' => $request->payment_method,
-            'created_by'     => Auth::id(),
+            'discount'         => $request->discount ?? 0,
+            'tax'              => $request->tax ?? 0,
+            'advance_paid'     => $request->advance_paid ?? 0,
+            'total_price'      => $total,
+            'currency'         => $request->currency,
+            'status'           => $request->status,
+            'payment_status'   => $request->payment_status,
+            'payment_method'   => $request->payment_method,
+            'notes'            => $request->notes,
+            'auth_id'          => Auth::id(),
+            'created_by'       => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Rent Vehicle Booking saved successfully!');
+        return redirect()
+            ->back()
+            ->with('success', 'Rent Vehicle Booking saved successfully!');
     }
 
     /**
@@ -135,39 +154,51 @@ class RentVehicleBookingController extends Controller
     public function update(Request $request, RentVehicleBooking $booking)
     {
         $request->validate([
-            'customer_id'     => 'required|exists:customers,id',
-            'vehicle_id'      => 'required|exists:vehicle_details,id',
-            'start_datetime'  => 'required|date',
-            'end_datetime'    => 'required|date|after_or_equal:start_datetime',
-            'price'           => 'required|numeric|min:0',
+            'customer_id'      => 'required|exists:customers,id',
+            'vehicle_id'       => 'required|exists:vehicle_details,id',
+            'start_datetime'   => 'required|date',
+            'end_datetime'     => 'required|date|after_or_equal:start_datetime',
+            'price'            => 'required|numeric|min:0',
             'additional_price' => 'nullable|numeric|min:0',
-            'discount'        => 'nullable|numeric|min:0',
-            'tax'             => 'nullable|numeric|min:0',
-            'currency'        => 'required|string|max:5',
-            'status'          => 'required',
-            'payment_status'  => 'required',
+            'discount'         => 'nullable|numeric|min:0',
+            'tax'              => 'nullable|numeric|min:0',
+            'advance_paid'     => 'nullable|numeric|min:0',
+            'currency'         => 'required|string|max:5',
+            'status'           => 'required',
+            'payment_status'   => 'required',
+            'payment_method'   => 'nullable|string|max:50',
+            'notes'            => 'nullable|string',
         ]);
 
-        $total = $request->price + ($request->additional_price ?? 0) + ($request->tax ?? 0) - ($request->discount ?? 0);
+        // ✅ Recalculate total
+        $total = $request->price
+            + ($request->additional_price ?? 0)
+            + ($request->tax ?? 0)
+            - ($request->discount ?? 0);
 
+        // ✅ Update booking
         $booking->update([
-            'customer_id'     => $request->customer_id,
-            'vehicle_id'      => $request->vehicle_id,
-            'start_datetime'  => $request->start_datetime,
-            'end_datetime'    => $request->end_datetime,
-            'price'           => $request->price,
+            'customer_id'      => $request->customer_id,
+            'vehicle_id'       => $request->vehicle_id,
+            'start_datetime'   => $request->start_datetime,
+            'end_datetime'     => $request->end_datetime,
+            'price'            => $request->price,
             'additional_price' => $request->additional_price ?? 0,
-            'discount'        => $request->discount ?? 0,
-            'tax'             => $request->tax ?? 0,
-            'total_price'     => $total,
-            'notes'           => $request->notes,
-            'currency'        => $request->currency,
-            'status'          => $request->status,
-            'payment_status'  => $request->payment_status,
-            'payment_method'  => $request->payment_method,
+            'discount'         => $request->discount ?? 0,
+            'tax'              => $request->tax ?? 0,
+            'advance_paid'     => $request->advance_paid ?? 0,
+            'total_price'      => $total,
+            'currency'         => $request->currency,
+            'status'           => $request->status,
+            'payment_status'   => $request->payment_status,
+            'payment_method'   => $request->payment_method,
+            'notes'            => $request->notes,
+            'auth_id'          => Auth::id(),
+            'updated_by'       => Auth::id(),
         ]);
 
-        return redirect()->route('admin.rent-vehicle-bookings.edit', $booking->id)
+        return redirect()
+            ->route('admin.rent-vehicle-bookings.edit', $booking->id)
             ->with('success', 'Rent Vehicle Booking updated successfully!');
     }
 
@@ -189,7 +220,7 @@ class RentVehicleBookingController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:quotation,invoice,confirmed,completed,cancelled',
+            'status' => 'required',
         ]);
 
         $booking = RentVehicleBooking::findOrFail($id);

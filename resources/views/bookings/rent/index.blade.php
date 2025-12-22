@@ -65,11 +65,12 @@
                     <label for="filterStatus" class="form-label">Status</label>
                     <select id="filterStatus" class="form-select">
                         <option value="">All</option>
-                        <option value="quotation">Quotation</option>
-                        <option value="invoice">Invoice</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="Quotation">Quotation</option>
+                        <option value="Accepted">Accepted</option>
+                        <option value="Ivoiced">Invoiced</option>
+                        <option value="Partially Paid">Partially Paid</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Cancelled">Cancelled</option>
                     </select>
                 </div>
 
@@ -216,7 +217,7 @@
                                 .catch(err => {
                                     console.error(err);
                                     Swal.fire('Error', 'Something went wrong.',
-                                    'error');
+                                        'error');
                                 });
                         }
                     });

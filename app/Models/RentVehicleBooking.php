@@ -22,6 +22,8 @@ class RentVehicleBooking extends Model
         'price',
         'additional_price',
         'discount',
+        'advance_paid',   // ✅ added
+        'auth_id',        // ✅ added
         'tax',
         'total_price',
         'start_datetime',
@@ -31,13 +33,14 @@ class RentVehicleBooking extends Model
     ];
 
     protected $casts = [
-        'start_datetime' => 'datetime',
-        'end_datetime' => 'datetime',
-        'price' => 'decimal:2',
+        'start_datetime'   => 'datetime',
+        'end_datetime'     => 'datetime',
+        'price'            => 'decimal:2',
         'additional_price' => 'decimal:2',
-        'discount' => 'decimal:2',
-        'tax' => 'decimal:2',
-        'total_price' => 'decimal:2',
+        'discount'         => 'decimal:2',
+        'advance_paid'     => 'decimal:2', // ✅ added
+        'tax'              => 'decimal:2',
+        'total_price'      => 'decimal:2',
     ];
 
     // Relationships

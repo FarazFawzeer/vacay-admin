@@ -27,6 +27,8 @@ class VehicleInvBooking extends Model
         'additional_charges',
         'discount',
         'total_price',
+        'advance_paid',
+        'auth_id',
         'note',
         'status',
         'payment_status',

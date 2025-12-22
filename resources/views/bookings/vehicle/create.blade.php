@@ -67,45 +67,87 @@
                     </div>
 
                     <!-- Pickup & Drop-off Details -->
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Pickup Location</label>
                         <input type="text" name="pickup_location" id="pickup_location" class="form-control"
                             placeholder="e.g., Colombo Airport">
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Pickup Date & Time</label>
                         <input type="datetime-local" name="pickup_datetime" id="pickup_datetime" class="form-control">
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Drop-off Location</label>
                         <input type="text" name="dropoff_location" id="dropoff_location" class="form-control"
                             placeholder="e.g., Kandy City Centre">
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Drop-off Date & Time</label>
                         <input type="datetime-local" name="dropoff_datetime" id="dropoff_datetime" class="form-control">
                     </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Mileage</label>
+                            <select name="mileage" id="mileageSelect" class="form-select" required>
+                                <option value="unlimited">Unlimited</option>
+                                <option value="limited">Limited</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3" id="totalKmField" style="display:none;">
+                            <label class="form-label">Total KM</label>
+                            <input type="number" name="total_km" id="totalKmInput" class="form-control"
+                                placeholder="Enter total KM">
+                        </div>
 
-                    <!-- Pricing -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Base Price</label>
-                        <input type="number" step="0.01" name="price" id="price" class="form-control">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Currency</label>
+                            <select name="currency" id="currency" class="form-select">
+                                <option value="LKR">LKR</option>
+                                <option value="USD">USD</option>
+                                <option value="EUR">EUR</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <!-- Pricing -->
+                    <!-- Pricing -->
+
+
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Base Price</label>
+                        <input type="number" step="0.01" name="price" id="price" class="form-control"
+                            value="0">
+                    </div>
+
+                    <div class="col-md-2 mb-3">
                         <label class="form-label">Additional Charges</label>
                         <input type="number" step="0.01" name="additional_charges" id="additional_charges"
                             class="form-control" value="0">
                     </div>
-                    <div class="col-md-4 mb-3">
+
+                    <div class="col-md-2 mb-3">
                         <label class="form-label">Discount</label>
                         <input type="number" step="0.01" name="discount" id="discount" class="form-control"
                             value="0">
                     </div>
-                    <div class="col-md-4 mb-3">
+
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Advance Paid</label>
+                        <input type="number" step="0.01" name="advance_paid" id="advance_paid" class="form-control"
+                            value="0">
+                    </div>
+
+                    <div class="col-md-2 mb-3">
                         <label class="form-label">Total Price</label>
                         <input type="number" step="0.01" name="total_price" id="total_price" class="form-control"
                             readonly>
                     </div>
+
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Balance</label>
+                        <input type="number" step="0.01" name="balance" id="balance" class="form-control"
+                            readonly>
+                    </div>
+
 
                     <!-- Status / Payment -->
                     <div class="col-md-4 mb-3">
@@ -116,37 +158,20 @@
                             <option value="paid">Paid</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Currency</label>
-                        <select name="currency" id="currency" class="form-select">
-                            <option value="LKR">LKR</option>
-                            <option value="USD">USD</option>
-                            <option value="EUR">EUR</option>
-                        </select>
-                    </div>
+
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Status</label>
                         <select name="status" id="status" class="form-select">
-                            <option value="quotation">Quotation</option>
-                            <option value="invoice">Invoice</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="completed">Completed</option>
-                            <option value="cancelled">Cancelled</option>
+                            <option value="Quotation" selected>Quotation</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="Invoiced">Invoiced</option>
+                            <option value="Partially Paid">Partially Paid</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Cancelled">Cancelled</option>
                         </select>
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Mileage</label>
-                        <select name="mileage" id="mileageSelect" class="form-select" required>
-                            <option value="unlimited">Unlimited</option>
-                            <option value="limited">Limited</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 mb-3" id="totalKmField" style="display:none;">
-                        <label class="form-label">Total KM</label>
-                        <input type="number" name="total_km" id="totalKmInput" class="form-control"
-                            placeholder="Enter total KM">
-                    </div>
+
 
                     <!-- Note -->
                     <div class="col-md-12 mb-3">
@@ -156,9 +181,15 @@
                 </div>
 
                 <div class="text-end gap-2 d-flex justify-content-end">
+                    <button type="button" class="btn btn-warning" style="width:120px;"
+                        onclick="window.location='{{ route('admin.vehicle-bookings.index') }}'">
+                        Back
+                    </button>
+
+
                     <button type="button" class="btn btn-secondary" onclick="previewBooking()"
                         style="width:120px;">Preview</button>
-                    <button type="submit" class="btn btn-primary" style="width:120px;">Save Booking</button>
+                    <button type="submit" class="btn btn-primary" style="width:120px;">Save </button>
                 </div>
             </form>
         </div>
@@ -168,7 +199,7 @@
     <div class="modal fade" id="bookingPreviewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header  text-white">
                     <h5 class="modal-title">Vehicle Booking Preview</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
@@ -185,6 +216,13 @@
 
 
     <script>
+        const priceInput = document.getElementById("price");
+        const additionalInput = document.getElementById("additional_charges");
+        const discountInput = document.getElementById("discount");
+        const advanceInput = document.getElementById("advance_paid");
+        const totalInput = document.getElementById("total_price");
+        const balanceInput = document.getElementById("balance");
+
         document.addEventListener("DOMContentLoaded", function() {
             // Mileage toggle
             const mileageSelect = document.getElementById("mileageSelect");
@@ -204,22 +242,23 @@
                 toggleTotalKm();
             }
 
-            // Total price calculation
-            const priceInput = document.getElementById("price");
-            const additionalInput = document.getElementById("additional_charges");
-            const discountInput = document.getElementById("discount");
-            const totalInput = document.getElementById("total_price");
-
             function calculateTotal() {
                 const price = parseFloat(priceInput.value) || 0;
                 const add = parseFloat(additionalInput.value) || 0;
                 const discount = parseFloat(discountInput.value) || 0;
-                totalInput.value = (price + add) - discount;
+                const advance = parseFloat(advanceInput.value) || 0;
+
+                const total = (price + add) - discount;
+                totalInput.value = total.toFixed(2);
+
+                const balance = Math.max(0, total - advance);
+                balanceInput.value = balance.toFixed(2);
             }
 
-            [priceInput, additionalInput, discountInput].forEach(el => el.addEventListener('input',
+            [priceInput, additionalInput, discountInput, advanceInput].forEach(el => el.addEventListener("input",
                 calculateTotal));
         });
+
 
 
         const STORAGE_BASE = "{{ asset('storage') }}";
@@ -239,195 +278,160 @@
             const customerSelect = document.getElementById('customer_id');
             const vehicleSelect = document.getElementById('vehicle_id');
 
-            const customerName = customerSelect.options[customerSelect.selectedIndex].text;
-            const customerEmail = customerSelect.options[customerSelect.selectedIndex].dataset.email;
-            const customerPhone = customerSelect.options[customerSelect.selectedIndex].dataset.phone;
+            const customerOption = customerSelect.options[customerSelect.selectedIndex];
+            const vehicleOption = vehicleSelect.options[vehicleSelect.selectedIndex];
 
-            const vehicleName = vehicleSelect.options[vehicleSelect.selectedIndex].text;
+            const customerName = customerOption ? customerOption.text : '-';
+            const customerEmail = customerOption ? customerOption.dataset.email : '-';
+            const customerPhone = customerOption ? customerOption.dataset.phone : '-';
 
-            // Get images array
+            const vehicleName = vehicleOption ? vehicleOption.text : '-';
+
+            // Images
             let images = [];
-            const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
-
-            if (selectedOption && selectedOption.dataset.images) {
+            if (vehicleOption && vehicleOption.dataset.images) {
                 try {
-                    images = JSON.parse(selectedOption.dataset.images);
+                    images = JSON.parse(vehicleOption.dataset.images);
                 } catch (e) {
-                    console.error("Invalid vehicle images JSON", e);
                     images = [];
                 }
             }
+            const mainImage = images.length ? getImageUrl(images[0]) : "https://via.placeholder.com/300x200?text=No+Image";
 
-            // --- 🚨 CRITICAL CHANGE HERE ---
-            // MAIN IMAGE
-            const mainImage = getImageUrl(images[0]);
+            // Dates & Locations
+            const pickupLocation = document.getElementById('pickup_location')?.value || '-';
+            const pickupDatetime = document.getElementById('pickup_datetime')?.value || '-';
+            const dropoffLocation = document.getElementById('dropoff_location')?.value || '-';
+            const dropoffDatetime = document.getElementById('dropoff_datetime')?.value || '-';
 
-            // SUB IMAGES (THUMBNAILS)
-            const thumbnails = images.slice(1).map(img => {
-                const url = getImageUrl(img); // Use the helper function
+            // Mileage
+            const mileage = document.getElementById('mileageSelect')?.value || '-';
+            const totalKm = document.getElementById('totalKmInput')?.value || '-';
 
-                return `
-            <img src="${url}" 
-                style="width:60px;height:45px;object-fit:cover;margin:0 3px;
-                border-radius:3px;border:1px solid #ddd;">
-        `;
-            }).join("");
+            // Prices
+            const price = parseFloat(document.getElementById('price')?.value) || 0;
+            const addCharges = parseFloat(document.getElementById('additional_charges')?.value) || 0;
+            const discount = parseFloat(document.getElementById('discount')?.value) || 0;
+            const advancePaid = parseFloat(document.getElementById('advance_paid')?.value) || 0;
 
-            const pickupLocation = document.getElementById('pickup_location').value;
-            const pickupDatetime = document.getElementById('pickup_datetime').value;
-            const dropoffLocation = document.getElementById('dropoff_location').value;
-            const dropoffDatetime = document.getElementById('dropoff_datetime').value;
+            const total = Math.max(0, (price + addCharges) - discount);
+            const balance = Math.max(0, total - advancePaid);
 
-            const price = parseFloat(document.getElementById('price').value || 0);
-            const addCharges = parseFloat(document.getElementById('additional_charges').value || 0);
-            const discount = parseFloat(document.getElementById('discount').value || 0);
-            const total = parseFloat(document.getElementById('total_price').value || 0);
+            const currency = document.getElementById('currency')?.value || 'LKR';
+            const paymentStatus = document.getElementById('payment_status')?.value || '-';
+            const status = document.getElementById('status')?.value || '-';
+            const note = document.getElementById('note')?.value || '';
 
-            const paymentStatus = document.getElementById('payment_status').value;
-            const currency = document.getElementById('currency').value;
-            const status = document.getElementById('status').value;
-            const note = document.getElementById('note').value;
-
-            // Generate invoice number (you can replace this with actual invoice number from database)
-            const invoiceNo = document.getElementById('invoice_no').value;
-            const invoiceDate = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-
-            const badgeColors = {
-                quotation: '#6c757d',
-                confirmed: '#198754',
-                completed: '#20c997',
-                cancelled: '#dc3545'
-            };
-            const badgeColor = badgeColors[status] || '#6c757d';
+            const invoiceNo = document.getElementById('invoice_no')?.value || '-';
+            const invoiceDate = new Date().toLocaleDateString('en-GB');
 
             const html = `
-    <div style="max-width:800px; margin:0 auto; font-family:Arial, sans-serif; background:#fff; padding:40px; border:1px solid #ddd;">
-        
-        <!-- Company Logo & Details (Centered) -->
-        <div style="text-align:center; margin-bottom:30px; padding-bottom:20px; border-bottom:2px solid #333;">
-            <div style="margin-bottom:15px;">
-                <img src="{{ asset('images/vacayguider.png') }}" alt="Company Logo" style="max-width:150px; height:auto;" onerror="this.style.display='none'">
-            </div>
-            <p style="margin:5px 0; color:#666; font-size:14px;">123 Business Street, City, State 12345</p>
-            <p style="margin:5px 0; color:#666; font-size:14px;">Phone:  +94 114 272 372 | Email: info@vacayguider.com</p>
-            <p style="margin:5px 0; color:#666; font-size:14px;">Website: www.vacayguider.com</p>
-        </div>
+<div style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
 
-        <!-- Invoice Header -->
-        <div style="text-align:center; margin-bottom:30px;">
-            <h2 style="margin:0 0 10px 0; font-size:24px; color:#333;">TRANSPORT INVOICE</h2>
-            <span style="background:${badgeColor}; color:white; padding:5px 15px; border-radius:3px; font-size:12px; font-weight:bold;">${status.toUpperCase()}</span>
-        </div>
-
-        <!-- Customer Details & Invoice Info -->
-      <!-- Customer Details & Invoice Info -->
-<table style="width:100%; margin-bottom:30px; border-collapse: collapse;border: none;">
-    <tr>
-        <!-- Left: Bill To -->
-        <td style="vertical-align: top; width:50%; padding-right:15px;">
-            <h3 style="margin:0 0 10px 0; font-size:14px; color:#333; font-weight:bold; text-transform:uppercase;">Bill To:</h3>
-            <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Name:</strong> ${customerName}</p>
-            <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Email:</strong> ${customerEmail}</p>
-            <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Phone:</strong> ${customerPhone}</p>
-        </td>
-
-        <!-- Right: Invoice Info -->
-        <td style="vertical-align: top; width:50%; padding-left:15px; text-align:right;">
-            <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Invoice No:</strong> ${invoiceNo}</p>
-            <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Invoice Date:</strong> ${invoiceDate}</p>
-            <p style="margin:5px 0; color:#666; font-size:14px;"><strong>Payment Status:</strong> 
-                <span style="color:${badgeColor}; font-weight:bold;">${paymentStatus.toUpperCase()}</span>
-            </p>
-        </td>
-    </tr>
-</table>
-
-
-        <!-- Vehicle Details -->
-<div style="width:100%; text-align:center; margin:30px 0;">
-    <table style="max-width:600px; width:100%; margin:0 auto; background:#f9f9f9; border-radius:5px; border-collapse:collapse;">
+    <!-- Header -->
+    <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
         <tr>
-            <td style="padding:20px;"> <!-- Add padding here -->
-                <!-- Section Header -->
-                <h3 style="margin:0 0 15px 0; font-size:16px; color:#333; font-weight:bold; text-align:center;">
-                    Vehicle Details
-                </h3>
-
-                <!-- Vehicle Row -->
-                <table style="width:100%; border-collapse:collapse;">
-                    <tr>
-                        <td style="width:280px; vertical-align:top; text-align:center; padding-right:15px;">
-                            <img src="${mainImage}" style="width:280px; height:auto; max-height:180px; object-fit:cover; border-radius:5px; border:1px solid #ddd;" alt="Vehicle">
-                            <div style="margin-top:8px;">
-                                ${thumbnails}
-                            </div>
-                        </td>
-                        <td style="vertical-align:top; text-align:left; padding-left:15px;">
-                            <p style="margin:0 0 10px 0; font-size:18px; color:#333; font-weight:bold;">${vehicleName}</p>
-                            <p style="margin:8px 0; color:#666; font-size:14px;"><strong>Pickup:</strong> ${pickupLocation}</p>
-                            <p style="margin:8px 0; color:#666; font-size:14px;"><strong>Date/Time:</strong> ${pickupDatetime || 'N/A'}</p>
-                            <p style="margin:8px 0; color:#666; font-size:14px;"><strong>Drop-off:</strong> ${dropoffLocation}</p>
-                            <p style="margin:8px 0; color:#666; font-size:14px;"><strong>Date/Time:</strong> ${dropoffDatetime || 'N/A'}</p>
-                        </td>
-                    </tr>
+            <td>
+                <img src="{{ asset('images/vacayguider.png') }}" style="height:80px;">
+                <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
+                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
+                    Negombo, Sri Lanka<br>
+                    +94 114 272 372 | info@vacayguider.com
+                </div>
+            </td>
+            <td style="text-align:right;">
+                <h1 style="margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">${status}</h1>
+                <table style="margin-left:auto;margin-top:10px;font-size:13px;">
+                    <tr><td style="color:#888;padding:2px 10px;">Invoice No</td><td>${invoiceNo}</td></tr>
+                    <tr><td style="color:#888;padding:2px 10px;">Date</td><td>${invoiceDate}</td></tr>
                 </table>
-
             </td>
         </tr>
     </table>
-</div>
 
+    <!-- Customer & Booking Info -->
+    <table style="width:100%;margin-bottom:35px;font-size:13px;">
+        <tr>
+            <td style="width:50%;vertical-align:top;">
+                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Client Information</h4>
+                <div style="font-size:15px;font-weight:bold;">${customerName}</div>
+                <div>${customerEmail}</div>
+                <div>${customerPhone}</div>
+            </td>
+            <td style="width:50%;vertical-align:top;border-left:1px solid #eee;padding-left:25px;">
+                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Booking Details</h4>
+                <div><strong>Vehicle:</strong> ${vehicleName}</div>
+                <div><strong>Pickup Location:</strong> ${pickupLocation}</div>
+                <div><strong>Pickup Date & Time:</strong> ${pickupDatetime}</div>
+                <div><strong>Drop-off Location:</strong> ${dropoffLocation}</div>
+                <div><strong>Drop-off Date & Time:</strong> ${dropoffDatetime}</div>
+                <div><strong>Mileage:</strong> ${mileage} ${mileage === 'limited' ? `(${totalKm} KM)` : ''}</div>
+    
+            </td>
+        </tr>
+    </table>
 
+    <!-- Vehicle Preview -->
+    <table style="width:100%;margin-bottom:30px; border-collapse:collapse;">
+        <tr>
+            <td style="vertical-align:top; padding-right:15px;">
+                <h3 style="margin-top:0;">${vehicleName}</h3>
+                <p style="color:#666;font-size:13px;">${note}</p>
+            </td>
+            <td style="width:300px; vertical-align:top;">
+                <img src="${mainImage}" style="width:300px;height:200px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+            </td>
+            <td style="width:260px; vertical-align:top; padding-left:10px;">
+                ${images.length > 1 ? (function(){
+                    let html = '<table style="width:100%; border-collapse:collapse;">';
+                    const subImages = images.slice(1,5);
+                    for(let i=0;i<subImages.length;i++){
+                        if(i%2===0) html += '<tr>';
+                        html += `<td style="padding:2px;"><img src="${getImageUrl(subImages[i])}" style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;"></td>`;
+                        if(i%2===1) html += '</tr>';
+                    }
+                    if(subImages.length%2!==0) html += '<td></td></tr>';
+                    html += '</table>';
+                    return html;
+                })() : ''}
+            </td>
+        </tr>
+    </table>
 
+    <!-- Charges -->
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:30px;">
+        <thead>
+            <tr style="background:#f9f9f9;border-top:1px solid #333;border-bottom:1px solid #333;">
+                <th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;">Description</th>
+                <th style="padding:12px;text-align:right;font-size:11px;text-transform:uppercase;">Amount (${currency})</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td style="padding:14px;border-bottom:1px solid #eee;">Base Rental Charge</td><td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${price.toFixed(2)}</td></tr>
+            ${addCharges > 0 ? `<tr><td style="padding:14px;border-bottom:1px solid #eee;">Additional Charges</td><td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${addCharges.toFixed(2)}</td></tr>` : ''}
+            ${discount > 0 ? `<tr><td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td><td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">(${discount.toFixed(2)})</td></tr>` : ''}
+        </tbody>
+    </table>
 
-        <!-- Pricing Table -->
-        <table style="width:100%; border-collapse:collapse; margin-bottom:20px;page-break-before: always;">
-            <thead>
-                <tr style="background:#333; color:white;">
-                    <th style="padding:12px; text-align:left; font-size:14px; font-weight:600;">Description</th>
-                    <th style="padding:12px; text-align:right; font-size:14px; font-weight:600;">Amount</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr style="border-bottom:1px solid #ddd;">
-                    <td style="padding:12px; font-size:14px; color:#666;">Base Rental Price</td>
-                    <td style="padding:12px; text-align:right; font-size:14px; color:#666;">${currency} ${price.toFixed(2)}</td>
-                </tr>
-                <tr style="border-bottom:1px solid #ddd;">
-                    <td style="padding:12px; font-size:14px; color:#666;">Additional Charges</td>
-                    <td style="padding:12px; text-align:right; font-size:14px; color:#666;">${currency} ${addCharges.toFixed(2)}</td>
-                </tr>
-                <tr style="border-bottom:1px solid #ddd;">
-                    <td style="padding:12px; font-size:14px; color:#666;">Discount</td>
-                    <td style="padding:12px; text-align:right; font-size:14px; color:#28a745;">- ${currency} ${discount.toFixed(2)}</td>
-                </tr>
-                <tr style="background:#f0f0f0;">
-                    <td style="padding:15px 12px; font-size:16px; color:#333; font-weight:bold;">TOTAL AMOUNT</td>
-                    <td style="padding:15px 12px; text-align:right; font-size:18px; color:#333; font-weight:bold;">${currency} ${total.toFixed(2)}</td>
-                </tr>
-            </tbody>
+    <!-- Totals -->
+    <div style="width:40%;margin-left:auto;">
+        <table style="width:100%;font-size:14px;">
+            <tr><td style="padding:8px 0;color:#888;">Subtotal</td><td style="padding:8px 0;text-align:right;">${total.toFixed(2)}</td></tr>
+            <tr><td style="padding:8px 0;color:#888;">Advance Paid</td><td style="padding:8px 0;text-align:right;color:#198754;">${advancePaid.toFixed(2)}</td></tr>
+            <tr style="border-top:1px solid #333;"><td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance Due</td><td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">${currency} ${balance.toFixed(2)}</td></tr>
         </table>
-
-        <!-- Notes -->
-        ${note ? `<div style="margin-bottom:20px; padding:15px; background:#fffbea; border-left:4px solid #ffc107;">
-                                                <p style="margin:0; font-size:14px; color:#666;"><strong>Note:</strong> ${note}</p>
-                                            </div>` : ''}
-
-        <!-- Footer -->
-        <div style="margin-top:40px; padding-top:20px; border-top:1px solid #ddd; text-align:center;">
-            <p style="margin:5px 0; color:#999; font-size:12px;">Thank you for your business!</p>
-            <p style="margin:5px 0; color:#999; font-size:12px;">For questions about this invoice, please contact us at info@vacayguider.com</p>
-        </div>
     </div>
-    `;
+
+    <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
+        This is a system generated invoice. No signature required.<br>
+        <strong>Vacay Guider</strong> | www.vacayguider.com
+    </div>
+</div>`;
 
             document.getElementById('bookingPreviewBody').innerHTML = html;
             new bootstrap.Modal(document.getElementById('bookingPreviewModal')).show();
         }
+
 
 
 

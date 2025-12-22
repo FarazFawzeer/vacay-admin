@@ -16,34 +16,36 @@
     <tbody>
         @forelse($bookings as $booking)
             <tr id="booking-{{ $booking->id }}">
-                
+
                 {{-- Invoice No --}}
                 <td>{{ $booking->inv_no }}</td>
 
                 {{-- Customer --}}
-                <td>{{ $booking->customer->name ?? $booking->customer_name ?? '-' }}</td>
+                <td>{{ $booking->customer->name ?? ($booking->customer_name ?? '-') }}</td>
 
                 {{-- Vehicle --}}
                 <td>
-                    {{ $booking->vehicle->name ?? $booking->vehicle_model ?? '-' }}
-                    @if(!empty($booking->vehicle_type))
+                    {{ $booking->vehicle->name ?? ($booking->vehicle_model ?? '-') }}
+                    @if (!empty($booking->vehicle_type))
                         <br><small class="text-muted">{{ ucfirst($booking->vehicle_type) }}</small>
                     @endif
                 </td>
 
                 {{-- Pickup Location --}}
                 <td>{{ $booking->pickup_location }} <br>
-                    <small class="text-muted">{{ \Carbon\Carbon::parse($booking->pickup_datetime)->format('d M Y, h:i A') }}</small>
+                    <small
+                        class="text-muted">{{ \Carbon\Carbon::parse($booking->pickup_datetime)->format('d M Y, h:i A') }}</small>
                 </td>
 
                 {{-- Dropoff Location --}}
                 <td>{{ $booking->dropoff_location }} <br>
-                    <small class="text-muted">{{ \Carbon\Carbon::parse($booking->dropoff_datetime)->format('d M Y, h:i A') }}</small>
+                    <small
+                        class="text-muted">{{ \Carbon\Carbon::parse($booking->dropoff_datetime)->format('d M Y, h:i A') }}</small>
                 </td>
 
                 {{-- Total KM --}}
                 <td>
-                    @if($booking->mileage == 'unlimited')
+                    @if ($booking->mileage == 'unlimited')
                         Unlimited
                     @else
                         {{ $booking->total_km }} km
@@ -56,55 +58,50 @@
                 {{-- Status Dropdown --}}
                 <td>
                     <div class="dropdown">
-                        <button class="btn btn-sm status-dropdown-btn
-                            @switch($booking->status)
-                                @case('quotation') btn-secondary @break
-                                @case('invoice') btn-info @break
-                                @case('confirmed') btn-primary @break
-                                @case('completed') btn-success @break
-                                @case('cancelled') btn-danger @break
-                                @default btn-secondary
-                            @endswitch
-                            dropdown-toggle"
-                            type="button"
-                            id="statusDropdown{{ $booking->id }}"
-                            data-bs-toggle="dropdown"
+                        <button
+                            class="btn btn-sm status-dropdown-btn
+        @switch($booking->status)
+            @case('Quotation') btn-secondary @break
+            @case('Accepted') btn-primary @break
+            @case('Invoiced') btn-info @break
+            @case('Partially Paid') btn-warning @break
+            @case('Paid') btn-success @break
+            @case('Cancelled') btn-danger @break
+            @default btn-secondary
+        @endswitch
+        dropdown-toggle"
+                            type="button" id="statusDropdown{{ $booking->id }}" data-bs-toggle="dropdown"
                             aria-expanded="false">
-                            {{ ucfirst(str_replace('_',' ', $booking->status)) }}
+                            {{ $booking->status }}
                         </button>
 
                         <ul class="dropdown-menu" aria-labelledby="statusDropdown{{ $booking->id }}">
-                            @foreach(['quotation', 'invoice', 'confirmed', 'completed', 'cancelled'] as $statusOption)
+                            @foreach (['Quotation', 'Accepted', 'Invoiced', 'Partially Paid', 'Paid', 'Cancelled'] as $statusOption)
                                 <li>
-                                    <a class="dropdown-item change-status"
-                                       href="#"
-                                       data-id="{{ $booking->id }}"
-                                       data-status="{{ $statusOption }}">
-                                        {{ ucfirst(str_replace('_',' ', $statusOption)) }}
+                                    <a class="dropdown-item change-status" href="#" data-id="{{ $booking->id }}"
+                                        data-status="{{ $statusOption }}">
+                                        {{ $statusOption }}
                                     </a>
                                 </li>
                             @endforeach
                         </ul>
                     </div>
+
                 </td>
 
                 {{-- Actions --}}
                 <td class="text-center">
-                    <a href="{{ route('admin.vehicle-bookings.show', $booking->id) }}"
-                       class="icon-btn text-info"
-                       title="View Booking">
+                    <a href="{{ route('admin.vehicle-bookings.show', $booking->id) }}" class="icon-btn text-info"
+                        title="View Booking">
                         <i class="bi bi-eye-fill fs-5"></i>
                     </a>
 
-                    <a href="{{ route('admin.vehicle-bookings.edit', $booking->id) }}"
-                       class="icon-btn text-primary"
-                       title="Edit Booking">
+                    <a href="{{ route('admin.vehicle-bookings.edit', $booking->id) }}" class="icon-btn text-primary"
+                        title="Edit Booking">
                         <i class="bi bi-pencil-square fs-5"></i>
                     </a>
 
-                    <button type="button"
-                        data-id="{{ $booking->id }}"
-                        class="icon-btn text-danger delete-booking"
+                    <button type="button" data-id="{{ $booking->id }}" class="icon-btn text-danger delete-booking"
                         title="Delete Booking">
                         <i class="bi bi-trash-fill fs-5"></i>
                     </button>

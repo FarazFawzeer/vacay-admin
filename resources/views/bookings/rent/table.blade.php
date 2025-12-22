@@ -7,8 +7,10 @@
             <th>Start</th>
             <th>End</th>
             <th>Total Price</th>
-            <th>Status</th>
             <th>Payment</th>
+            <th>Created By</th>
+            <th>Status</th>
+
             <th>Action</th>
         </tr>
     </thead>
@@ -32,38 +34,46 @@
                 </td>
 
                 <td>{{ $booking->currency }} {{ number_format($booking->total_price, 2) }}</td>
-
-              <td>
-    <div class="dropdown">
-        <button class="btn btn-sm btn-secondary dropdown-toggle"
-                type="button"
-                id="statusDropdown{{ $booking->id }}"
-                data-bs-toggle="dropdown">
-            {{ ucfirst($booking->status) }}
-        </button>
-
-        <ul class="dropdown-menu">
-            @foreach(['quotation', 'invoice', 'confirmed', 'completed', 'cancelled'] as $status)
-                <li>
-                    <a class="dropdown-item change-status"
-                       href="#"
-                       data-id="{{ $booking->id }}"
-                       data-status="{{ $status }}">
-                        {{ ucfirst($status) }}
-                    </a>
-                </li>
-            @endforeach
-        </ul>
-    </div>
-</td>
-
-
                 <td>{{ ucfirst($booking->payment_status) }}</td>
+                <td> {{ $booking->created_by ?? '-' }} - {{ $booking->creator->name ?? '-' }}</td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-secondary dropdown-toggle" type="button"
+                            id="statusDropdown{{ $booking->id }}" data-bs-toggle="dropdown">
+                            {{ ucfirst($booking->status) }}
+                        </button>
+
+                        @php
+                            $statuses = [
+                                'quotation' => ['label' => 'Quotation', 'color' => 'secondary'],
+                                'accepted' => ['label' => 'Accepted', 'color' => 'info'],
+                                'invoiced' => ['label' => 'Invoiced', 'color' => 'primary'],
+                                'partially_paid' => ['label' => 'Partially Paid', 'color' => 'warning'],
+                                'paid' => ['label' => 'Paid', 'color' => 'success'],
+                                'cancelled' => ['label' => 'Cancelled', 'color' => 'danger'],
+                            ];
+                        @endphp
+
+                        <ul class="dropdown-menu">
+                            @foreach ($statuses as $value => $status)
+                                <li>
+                                    <a class="dropdown-item change-status" href="#" data-id="{{ $booking->id }}"
+                                        data-status="{{ $value }}">
+                                        {{ $status['label'] }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+
+                    </div>
+                </td>
+
+
+
 
                 <td class="text-center">
 
-                    <a href="{{ route('admin.rent-vehicle-bookings.show', $booking->id) }}"
-                        class="icon-btn text-info">
+                    <a href="{{ route('admin.rent-vehicle-bookings.show', $booking->id) }}" class="icon-btn text-info">
                         <i class="bi bi-eye-fill fs-5"></i>
                     </a>
 
@@ -72,8 +82,7 @@
                         <i class="bi bi-pencil-square fs-5"></i>
                     </a>
 
-                    <button data-id="{{ $booking->id }}"
-                            class="icon-btn text-danger delete-booking">
+                    <button data-id="{{ $booking->id }}" class="icon-btn text-danger delete-booking">
                         <i class="bi bi-trash-fill fs-5"></i>
                     </button>
 

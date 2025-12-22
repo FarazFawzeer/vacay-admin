@@ -66,11 +66,12 @@
                     <label for="filterStatus" class="form-label">Status</label>
                     <select id="filterStatus" class="form-select">
                         <option value="">All</option>
-                        <option value="quotation">Quotation</option>
-                        <option value="invoice">Invoice</option>
-                        <option value="confirmed">Confirmed</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
+                        <option value="Quotation" selected>Quotation</option>
+                        <option value="Accepted">Accepted</option>
+                        <option value="Invoiced">Invoiced</option>
+                        <option value="Partially Paid">Partially Paid</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Cancelled">Cancelled</option>
                     </select>
                 </div>
 
