@@ -57,60 +57,20 @@
                     </div>
 
                     <!-- Start & End -->
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Start Date & Time</label>
                         <input type="datetime-local" name="start_datetime" id="start_datetime" class="form-control"
                             required>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">End Date & Time</label>
                         <input type="datetime-local" name="end_datetime" id="end_datetime" class="form-control" required>
                     </div>
 
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Currency</label>
-                        <select name="currency" id="currency" class="form-control" required>
-                            <option value="LKR">LKR</option>
-                            <option value="USD">USD</option>
-                            <option value="EUR">USD</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Base Price</label>
-                        <input type="number" step="0.01" value="0" name="price" id="price"
-                            class="form-control calc" required>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Additional Charges</label>
-                        <input type="number" step="0.01" value="0" name="additional_price" id="additional_price"
-                            class="form-control calc">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Discount</label>
-                        <input type="number" step="0.01" name="discount" id="discount" value="0"
-                            class="form-control calc">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Total Price</label>
-                        <input type="number" step="0.01" name="total_price" id="total_price" class="form-control"
-                            value="0" readonly required>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Advance Paid</label>
-                        <input type="number" step="0.01" name="advance_paid" id="advance_paid" class="form-control calc"
-                            value="0">
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Balance Amount</label>
-                        <input type="number" step="0.01" id="balance_amount" class="form-control" readonly>
-                    </div>
 
 
                     <!-- Status / Payment -->
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Booking Status</label>
                         <select name="status" id="status" class="form-select" required>
                             <option value="Quotation">Quotation</option>
@@ -121,7 +81,7 @@
                             <option value="Cancelled">Cancelled</option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Payment Status</label>
                         <select name="payment_status" id="payment_status" class="form-select" required>
                             <option value="unpaid">Unpaid</option>
@@ -135,6 +95,87 @@
                         <label class="form-label">Notes</label>
                         <textarea name="notes" id="notes" rows="4" class="form-control"></textarea>
                     </div>
+
+                    {{-- Price & Payment Details --}}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-light">
+                                <strong>Price & Payment Details</strong>
+                            </div>
+                            <div class="card-body">
+
+                                {{-- Currency --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Currency</label>
+                                    <div class="col-sm-10">
+                                        <select name="currency" id="currency" class="form-select" required>
+                                            <option value="LKR">LKR</option>
+                                            <option value="USD">USD</option>
+                                            <option value="EUR">EUR</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {{-- Base Price --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Base Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" value="0" name="price" id="price"
+                                            class="form-control calc" required>
+                                    </div>
+                                </div>
+
+                                {{-- Additional Charges --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Additional Charges</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" value="0" name="additional_price"
+                                            id="additional_price" class="form-control calc">
+                                    </div>
+                                </div>
+
+                                {{-- Discount --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Discount</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" name="discount" id="discount"
+                                            value="0" class="form-control calc">
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                {{-- Total Price --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Total Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" name="total_price" id="total_price"
+                                            class="form-control" value="0" readonly required>
+                                    </div>
+                                </div>
+
+                                {{-- Advance Paid --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Advance Paid</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" name="advance_paid" id="advance_paid"
+                                            class="form-control calc" value="0">
+                                    </div>
+                                </div>
+
+                                {{-- Balance Amount --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Balance Amount</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" id="balance_amount" class="form-control"
+                                            readonly>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="text-end gap-2 d-flex justify-content-end">
@@ -335,8 +376,8 @@
     for (let i = 0; i < subImages.length; i++) {
         if (i % 2 === 0) html += '<tr>';
         html += `<td style="padding:2px;">
-                        <img src="${getImageUrl(subImages[i])}" style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
-                     </td>`;
+                            <img src="${getImageUrl(subImages[i])}" style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+                         </td>`;
         if (i % 2 === 1) html += '</tr>';
     }
     if (subImages.length % 2 !== 0) html += '<td></td></tr>'; // close last row if odd
@@ -364,15 +405,15 @@
                 <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${price.toFixed(2)}</td>
             </tr>
             ${addCharges > 0 ? `
-                    <tr>
-                        <td style="padding:14px;border-bottom:1px solid #eee;">Additional Charges</td>
-                        <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${addCharges.toFixed(2)}</td>
-                    </tr>` : ''}
+                        <tr>
+                            <td style="padding:14px;border-bottom:1px solid #eee;">Additional Charges</td>
+                            <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${addCharges.toFixed(2)}</td>
+                        </tr>` : ''}
             ${discount > 0 ? `
-                    <tr>
-                        <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
-                        <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">(${discount.toFixed(2)})</td>
-                    </tr>` : ''}
+                        <tr>
+                            <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
+                            <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">(${discount.toFixed(2)})</td>
+                        </tr>` : ''}
         </tbody>
     </table>
 

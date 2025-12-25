@@ -130,7 +130,7 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.enquiry.airTicket') }}">
                                 <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
-                                Air Ticket 
+                                Air Ticket
                             </a>
                         </li>
                         <li class="sub-nav-item">
@@ -139,7 +139,7 @@
                                 Driving Permit Request
                             </a>
                         </li>
-                          <li class="sub-nav-item">
+                        <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.enquiry.chatbot') }}">
                                 <iconify-icon icon="solar:circle-outline" style="margin-right:5px;"></iconify-icon>
                                 Chatbot
@@ -181,7 +181,7 @@
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.vehicles.index') }}">Vehicles</a>
                         </li>
-                         <li class="sub-nav-item">
+                        <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.passports.index') }}">Passport</a>
                         </li>
                         <li class="sub-nav-item">
@@ -237,10 +237,13 @@
                             <a class="sub-nav-link" href="{{ route('admin.vehicle-bookings.index') }}">Transport
                                 Solutions</a>
                         </li>
+                         <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.airline-bookings.index') }}">AirLine</a>
+                        </li>
                         <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.visa-bookings.index') }}">Visa</a>
                         </li>
-                        
+
                     </ul>
                 </div>
             </li>

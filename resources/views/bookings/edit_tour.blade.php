@@ -82,14 +82,12 @@
                     <div class="col-md-2">
                         <label for="travel_start_date" class="form-label">Travel Start Date</label>
                         <input type="date" name="travel_start_date" id="travel_start_date" class="form-control"
-value="{{ $booking->travel_date?->format('Y-m-d') ?? '' }}"
-                            required>
+                            value="{{ $booking->travel_date?->format('Y-m-d') ?? '' }}" required>
                     </div>
                     <div class="col-md-2">
                         <label for="travel_end_date" class="form-label">Travel End Date</label>
                         <input type="date" name="travel_end_date" id="travel_end_date" class="form-control"
-value="{{ $booking->travel_end_date?->format('Y-m-d') ?? '' }}"
-                            required>
+                            value="{{ $booking->travel_end_date?->format('Y-m-d') ?? '' }}" required>
                         <div id="travel_end_date_error" class="text-danger mt-1"></div>
                     </div>
                     <div class="col-md-2">
@@ -117,38 +115,7 @@ value="{{ $booking->travel_end_date?->format('Y-m-d') ?? '' }}"
                     </div>
                 </div>
 
-                {{-- Pricing --}}
-                <div class="row mb-3">
-                    <div class="col-md-2">
-                        <label for="package_price" class="form-label">Package Price</label>
-                        <input type="number" name="package_price" id="package_price" class="form-control"
-                            step="0.01" value="{{ $booking->package_price }}" required>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="additional_charges" class="form-label">Additional Charges</label>
-                        <input type="number" name="additional_charges" id="additional_charges" class="form-control"
-                            step="0.01" value="{{ $booking->tax }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="discount" class="form-label">Discount</label>
-                        <input type="number" name="discount" id="discount" class="form-control" step="0.01"
-                            value="{{ $booking->discount }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="total_price" class="form-label">Total Price</label>
-                        <input type="number" name="total_price" id="total_price" class="form-control" step="0.01"
-                            readonly>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="advance_paid" class="form-label">Advance Paid</label>
-                        <input type="number" name="advance_paid" id="advance_paid" class="form-control" step="0.01"
-                            value="{{ $booking->advance_paid }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="balance_amount" class="form-label">Balance Amount</label>
-                        <input type="number" id="balance_amount" class="form-control" step="0.01" readonly>
-                    </div>
-                </div>
+
 
                 {{-- Status --}}
                 <div class="row mb-3">
@@ -186,6 +153,75 @@ value="{{ $booking->travel_end_date?->format('Y-m-d') ?? '' }}"
                     <label for="special_requirements" class="form-label">Special Requirements / Notes</label>
                     <textarea name="special_requirements" id="special_requirements" class="form-control" rows="3">{{ $booking->special_requirements }}</textarea>
                 </div>
+
+                {{-- Price & Payment Details --}}
+                <div class="col-md-6 mb-3">
+                    <div class="card border-secondary">
+                        <div class="card-header bg-light">
+                            <strong>Price & Payment Details</strong>
+                        </div>
+                        <div class="card-body">
+
+                            {{-- Package Price --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Package Price</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="package_price" id="package_price" class="form-control"
+                                        step="0.01" value="{{ $booking->package_price }}" required>
+                                </div>
+                            </div>
+
+                            {{-- Additional Charges --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Additional Charges</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="additional_charges" id="additional_charges"
+                                        class="form-control" step="0.01" value="{{ $booking->tax }}">
+                                </div>
+                            </div>
+
+                            {{-- Discount --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Discount</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="discount" id="discount" class="form-control"
+                                        step="0.01" value="{{ $booking->discount }}">
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            {{-- Total Price --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Total Price</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="total_price" id="total_price" class="form-control"
+                                        step="0.01" value="{{ $booking->total_price }}" readonly>
+                                </div>
+                            </div>
+
+                            {{-- Advance Paid --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Advance Paid</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="advance_paid" id="advance_paid" class="form-control"
+                                        step="0.01" value="{{ $booking->advance_paid }}">
+                                </div>
+                            </div>
+
+                            {{-- Balance Amount --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Balance Amount</label>
+                                <div class="col-sm-8">
+                                    <input type="number" id="balance_amount" class="form-control" step="0.01"
+                                        value="{{ $booking->balance_amount }}" readonly>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
 
                 {{-- Buttons --}}
                 <div class="d-flex justify-content-end gap-2">
@@ -299,54 +335,75 @@ value="{{ $booking->travel_end_date?->format('Y-m-d') ?? '' }}"
         calculateTotal();
 
         // Preview
-     function previewQuotation() {
-    const customerSelect = document.getElementById('customer_id');
-    const packageSelect = document.getElementById('package_id');
-    const statusSelect = document.getElementById('status');
+        function previewQuotation() {
+            const customerSelect = document.getElementById('customer_id');
+            const packageSelect = document.getElementById('package_id');
+            const statusSelect = document.getElementById('status');
 
-    const travelStart = document.getElementById('travel_start_date').value;
-    const travelEnd = document.getElementById('travel_end_date').value;
-    const paymentStatus = document.getElementById('payment_status').value;
-    const adults = document.getElementById('adults').value;
-    const children = document.getElementById('children').value;
-    const infants = document.getElementById('infants').value;
-    const currency = document.getElementById('currency').value;
-    const specialReq = document.getElementById('special_requirements').value;
+            const travelStart = document.getElementById('travel_start_date').value;
+            const travelEnd = document.getElementById('travel_end_date').value;
+            const paymentStatus = document.getElementById('payment_status').value;
+            const adults = document.getElementById('adults').value;
+            const children = document.getElementById('children').value;
+            const infants = document.getElementById('infants').value;
+            const currency = document.getElementById('currency').value;
+            const specialReq = document.getElementById('special_requirements').value;
 
-    const packagePriceVal = parseFloat(document.getElementById('package_price').value) || 0;
-    const addChargesVal = parseFloat(document.getElementById('additional_charges').value) || 0;
-    const discountVal = parseFloat(document.getElementById('discount').value) || 0;
-    const advancePaidVal = parseFloat(document.getElementById('advance_paid').value) || 0;
+            const packagePriceVal = parseFloat(document.getElementById('package_price').value) || 0;
+            const addChargesVal = parseFloat(document.getElementById('additional_charges').value) || 0;
+            const discountVal = parseFloat(document.getElementById('discount').value) || 0;
+            const advancePaidVal = parseFloat(document.getElementById('advance_paid').value) || 0;
 
-    const totalPriceVal = Math.max(0, (packagePriceVal + addChargesVal) - discountVal);
-    const balanceVal = Math.max(0, totalPriceVal - advancePaidVal);
+            const totalPriceVal = Math.max(0, (packagePriceVal + addChargesVal) - discountVal);
+            const balanceVal = Math.max(0, totalPriceVal - advancePaidVal);
 
-    const status = statusSelect.value;
+            const status = statusSelect.value;
 
-    const customerOption = customerSelect.options[customerSelect.selectedIndex];
-    const customerName = customerOption.text;
-    const customerEmail = customerOption.dataset.email;
-    const customerPhone = customerOption.dataset.phone;
+            const customerOption = customerSelect.options[customerSelect.selectedIndex];
+            const customerName = customerOption.text;
+            const customerEmail = customerOption.dataset.email;
+            const customerPhone = customerOption.dataset.phone;
 
-    const packageOption = packageSelect.options[packageSelect.selectedIndex];
-    const packageName = packageOption.text;
-    const packageRef = packageOption.dataset.tourRef;
+            const packageOption = packageSelect.options[packageSelect.selectedIndex];
+            const packageName = packageOption.text;
+            const packageRef = packageOption.dataset.tourRef;
 
-    const currentDate = new Date().toLocaleDateString('en-GB');
+            const currentDate = new Date().toLocaleDateString('en-GB');
 
-    let badgeText = '', badgeColor = '';
-    switch (status) {
-        case 'quotation': badgeText = 'QUOTATION'; badgeColor = '#6c757d'; break;
-        case 'accepted': badgeText = 'ACCEPTED'; badgeColor = '#0d6efd'; break;
-        case 'invoiced': badgeText = 'INVOICED'; badgeColor = '#6610f2'; break;
-        case 'partially_paid': badgeText = 'PARTIALLY PAID'; badgeColor = '#ffc107'; break;
-        case 'paid': badgeText = 'PAID'; badgeColor = '#198754'; break;
-        case 'cancelled': badgeText = 'CANCELLED'; badgeColor = '#dc3545'; break;
-        default: badgeText = 'QUOTATION'; badgeColor = '#6c757d';
-    }
+            let badgeText = '',
+                badgeColor = '';
+            switch (status) {
+                case 'quotation':
+                    badgeText = 'QUOTATION';
+                    badgeColor = '#6c757d';
+                    break;
+                case 'accepted':
+                    badgeText = 'ACCEPTED';
+                    badgeColor = '#0d6efd';
+                    break;
+                case 'invoiced':
+                    badgeText = 'INVOICED';
+                    badgeColor = '#6610f2';
+                    break;
+                case 'partially_paid':
+                    badgeText = 'PARTIALLY PAID';
+                    badgeColor = '#ffc107';
+                    break;
+                case 'paid':
+                    badgeText = 'PAID';
+                    badgeColor = '#198754';
+                    break;
+                case 'cancelled':
+                    badgeText = 'CANCELLED';
+                    badgeColor = '#dc3545';
+                    break;
+                default:
+                    badgeText = 'QUOTATION';
+                    badgeColor = '#6c757d';
+            }
 
-    // Generate HTML (same style as create)
-    const html = `
+            // Generate HTML (same style as create)
+            const html = `
 <div style="max-width:800px; margin:0 auto; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color:#333; background:#fff; padding:20px;">
     <table style="width:100%; border-bottom:2px solid #333; padding-bottom:20px; margin-bottom:30px;">
         <tr>
@@ -414,15 +471,15 @@ value="{{ $booking->travel_end_date?->format('Y-m-d') ?? '' }}"
                 </td>
             </tr>
             ${addChargesVal > 0 ? `
-            <tr>
-                <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
-                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
-            </tr>` : ''}
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
+                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
+                    </tr>` : ''}
             ${discountVal > 0 ? `
-            <tr>
-                <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
-                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
-            </tr>` : ''}
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
+                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
+                    </tr>` : ''}
         </tbody>
     </table>
 
@@ -444,10 +501,10 @@ value="{{ $booking->travel_end_date?->format('Y-m-d') ?? '' }}"
     </div>
 
     ${specialReq ? `
-    <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
-        <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
-        <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
-    </div>` : ''}
+            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
+                <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
+                <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
+            </div>` : ''}
 
     <div style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
         <p style="margin-bottom:5px;">This is a computer-generated document. No signature is required.</p>
@@ -455,9 +512,8 @@ value="{{ $booking->travel_end_date?->format('Y-m-d') ?? '' }}"
     </div>
 </div>`;
 
-    document.getElementById('quotationPreviewBody').innerHTML = html;
-    new bootstrap.Modal(document.getElementById('quotationPreviewModal')).show();
-}
-
+            document.getElementById('quotationPreviewBody').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('quotationPreviewModal')).show();
+        }
     </script>
 @endsection

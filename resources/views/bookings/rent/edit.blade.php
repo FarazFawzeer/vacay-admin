@@ -60,59 +60,21 @@
                     </div>
 
                     <!-- Start & End Date -->
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Start Date & Time</label>
                         <input type="datetime-local" name="start_datetime" id="start_datetime" class="form-control"
                             value="{{ date('Y-m-d\TH:i', strtotime($booking->start_datetime)) }}" required>
                     </div>
-                    <div class="col-md-6 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">End Date & Time</label>
                         <input type="datetime-local" name="end_datetime" id="end_datetime" class="form-control"
                             value="{{ date('Y-m-d\TH:i', strtotime($booking->end_datetime)) }}" required>
                     </div>
 
-                    <!-- Currency and Pricing -->
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Currency</label>
-                        <select name="currency" id="currency" class="form-select" required>
-                            <option value="LKR" {{ $booking->currency == 'LKR' ? 'selected' : '' }}>LKR</option>
-                            <option value="USD" {{ $booking->currency == 'USD' ? 'selected' : '' }}>USD</option>
-                            <option value="EUR" {{ $booking->currency == 'EUR' ? 'selected' : '' }}>EUR</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Base Price</label>
-                        <input type="number" step="0.01" name="price" id="price" class="form-control calc"
-                            value="{{ $booking->price }}" required>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Additional Charges</label>
-                        <input type="number" step="0.01" name="additional_price" id="additional_price"
-                            class="form-control calc" value="{{ $booking->additional_price }}">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Discount</label>
-                        <input type="number" step="0.01" name="discount" id="discount" class="form-control calc"
-                            value="{{ $booking->discount }}">
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Total Price</label>
-                        <input type="number" step="0.01" name="total_price" id="total_price" class="form-control"
-                            value="{{ $booking->total_price }}" readonly>
-                    </div>
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Advance Paid</label>
-                        <input type="number" step="0.01" name="advance_paid" id="advance_paid" class="form-control calc"
-                            value="{{ $booking->advance_paid }}">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Balance Amount</label>
-                        <input type="number" step="0.01" id="balance_amount" class="form-control"
-                            value="{{ $booking->total_price - $booking->advance_paid }}" readonly>
-                    </div>
+                 
 
                     <!-- Booking & Payment Status -->
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Booking Status</label>
                         <select name="status" id="status" class="form-select" required>
                             <option value="Quotation" {{ $booking->status == 'Quotation' ? 'selected' : '' }}>Quotation
@@ -128,7 +90,7 @@
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Payment Status</label>
                         <select name="payment_status" id="payment_status" class="form-select" required>
                             <option value="unpaid" {{ $booking->payment_status == 'unpaid' ? 'selected' : '' }}>Unpaid
@@ -139,6 +101,87 @@
                             </option>
                         </select>
                     </div>
+
+                    {{-- Price & Payment Details --}}
+<div class="col-md-6 mb-3">
+    <div class="card border-secondary">
+        <div class="card-header bg-light">
+            <strong>Price & Payment Details</strong>
+        </div>
+        <div class="card-body">
+
+            {{-- Currency --}}
+            <div class="mb-2 row">
+                <label class="col-sm-2 col-form-label">Currency</label>
+                <div class="col-sm-10">
+                    <select name="currency" id="currency" class="form-select" required>
+                        <option value="LKR" {{ $booking->currency == 'LKR' ? 'selected' : '' }}>LKR</option>
+                        <option value="USD" {{ $booking->currency == 'USD' ? 'selected' : '' }}>USD</option>
+                        <option value="EUR" {{ $booking->currency == 'EUR' ? 'selected' : '' }}>EUR</option>
+                    </select>
+                </div>
+            </div>
+
+            {{-- Base Price --}}
+            <div class="mb-2 row">
+                <label class="col-sm-2 col-form-label">Base Price</label>
+                <div class="col-sm-10">
+                    <input type="number" step="0.01" name="price" id="price" class="form-control calc"
+                        value="{{ $booking->price }}" required>
+                </div>
+            </div>
+
+            {{-- Additional Charges --}}
+            <div class="mb-2 row">
+                <label class="col-sm-2 col-form-label">Additional Charges</label>
+                <div class="col-sm-10">
+                    <input type="number" step="0.01" name="additional_price" id="additional_price"
+                        class="form-control calc" value="{{ $booking->additional_price }}">
+                </div>
+            </div>
+
+            {{-- Discount --}}
+            <div class="mb-2 row">
+                <label class="col-sm-2 col-form-label">Discount</label>
+                <div class="col-sm-10">
+                    <input type="number" step="0.01" name="discount" id="discount" class="form-control calc"
+                        value="{{ $booking->discount }}">
+                </div>
+            </div>
+
+            <hr>
+
+            {{-- Total Price --}}
+            <div class="mb-2 row">
+                <label class="col-sm-2 col-form-label">Total Price</label>
+                <div class="col-sm-10">
+                    <input type="number" step="0.01" name="total_price" id="total_price"
+                        class="form-control" value="{{ $booking->total_price }}" readonly>
+                </div>
+            </div>
+
+            {{-- Advance Paid --}}
+            <div class="mb-2 row">
+                <label class="col-sm-2 col-form-label">Advance Paid</label>
+                <div class="col-sm-10">
+                    <input type="number" step="0.01" name="advance_paid" id="advance_paid"
+                        class="form-control calc" value="{{ $booking->advance_paid }}">
+                </div>
+            </div>
+
+            {{-- Balance Amount --}}
+            <div class="mb-2 row">
+                <label class="col-sm-2 col-form-label">Balance Amount</label>
+                <div class="col-sm-10">
+                    <input type="number" step="0.01" id="balance_amount" class="form-control"
+                        value="{{ $booking->total_price - $booking->advance_paid }}" readonly>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
                     <!-- Notes -->
                     <div class="col-md-12 mb-3">

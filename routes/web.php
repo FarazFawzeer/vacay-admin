@@ -22,6 +22,7 @@ use App\Http\Controllers\VisaBookingController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\PassportController;
+use App\Http\Controllers\AirlineInvBookingController;
 
 require __DIR__ . '/auth.php';
 
@@ -130,6 +131,13 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('visa-bookings/store', [VisaBookingController::class, 'store'])->name('visa-bookings.store');
     Route::post('visa-bookings/{booking}/status', [VisaBookingController::class, 'updateStatus'])->name('visa-bookings.updateStatus');
     Route::post('visa-bookings/generate-pdf', [VisaBookingController::class, 'generatePdf'])->name('visa-bookings.generatePdf');
+    Route::get('/ajax/visas/by-country', [VisaBookingController::class, 'getVisasByCountry']);
+    Route::get('/ajax/visa/{visa}/categories', [VisaBookingController::class, 'getVisaCategories']);
+
+    Route::resource('airline-bookings', AirlineInvBookingController::class);
+
+    // Additional routes
+    Route::post('airline-bookings/generate-pdf', [AirlineInvBookingController::class, 'generatePdf'])->name('airline-bookings.generatePdf');
 
     Route::resource('passports', PassportController::class);
 

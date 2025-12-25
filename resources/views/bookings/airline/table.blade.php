@@ -2,14 +2,14 @@
     <thead>
         <tr>
             <th>Invoice No</th>
-            <th>Passport Holder</th>
-            <th>Passport No</th>
-            <th>Visa</th>
+            <th>Passenger / Customer</th>
+            <th>From → To</th>
+            <th>Airline / Flight</th>
             <th>Total</th>
             <th>Balance</th>
-            <th>Status</th>
             <th>Payment</th>
-            <th>Created</th>
+            <th>Status</th>
+
             <th class="text-center">Action</th>
         </tr>
     </thead>
@@ -21,37 +21,29 @@
                 {{-- Invoice --}}
                 <td class="fw-bold">{{ $booking->invoice_no }}</td>
 
-                {{-- Passport Holder --}}
+                {{-- Passenger / Customer --}}
                 <td>
-                    {{ $booking->passport->first_name ?? '-' }}
-                    {{ $booking->passport->second_name ?? '' }}
+                    {{ $booking->customer ? $booking->customer->name : '-' }}
                 </td>
 
-                {{-- Passport Number --}}
-                <td>{{ $booking->passport->passport_number ?? '-' }}</td>
+                {{-- Route From → To --}}
+                <td>{{ $booking->from_country ?? '-' }} → {{ $booking->to_country ?? '-' }}</td>
 
-                {{-- Visa --}}
-                <td>
-                    {{ $booking->visa->from_country ?? '-' }}
-                    →
-                    {{ $booking->visa->to_country ?? '-' }} <br>
-                    <small class="text-muted">{{ $booking->visa->visa_type ?? '-' }}</small>
-                </td>
+                {{-- Airline / Flight --}}
+                <td>{{ $booking->airline ?? '-' }}</td>
 
                 {{-- Total --}}
-                <td>
-                    {{ $booking->currency }}
-                    {{ number_format($booking->total_amount, 2) }}
-                </td>
+                <td>{{ $booking->currency }} {{ number_format($booking->total_amount, 2) }}</td>
 
                 {{-- Balance --}}
                 <td class="{{ $booking->balance > 0 ? 'text-danger' : 'text-success' }}">
-                    {{ $booking->currency }}
-                    {{ number_format($booking->balance, 2) }}
+                    {{ $booking->currency }} {{ number_format($booking->balance, 2) }}
                 </td>
+                {{-- Payment Status --}}
+                <td>{{ ucfirst($booking->payment_status) }}</td>
+
 
                 {{-- Booking Status --}}
-                {{-- Status --}}
                 <td>
                     <div class="dropdown">
                         <button
@@ -84,43 +76,32 @@
                     </div>
                 </td>
 
-                {{-- Payment Status --}}
-                <td>
-                    <span
-                        class="badge bg-{{ $booking->payment_status === 'paid' ? 'success' : ($booking->payment_status === 'partial' ? 'warning' : 'secondary') }}">
-                        {{ ucfirst($booking->payment_status) }}
-                    </span>
-                </td>
 
-                {{-- Created --}}
-                <td>{{ $booking->created_at->format('d M Y') }}</td>
+
+
 
                 {{-- Actions --}}
                 <td class="text-center">
                     <div class="d-flex justify-content-center gap-2">
-
-                        <a href="{{ route('admin.visa-bookings.show', $booking->id) }}"
+                        <a href="{{ route('admin.airline-bookings.show', $booking->id) }}"
                             class="text-info text-decoration-none">
                             <i class="bi bi-eye-fill fs-5"></i>
                         </a>
-
-                        <a href="{{ route('admin.visa-bookings.edit', $booking->id) }}"
+                        <a href="{{ route('admin.airline-bookings.edit', $booking->id) }}"
                             class="text-primary text-decoration-none">
                             <i class="bi bi-pencil-square fs-5"></i>
                         </a>
-
                         <button type="button" data-id="{{ $booking->id }}"
                             class="btn btn-link text-danger p-0 delete-booking">
                             <i class="bi bi-trash-fill fs-5"></i>
                         </button>
-
                     </div>
                 </td>
             </tr>
         @empty
             <tr>
                 <td colspan="10" class="text-center text-muted">
-                    No visa bookings found.
+                    No airline bookings found.
                 </td>
             </tr>
         @endforelse

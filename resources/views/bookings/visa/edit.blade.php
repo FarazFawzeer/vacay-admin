@@ -12,239 +12,451 @@
         </div>
 
         <div class="card-body">
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
+            <form id="visaBookingForm" action="{{ route('admin.visa-bookings.update', $booking->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+     @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             @endif
 
-          <form action="{{ route('admin.visa-bookings.update', $booking->id) }}" method="POST" id="visaBookingForm">
-    @csrf
-    @method('PUT')
-                <input type="hidden" id="invoice_no" value="{{ $booking->invoice_no ?? 'VB-0001' }}">
-
+          @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
                 <div class="row">
-                    <!-- Customer -->
+
+                    {{-- Passport --}}
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Customer</label>
-                        <select name="customer_id" id="customer_id" class="form-select" required>
-                            <option value="">Select Customer</option>
-                            @foreach ($customers as $customer)
-                                <option value="{{ $customer->id }}"
-                                    data-email="{{ $customer->email ?? 'N/A' }}"
-                                    data-phone="{{ $customer->contact ?? 'N/A' }}"
-                                    {{ $booking->customer_id == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }} ({{ $customer->customer_code ?? 'N/A' }})
+                        <label class="form-label">Passport</label>
+                        <select name="passport_id" class="form-select" required>
+                            @foreach ($passports as $passport)
+                                <option value="{{ $passport->id }}" @selected($booking->passport_id == $passport->id)>
+                                    {{ $passport->passport_number }} -
+                                    {{ $passport->first_name }} {{ $passport->second_name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Visa -->
+                    {{-- From → To --}}
+                    {{-- From → To --}}
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Visa</label>
-                        <select name="visa_id" id="visa_id" class="form-select" required>
-                            <option value="">Select Visa</option>
+                        <label class="form-label">From → To Country</label>
+                        <select id="country_pair" class="form-select" required>
+                            <option value="">Select Route</option>
                             @foreach ($visas as $visa)
-                                <option value="{{ $visa->id }}" data-country="{{ $visa->country }}"
-                                    {{ $booking->visa_id == $visa->id ? 'selected' : '' }}>
-                                    {{ $visa->country }} - {{ $visa->visa_type }}
+                                <option value="{{ $visa->from_country }}|{{ $visa->to_country }}"
+                                    {{ $booking->visa->from_country == $visa->from_country && $booking->visa->to_country == $visa->to_country ? 'selected' : '' }}>
+                                    {{ $visa->from_country }} → {{ $visa->to_country }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <!-- Passport Number -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Passport Number</label>
-                        <input type="text" name="passport_number" id="passport_number" class="form-control"
-                               value="{{ $booking->passport_number }}" required>
-                    </div>
-
-                    <!-- Visa Type -->
-                    <div class="col-md-6 mb-3">
+                    {{-- Visa Type --}}
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Visa Type</label>
-                        <input type="text" name="type" id="type" class="form-control" readonly
-                               value="{{ $booking->visa->visa_type ?? '' }}">
-                    </div>
-
-                    <!-- Agent -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Agent</label>
-                        <input type="text" name="agent" id="agent" class="form-control"
-                               value="{{ $booking->agent }}">
-                    </div>
-
-                    <!-- Visa Issue Date -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Visa Issue Date</label>
-                        <input type="date" name="visa_issue_date" id="visa_issue_date" class="form-control"
-                               value="{{ $booking->visa_issue_date->format('Y-m-d') }}" required>
-                    </div>
-
-                    <!-- Visa Expiry Date -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Visa Expiry Date</label>
-                        <input type="date" name="visa_expiry_date" id="visa_expiry_date" class="form-control"
-                               value="{{ $booking->visa_expiry_date->format('Y-m-d') }}" required>
-                    </div>
-
-                    <!-- Status -->
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" id="status" class="form-select" required>
-                            <option value="pending" {{ $booking->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="approved" {{ $booking->status == 'approved' ? 'selected' : '' }}>Approved</option>
-                            <option value="rejected" {{ $booking->status == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                        <select name="visa_id" id="visa_id" class="form-select" required>
+                            <option value="">Select Visa Type</option>
                         </select>
                     </div>
 
-                    <!-- Notes -->
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Notes</label>
-                        <textarea name="notes" id="notes" rows="4" class="form-control">{{ $booking->notes }}</textarea>
+                    {{-- Visa Category --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Visa Category</label>
+                        <select name="visa_category_id" id="visa_category_id" class="form-select" required>
+                            <option value="">Select Category</option>
+                        </select>
                     </div>
+
+
+
+
+                    {{-- Status --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Booking Status</label>
+                        <select name="status" class="form-select">
+                            @foreach (['Quotation', 'Accepted', 'Invoiced', 'Partially Paid', 'Paid', 'Cancelled'] as $st)
+                                <option value="{{ $st }}" @selected($booking->status == $st)>
+                                    {{ ucwords(str_replace('_', ' ', $st)) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Payment --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Payment Status</label>
+                        <select name="payment_status" class="form-select">
+                            @foreach (['unpaid', 'partial', 'paid'] as $ps)
+                                <option value="{{ $ps }}" @selected($booking->payment_status == $ps)>
+                                    {{ ucfirst($ps) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Price & Payment Details --}}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-light">
+                                <strong>Price & Payment Details</strong>
+                            </div>
+                            <div class="card-body">
+
+                                {{-- Currency --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Currency</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" id="currency" name="currency" class="form-control"
+                                            value="{{ $booking->currency }}" readonly>
+                                    </div>
+                                </div>
+
+                                {{-- Base Price --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Base Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" id="base_price" name="base_price" class="form-control"
+                                            value="{{ $booking->base_price }}" readonly>
+                                    </div>
+                                </div>
+
+                                {{-- Additional Price --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Additional Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" id="additional_price" name="additional_price"
+                                            class="form-control" value="{{ $booking->additional_price }}">
+                                    </div>
+                                </div>
+
+                                {{-- Discount --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Discount</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" id="discount" name="discount" class="form-control"
+                                            value="{{ $booking->discount }}">
+                                    </div>
+                                </div>
+
+                                <hr>
+
+                                {{-- Total --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Total</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" id="total_amount" name="total_amount" class="form-control"
+                                            value="{{ $booking->total_amount }}" readonly>
+                                    </div>
+                                </div>
+
+                                {{-- Advance Paid --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Advance Paid</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" id="advanced_paid" name="advanced_paid" class="form-control"
+                                            value="{{ $booking->advanced_paid }}">
+                                    </div>
+                                </div>
+
+                                {{-- Balance --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Balance</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" id="balance" name="balance" class="form-control"
+                                            value="{{ $booking->balance }}" readonly>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="text-end gap-2 d-flex justify-content-end">
-                    <a href="{{ route('admin.visa-bookings.index') }}" class="btn btn-light" style="width:135px;">Back</a>
-                    <button type="button" class="btn btn-secondary" onclick="previewVisaBooking()"
-                            style="width:135px;">Preview</button>
-                    <button type="submit" class="btn btn-primary" style="width:135px;">Update Booking</button>
+                <div class="text-end mt-3">
+                    <a href="{{ route('admin.visa-bookings.index') }}" class="btn btn-warning"
+                        style="width:130px;">Back</a>
+
+                    <button type="button" class="btn btn-secondary me-2" onclick="previewBooking()"
+                        style="width:130px;">
+                        Preview
+                    </button>
+
+                    <button type="submit" class="btn btn-primary" style="width:130px;">
+                        Update
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
     {{-- Preview Modal --}}
-    <div class="modal fade" id="bookingPreviewModal" tabindex="-1">
+    <div class="modal fade" id="bookingPreviewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header text-white bg-primary">
                     <h5 class="modal-title">Visa Booking Preview</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="bookingPreviewBody"></div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success" onclick="generatePdf()">Generate PDF</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        style="width:130px;">Close</button>
+                    <button type="button" class="btn btn-success" onclick="generatePdf()" style="width:130px;">Generate
+                        PDF</button>
                 </div>
             </div>
         </div>
     </div>
-@endsection
 
-@section('scripts')
-<script>
-    // Fill visa type automatically
-    document.getElementById('visa_id').addEventListener('change', function() {
-        const selected = this.options[this.selectedIndex];
-        document.getElementById('type').value = selected.dataset.country ? selected.text.split(' - ')[1] : '';
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    function calculate() {
+        const basePrice = parseFloat(document.getElementById('base_price').value) || 0;
+        const additional = parseFloat(document.getElementById('additional_price').value) || 0;
+        const discount = parseFloat(document.getElementById('discount').value) || 0;
+        const advanced = parseFloat(document.getElementById('advanced_paid').value) || 0;
+
+        const total = basePrice + additional - discount;
+        const balance = total - advanced;
+
+        document.getElementById('total_amount').value = total.toFixed(2);
+        document.getElementById('balance').value = balance.toFixed(2);
+    }
+
+    // Recalculate on input changes
+    document.getElementById('additional_price').addEventListener('input', calculate);
+    document.getElementById('discount').addEventListener('input', calculate);
+    document.getElementById('advanced_paid').addEventListener('input', calculate);
+
+    // Recalculate when category changes (already in your code)
+    const categorySelect = document.getElementById('visa_category_id');
+    categorySelect.addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        document.getElementById('base_price').value = opt.dataset.price || 0;
+        document.getElementById('currency').value = opt.dataset.currency || '';
+        calculate();
     });
 
-    function previewVisaBooking() {
-        const customerSelect = document.getElementById('customer_id');
-        const visaSelect = document.getElementById('visa_id');
+    // Initial calculation on page load
+    calculate();
+});
+</script>
 
-        const customerName = customerSelect.options[customerSelect.selectedIndex].text;
-        const customerEmail = customerSelect.options[customerSelect.selectedIndex].dataset.email;
-        const customerPhone = customerSelect.options[customerSelect.selectedIndex].dataset.phone;
 
-        const visaName = visaSelect.options[visaSelect.selectedIndex].text;
+    <script>
 
-        const passportNumber = document.getElementById('passport_number').value;
-        const agent = document.getElementById('agent').value;
-        const visaIssueDate = document.getElementById('visa_issue_date').value || 'N/A';
-        const visaExpiryDate = document.getElementById('visa_expiry_date').value || 'N/A';
-        const status = document.getElementById('status').value || 'pending';
-        const note = document.getElementById('notes').value;
+        
+        document.addEventListener('DOMContentLoaded', function() {
 
-        const invoiceNo = document.getElementById('invoice_no').value || 'N/A';
-        const invoiceDate = new Date().toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+            
+
+            const bookingVisaId = {{ $booking->visa_id }};
+            const bookingCategoryId = {{ $booking->visa_category_id }};
+
+            const countryPair = document.getElementById('country_pair');
+            const visaSelect = document.getElementById('visa_id');
+            const categorySelect = document.getElementById('visa_category_id');
+
+            // Load visa types when route changes
+            function loadVisas(selectSaved = false) {
+                if (!countryPair.value) return;
+
+                const [from, to] = countryPair.value.split('|');
+
+                fetch(`/admin/ajax/visas/by-country?from_country=${from}&to_country=${to}`)
+                    .then(res => res.json())
+                    .then(visas => {
+                        visaSelect.innerHTML = '<option value="">Select Visa Type</option>';
+
+                        visas.forEach(v => {
+                            visaSelect.innerHTML += `
+                        <option value="${v.id}" ${selectSaved && v.id == bookingVisaId ? 'selected' : ''}>
+                            ${v.visa_type}
+                        </option>`;
+                        });
+
+                        if (selectSaved) {
+                            loadCategories(true);
+                        }
+                    });
+            }
+
+            // Load categories
+            function loadCategories(selectSaved = false) {
+                if (!visaSelect.value) return;
+
+                fetch(`/admin/ajax/visa/${visaSelect.value}/categories`)
+                    .then(res => res.json())
+                    .then(categories => {
+                        categorySelect.innerHTML = '<option value="">Select Category</option>';
+
+                        categories.forEach(c => {
+                            categorySelect.innerHTML += `
+                        <option value="${c.id}"
+                            data-price="${c.price}"
+                            data-currency="${c.currency}"
+                            ${selectSaved && c.id == bookingCategoryId ? 'selected' : ''}>
+                            ${c.visa_type} (${c.processing_time})
+                        </option>`;
+                        });
+
+                        if (selectSaved) {
+                            categorySelect.dispatchEvent(new Event('change'));
+                        }
+                    });
+            }
+
+            // EVENTS
+            countryPair.addEventListener('change', () => loadVisas());
+            visaSelect.addEventListener('change', () => loadCategories());
+
+            categorySelect.addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                document.getElementById('base_price').value = opt.dataset.price || 0;
+                document.getElementById('currency').value = opt.dataset.currency || '';
+                calculate();
+            });
+
+            // INIT LOAD FOR EDIT
+            loadVisas(true);
         });
 
-        const badgeColors = { pending: '#ffc107', approved: '#198754', rejected: '#dc3545' };
-        const badgeColor = badgeColors[status] || '#6c757d';
+        // Preview Booking
+        function previewBooking() {
+            const passportSelect = document.querySelector('select[name="passport_id"]');
+            const countryPairSelect = document.getElementById('country_pair');
+            const visaTypeSelect = document.getElementById('visa_id');
+            const visaCategorySelect = document.getElementById('visa_category_id');
 
-        const html = `
-<div style="max-width:800px;margin:0 auto;font-family:Arial,sans-serif;background:#fff;padding:40px;border:1px solid #ddd;">
-    <div style="text-align:center;margin-bottom:30px;border-bottom:2px solid #333;padding-bottom:20px;">
-        <img src="{{ asset('images/vacayguider.png') }}" alt="Company Logo" style="max-width:150px;margin-bottom:15px;">
-        <p style="margin:5px 0;color:#666;font-size:14px;">123 Business Street, City, State 12345</p>
-        <p style="margin:5px 0;color:#666;font-size:14px;">Phone: +94 114 272 372 | Email: info@vacayguider.com</p>
-        <p style="margin:5px 0;color:#666;font-size:14px;">Website: www.vacayguider.com</p>
-    </div>
-    <div style="text-align:center;margin-bottom:30px;">
-        <h2 style="margin:0 0 10px 0;font-size:24px;color:#333;">VISA INVOICE</h2>
-        <span style="background:${badgeColor};color:white;padding:5px 15px;border-radius:3px;font-size:12px;font-weight:bold;">
-            ${status.toUpperCase()}
-        </span>
-    </div>
-    <table style="width:100%;margin-bottom:30px;border-collapse:collapse;">
+            const passportOption = passportSelect.options[passportSelect.selectedIndex];
+            const countryPair = countryPairSelect.value.split('|');
+            const visaTypeOption = visaTypeSelect.options[visaTypeSelect.selectedIndex];
+            const visaCategoryOption = visaCategorySelect.options[visaCategorySelect.selectedIndex];
+
+            const passportNumber = passportOption ? passportOption.text : '-';
+            const fromCountry = countryPair[0] || '-';
+            const toCountry = countryPair[1] || '-';
+            const visaType = visaTypeOption ? visaTypeOption.text : '-';
+            const visaCategory = visaCategoryOption ? visaCategoryOption.text : '-';
+
+            const basePrice = parseFloat(document.getElementById('base_price').value) || 0;
+            const additionalPrice = parseFloat(document.getElementById('additional_price').value) || 0;
+            const discount = parseFloat(document.getElementById('discount').value) || 0;
+            const advancedPaid = parseFloat(document.getElementById('advanced_paid').value) || 0;
+            const total = basePrice + additionalPrice - discount;
+            const balance = total - advancedPaid;
+            const currency = document.getElementById('currency').value || 'LKR';
+            const status = document.querySelector('select[name="status"]').value || '-';
+            const paymentStatus = document.querySelector('select[name="payment_status"]').value || '-';
+            const bookingDate = new Date().toLocaleDateString('en-GB');
+
+            const html = `
+<div style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
+    <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
         <tr>
-            <td style="width:50%;vertical-align:top;padding-right:15px;">
-                <h3 style="margin:0 0 10px 0;font-size:14px;color:#333;font-weight:bold;text-transform:uppercase;">Bill To:</h3>
-                <p style="margin:5px 0;color:#666;font-size:14px;"><strong>Name:</strong> ${customerName}</p>
-                <p style="margin:5px 0;color:#666;font-size:14px;"><strong>Email:</strong> ${customerEmail}</p>
-                <p style="margin:5px 0;color:#666;font-size:14px;"><strong>Phone:</strong> ${customerPhone}</p>
+            <td>
+                <img src="{{ asset('images/vacayguider.png') }}" style="height:80px;">
+                <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
+                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
+                    Negombo, Sri Lanka<br>
+                    +94 114 272 372 | info@vacayguider.com
+                </div>
             </td>
-            <td style="width:50%;vertical-align:top;padding-left:15px;text-align:right;">
-                <p style="margin:5px 0;color:#666;font-size:14px;"><strong>Invoice No:</strong> ${invoiceNo}</p>
-                <p style="margin:5px 0;color:#666;font-size:14px;"><strong>Invoice Date:</strong> ${invoiceDate}</p>
+            <td style="text-align:right;">
+                <h1 style="margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">${status}</h1>
+                <table style="margin-left:auto;margin-top:10px;font-size:13px;">
+                    <tr><td style="color:#888;padding:2px 10px;">Booking Date</td><td>${bookingDate}</td></tr>
+                    <tr><td style="color:#888;padding:2px 10px;">Payment Status</td><td>${paymentStatus}</td></tr>
+                </table>
             </td>
         </tr>
     </table>
-    <div style="width:100%;margin-bottom:30px;">
-        <table style="width:100%;border-collapse:collapse;background:#f9f9f9;border-radius:5px;">
-            <tr>
-                <td style="padding:20px;">
-                    <h3 style="margin:0 0 15px 0;font-size:16px;color:#333;font-weight:bold;text-align:center;">Visa Details</h3>
-                    <table style="width:100%;border-collapse:collapse;">
-                        <tr><td style="padding:8px 0;font-size:14px;color:#666;"><strong>Visa:</strong> ${visaName}</td></tr>
-                        <tr><td style="padding:8px 0;font-size:14px;color:#666;"><strong>Passport No:</strong> ${passportNumber}</td></tr>
-                        <tr><td style="padding:8px 0;font-size:14px;color:#666;"><strong>Agent:</strong> ${agent}</td></tr>
-                        <tr><td style="padding:8px 0;font-size:14px;color:#666;"><strong>Issue Date:</strong> ${visaIssueDate}</td></tr>
-                        <tr><td style="padding:8px 0;font-size:14px;color:#666;"><strong>Expiry Date:</strong> ${visaExpiryDate}</td></tr>
-                    </table>
-                </td>
+
+    <table style="width:100%;margin-bottom:35px;font-size:13px;">
+        <tr>
+            <td style="width:50%;vertical-align:top;">
+                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Passport Information</h4>
+                <div style="font-size:15px;font-weight:bold;">${passportNumber}</div>
+            </td>
+            <td style="width:50%;vertical-align:top;border-left:1px solid #eee;padding-left:25px;">
+                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Visa Details</h4>
+                <div><strong>Route:</strong> ${fromCountry} - ${toCountry}</div>
+                <div><strong>Visa Type:</strong> ${visaType}</div>
+                <div><strong>Visa Category:</strong> ${visaCategory}</div>
+            </td>
+        </tr>
+    </table>
+
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:30px;">
+        <thead>
+            <tr style="background:#f9f9f9;border-top:1px solid #333;border-bottom:1px solid #333;">
+                <th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;">Description</th>
+                <th style="padding:12px;text-align:right;font-size:11px;text-transform:uppercase;">Amount (${currency})</th>
             </tr>
+        </thead>
+        <tbody>
+            <tr><td style="padding:14px;border-bottom:1px solid #eee;">Base Price</td><td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${basePrice.toFixed(2)}</td></tr>
+            ${additionalPrice > 0 ? `<tr><td style="padding:14px;border-bottom:1px solid #eee;">Additional Price</td><td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${additionalPrice.toFixed(2)}</td></tr>` : ''}
+            ${discount > 0 ? `<tr><td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td><td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">(${discount.toFixed(2)})</td></tr>` : ''}
+        </tbody>
+    </table>
+
+    <div style="width:40%;margin-left:auto;">
+        <table style="width:100%;font-size:14px;">
+            <tr><td style="padding:8px 0;color:#888;">Total</td><td style="padding:8px 0;text-align:right;">${total.toFixed(2)}</td></tr>
+            <tr><td style="padding:8px 0;color:#198754;">Advanced Paid</td><td style="padding:8px 0;text-align:right;color:#198754;">${advancedPaid.toFixed(2)}</td></tr>
+            <tr style="border-top:1px solid #333;"><td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance</td><td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">${currency} ${balance.toFixed(2)}</td></tr>
         </table>
     </div>
-    ${note ? `<div style="margin-bottom:20px;padding:15px;background:#fffbea;border-left:4px solid #ffc107;">
-            <p style="margin:0;font-size:14px;color:#666;"><strong>Note:</strong> ${note}</p>
-        </div>` : ''}
-    <div style="margin-top:40px;padding-top:20px;border-top:1px solid #ddd;text-align:center;">
-        <p style="margin:5px 0;color:#999;font-size:12px;">Thank you for your business!</p>
-        <p style="margin:5px 0;color:#999;font-size:12px;">For inquiries, contact info@vacayguider.com</p>
+
+    <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
+        This is a system generated invoice. No signature required.<br>
+        <strong>Vacay Guider</strong> | www.vacayguider.com
     </div>
-</div>
-        `;
+</div>`;
 
-        document.getElementById('bookingPreviewBody').innerHTML = html;
-        new bootstrap.Modal(document.getElementById('bookingPreviewModal')).show();
-    }
+            document.getElementById('bookingPreviewBody').innerHTML = html;
+            new bootstrap.Modal(document.getElementById('bookingPreviewModal')).show();
+        }
 
-    function generatePdf() {
-        const htmlContent = document.getElementById('bookingPreviewBody').innerHTML;
-        fetch("{{ route('admin.visa-bookings.generatePdf') }}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                },
-                body: JSON.stringify({ html: htmlContent })
-            }).then(res => res.blob())
-            .then(blob => {
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'VisaBooking.pdf';
-                link.click();
-                URL.revokeObjectURL(link.href);
-            }).catch(err => {
-                console.error(err);
-                alert("PDF generation failed");
-            });
-    }
-</script>
+        // PDF Generation
+        function generatePdf() {
+            const htmlContent = document.getElementById('bookingPreviewBody').innerHTML;
+
+            fetch("{{ route('admin.visa-bookings.generatePdf') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({
+                        html: htmlContent
+                    })
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'Visa_Booking.pdf';
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("PDF generation failed");
+                });
+        }
+    </script>
 @endsection

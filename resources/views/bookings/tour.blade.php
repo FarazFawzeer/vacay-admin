@@ -114,40 +114,6 @@
 
 
 
-                {{-- Pricing --}}
-                <div class="row mb-3">
-                    <div class="col-md-2">
-                        <label for="package_price" class="form-label">Package Price</label>
-                        <input type="number" name="package_price" id="package_price" class="form-control" step="0.01"
-                            value="0" required>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="additional_charges" class="form-label">Additional Charges</label>
-                        <input type="number" name="additional_charges" id="additional_charges" class="form-control"
-                            step="0.01" value="0">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="discount" class="form-label">Discount</label>
-                        <input type="number" name="discount" id="discount" class="form-control" step="0.01"
-                            value="0">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="total_price" class="form-label">Total Price</label>
-                        <input type="number" name="total_price" id="total_price" class="form-control" step="0.01"
-                            readonly>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="advance_paid" class="form-label">Advance Paid</label>
-                        <input type="number" name="advance_paid" id="advance_paid" class="form-control" step="0.01"
-                            value="0">
-                    </div>
-
-                    <div class="col-md-2">
-                        <label for="balance_amount" class="form-label">Balance Amount</label>
-                        <input type="number" id="balance_amount" class="form-control" step="0.01" readonly>
-                    </div>
-                </div>
-
 
 
                 {{-- Status --}}
@@ -181,6 +147,86 @@
                     <label for="special_requirements" class="form-label">Special Requirements / Notes</label>
                     <textarea name="special_requirements" id="special_requirements" class="form-control" rows="3"></textarea>
                 </div>
+
+                <div class="col-md-6 mb-3">
+                    <div class="card border-secondary">
+                        <div class="card-header bg-light">
+                            <strong>Price & Payment Details</strong>
+                        </div>
+                        <div class="card-body">
+
+                            {{-- Currency --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Currency</label>
+                                <div class="col-sm-8">
+                                    <select name="currency" id="currency" class="form-select">
+                                        <option value="USD" selected>USD</option>
+                                        <option value="LKR">LKR</option>
+                                        <option value="EUR">EUR</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- Package Price --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Package Price</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="package_price" id="package_price" class="form-control"
+                                        step="0.01" value="0" required>
+                                </div>
+                            </div>
+
+                            {{-- Additional Charges --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Additional Charges</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="additional_charges" id="additional_charges"
+                                        class="form-control" step="0.01" value="0">
+                                </div>
+                            </div>
+
+                            {{-- Discount --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Discount</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="discount" id="discount" class="form-control"
+                                        step="0.01" value="0">
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            {{-- Total Price --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Total Price</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="total_price" id="total_price" class="form-control"
+                                        step="0.01" readonly>
+                                </div>
+                            </div>
+
+                            {{-- Advance Paid --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Advance Paid</label>
+                                <div class="col-sm-8">
+                                    <input type="number" name="advance_paid" id="advance_paid" class="form-control"
+                                        step="0.01" value="0">
+                                </div>
+                            </div>
+
+                            {{-- Balance Amount --}}
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label">Balance Amount</label>
+                                <div class="col-sm-8">
+                                    <input type="number" id="balance_amount" class="form-control" step="0.01"
+                                        readonly>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
 
                 {{-- Buttons --}}
                 <div class="d-flex justify-content-end gap-2">
@@ -434,15 +480,15 @@
                 </td>
             </tr>
             ${addChargesVal > 0 ? `
-                    <tr>
-                        <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
-                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
-                    </tr>` : ''}
+                            <tr>
+                                <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
+                                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
+                            </tr>` : ''}
             ${discountVal > 0 ? `
-                    <tr>
-                        <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
-                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
-                    </tr>` : ''}
+                            <tr>
+                                <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
+                                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
+                            </tr>` : ''}
         </tbody>
     </table>
 
@@ -464,10 +510,10 @@
     </div>
 
     ${specialReq ? `
-            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
-                <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
-                <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
-            </div>` : ''}
+                    <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
+                        <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
+                        <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
+                    </div>` : ''}
 
     <div style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
         <p style="margin-bottom:5px;">This is a computer-generated document. No signature is required.</p>

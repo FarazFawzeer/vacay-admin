@@ -1,8 +1,8 @@
-@extends('layouts.vertical', ['subtitle' => 'Visa Bookings'])
+@extends('layouts.vertical', ['subtitle' => 'Airline Bookings'])
 
 @section('content')
     @include('layouts.partials.page-title', [
-        'title' => 'Visa Bookings',
+        'title' => 'Airline Bookings',
         'subtitle' => 'View',
     ])
 
@@ -10,12 +10,12 @@
 
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
-                <h5 class="card-title mb-0">Visa Booking List</h5>
-                <p class="card-subtitle mb-0">All visa bookings in your system.</p>
+                <h5 class="card-title mb-0">Airline Booking List</h5>
+                <p class="card-subtitle mb-0">All airline bookings in your system.</p>
             </div>
 
             <div>
-                <a href="{{ route('admin.visa-bookings.create') }}" class="btn btn-primary">
+                <a href="{{ route('admin.airline-bookings.create') }}" class="btn btn-primary">
                     Add Booking
                 </a>
             </div>
@@ -61,7 +61,7 @@
 
             <!-- Table -->
             <div id="bookingTable" class="table-responsive">
-                @include('bookings.visa.table')
+                @include('bookings.airline.table')
             </div>
 
         </div>
@@ -75,7 +75,7 @@
             const tableContainer = document.getElementById('bookingTable');
 
             function fetchFilteredData(url = null) {
-                url = url ? url.toString() : "{{ route('admin.visa-bookings.index') }}";
+                url = url ? url.toString() : "{{ route('admin.airline-bookings.index') }}";
 
                 const params = new URLSearchParams({
                     status: statusSelect.value,
@@ -122,7 +122,7 @@
                 const bookingId = target.dataset.id;
                 const newStatus = target.dataset.status;
 
-                fetch(`/admin/visa-bookings/${bookingId}/status`, {
+                fetch(`/admin/airline-bookings/${bookingId}/status`, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -166,7 +166,7 @@
                         confirmButtonText: 'Yes, delete it!'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            fetch(`/admin/visa-bookings/${bookingId}`, {
+                            fetch(`/admin/airline-bookings/${bookingId}`, {
                                     method: 'DELETE',
                                     headers: {
                                         'X-CSRF-TOKEN': '{{ csrf_token() }}',

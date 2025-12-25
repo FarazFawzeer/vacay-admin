@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\VisaBooking;
 use App\Models\Customer;
+use App\Models\Passport;
 use App\Models\Visa;
+use App\Models\VisaCategory;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,20 +19,29 @@ class VisaBookingController extends Controller
      */
     public function index(Request $request)
     {
-        $query = VisaBooking::with(['customer', 'visa']);
+        $query = VisaBooking::with([
+            'passport',
+            'visa',
+            'visaCategory',
+            'agent'
+        ]);
 
-        if ($request->status) {
+        // Status filter
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        if ($request->inv_no) {
-            $query->where('inv_no', 'like', '%' . $request->inv_no . '%');
+        // Invoice number filter (FIXED)
+        if ($request->filled('inv_no')) {
+            $query->where('invoice_no', 'like', '%' . $request->inv_no . '%');
         }
 
-        $bookings = $query->orderBy('created_at', 'desc')
+        $bookings = $query
+            ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->appends($request->all());
 
+        // AJAX request
         if ($request->ajax()) {
             return view('bookings.visa.table', compact('bookings'))->render();
         }
@@ -38,15 +49,22 @@ class VisaBookingController extends Controller
         return view('bookings.visa.index', compact('bookings'));
     }
 
+
     /**
      * Create booking form
      */
+
     public function create()
     {
-        $customers = Customer::all();
-        $visas     = Visa::all();
+        // Fetch passports instead of customers
+        $passports = Passport::with('customer')->get();
 
+        // Fetch visas
+        $visas = Visa::with('categories')->get();
+
+        // Optional: Invoice number logic (keep only if you still use inv_no)
         $lastInvoice = VisaBooking::orderBy('id', 'desc')->first()?->inv_no;
+
         if ($lastInvoice && preg_match('/VB-(\d+)/', $lastInvoice, $m)) {
             $number = intval($m[1]) + 1;
             $nextInvoice = 'VB-' . str_pad($number, 4, '0', STR_PAD_LEFT);
@@ -54,8 +72,35 @@ class VisaBookingController extends Controller
             $nextInvoice = 'VB-0001';
         }
 
-        return view('bookings.visa.create', compact('customers', 'visas', 'nextInvoice'));
+        return view('bookings.visa.create', compact(
+            'passports',
+            'visas',
+            'nextInvoice'
+        ));
     }
+
+    public function getVisasByCountry(Request $request)
+    {
+        $request->validate([
+            'from_country' => 'required',
+            'to_country'   => 'required',
+        ]);
+
+        $visas = Visa::where('from_country', $request->from_country)
+            ->where('to_country', $request->to_country)
+            ->select('id', 'visa_type')
+            ->get();
+
+        return response()->json($visas);
+    }
+
+    public function getVisaCategories(Visa $visa)
+    {
+        return response()->json(
+            $visa->categories()->get()
+        );
+    }
+
 
     /**
      * Store new booking
@@ -63,38 +108,61 @@ class VisaBookingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'customer_id'      => 'required|exists:customers,id',
-            'visa_id'          => 'required|exists:visa,id',
-            'passport_number'  => 'required|string|max:50',
-            'type'             => 'required|string|max:50',
-            'agent'            => 'nullable|string|max:100',
-            'visa_issue_date'  => 'nullable|date',
-            'visa_expiry_date' => 'nullable|date|after_or_equal:visa_issue_date',
-            'status'           => 'required|in:pending,approved,rejected,cancelled',
+            'passport_id'        => 'required|exists:passports,id',
+            'visa_id'            => 'required|exists:visas,id',
+            'visa_category_id'   => 'required|exists:visa_categories,id',
+
+            'currency'           => 'required|string|max:10',
+            'base_price'         => 'required|numeric|min:0',
+            'additional_price'   => 'nullable|numeric|min:0',
+            'discount'           => 'nullable|numeric|min:0',
+            'total_amount'       => 'required|numeric|min:0',
+            'advanced_paid'      => 'nullable|numeric|min:0',
+            'balance'            => 'required|numeric|min:0',
+
+            'status'             => 'required',
+            'payment_status'     => 'required',
         ]);
 
-        $lastInvoice = VisaBooking::orderBy('id', 'desc')->first()?->inv_no;
-        if ($lastInvoice && preg_match('/VB-(\d+)/', $lastInvoice, $m)) {
-            $number = intval($m[1]) + 1;
-            $invNo = 'VB-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+        // Ensure the selected category belongs to the selected visa
+        $category = VisaCategory::where('id', $request->visa_category_id)
+            ->where('visa_id', $request->visa_id)
+            ->firstOrFail();
+
+        // Generate Invoice No
+        $lastInvoice = VisaBooking::orderBy('id', 'desc')->first()?->invoice_no;
+
+        if ($lastInvoice && preg_match('/VB(\d+)/', $lastInvoice, $matches)) {
+            $nextNumber = intval($matches[1]) + 1;
+            $invoiceNo = 'VB' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         } else {
-            $invNo = 'VB-0001';
+            $invoiceNo = 'VB0001';
         }
 
-        VisaBooking::create([
-            'inv_no'          => $invNo,
-            'customer_id'     => $request->customer_id,
-            'visa_id'         => $request->visa_id,
-            'passport_number' => $request->passport_number,
-            'type'            => $request->type,
-            'agent'           => $request->agent,
-            'visa_issue_date' => $request->visa_issue_date,
-            'visa_expiry_date'=> $request->visa_expiry_date,
-            'status'          => $request->status,
-            'created_by'      => Auth::id(),
+        // Create Visa Booking
+        $booking = VisaBooking::create([
+            'invoice_no'         => $invoiceNo,
+            'passport_id'        => $request->passport_id,
+            'visa_id'            => $request->visa_id,
+            'visa_category_id'   => $request->visa_category_id,
+
+            'currency'           => $request->currency,
+            'base_price'         => $request->base_price,
+            'additional_price'   => $request->additional_price ?? 0,
+            'discount'           => $request->discount ?? 0,
+            'total_amount'       => $request->total_amount,
+            'advanced_paid'      => $request->advanced_paid ?? 0,
+            'balance'            => $request->balance,
+
+            'status'             => $request->status,
+            'payment_status'     => $request->payment_status,
+
+            'created_by'         => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Visa booking saved successfully!');
+        return redirect()
+            ->route('admin.visa-bookings.index')
+            ->with('success', "Visa booking created successfully! Invoice No: {$invoiceNo}");
     }
 
     /**
@@ -102,19 +170,40 @@ class VisaBookingController extends Controller
      */
     public function show($id)
     {
-        $booking = VisaBooking::with(['customer', 'visa'])->findOrFail($id);
+        $booking = VisaBooking::with([
+            'customer',        // Customer info
+            'passport',        // Passport info
+            'visa',            // Visa info
+            'visaCategory'     // Visa category info
+        ])->findOrFail($id);
+
         return view('bookings.visa.show', compact('booking'));
     }
+
 
     /**
      * Edit booking
      */
     public function edit(VisaBooking $booking)
     {
-        $customers = Customer::all();
-        $visas     = Visa::all();
+        $booking->load([
+            'passport.customer',
+            'visa',
+            'visaCategory'
+        ]);
 
-        return view('bookings.visa.edit', compact('booking', 'customers', 'visas'));
+        $passports = Passport::with('customer')->get();
+
+        // Needed only for country route dropdown
+        $visas = Visa::select('from_country', 'to_country')
+            ->groupBy('from_country', 'to_country')
+            ->get();
+
+        return view('bookings.visa.edit', compact(
+            'booking',
+            'passports',
+            'visas'
+        ));
     }
 
     /**
@@ -123,23 +212,53 @@ class VisaBookingController extends Controller
     public function update(Request $request, VisaBooking $booking)
     {
         $request->validate([
-            'customer_id'      => 'required|exists:customers,id',
-            'visa_id'          => 'required|exists:visa,id',
-            'passport_number'  => 'required|string|max:50',
-            'type'             => 'required|string|max:50',
-            'agent'            => 'nullable|string|max:100',
-            'visa_issue_date'  => 'nullable|date',
-            'visa_expiry_date' => 'nullable|date|after_or_equal:visa_issue_date',
-            'status'           => 'required|in:pending,approved,rejected,cancelled',
+            'passport_id'        => 'required|exists:passports,id',
+            'visa_id'            => 'required|exists:visas,id',
+            'visa_category_id'   => 'required|exists:visa_categories,id',
+
+            'currency'           => 'required|string|max:10',
+            'base_price'         => 'required|numeric|min:0',
+            'additional_price'   => 'nullable|numeric|min:0',
+            'discount'           => 'nullable|numeric|min:0',
+            'total_amount'       => 'required|numeric|min:0',
+            'advanced_paid'      => 'nullable|numeric|min:0',
+            'balance'            => 'required|numeric|min:0',
+
+            'status'             => 'required',
+            'payment_status'     => 'required',
         ]);
 
-        $booking->update($request->only([
-            'customer_id', 'visa_id', 'passport_number', 'type', 'agent', 'visa_issue_date', 'visa_expiry_date', 'status'
-        ]));
+        // Ensure the selected category belongs to the selected visa
+        $category = VisaCategory::where('id', $request->visa_category_id)
+            ->where('visa_id', $request->visa_id)
+            ->firstOrFail();
 
-        return redirect()->route('admin.visa-bookings.edit', $booking->id)
+        // Update Visa Booking
+        $booking->update([
+            'passport_id'        => $request->passport_id,
+            'visa_id'            => $request->visa_id,
+            'visa_category_id'   => $request->visa_category_id,
+
+            'currency'           => $request->currency,
+            'base_price'         => $request->base_price,
+            'additional_price'   => $request->additional_price ?? 0,
+            'discount'           => $request->discount ?? 0,
+            'total_amount'       => $request->total_amount,
+            'advanced_paid'      => $request->advanced_paid ?? 0,
+            'balance'            => $request->balance,
+
+            'status'             => $request->status,
+            'payment_status'     => $request->payment_status,
+
+            'updated_by'         => Auth::id(),
+        ]);
+
+        return redirect()
+            ->route('admin.visa-bookings.edit', $booking->id)
             ->with('success', 'Visa booking updated successfully!');
     }
+
+
 
     /**
      * Delete booking
@@ -161,7 +280,7 @@ class VisaBookingController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:pending,approved,rejected,cancelled',
+            'status' => 'required',
         ]);
 
         $booking = VisaBooking::findOrFail($id);
@@ -178,45 +297,45 @@ class VisaBookingController extends Controller
     /**
      * Generate PDF of booking
      */
-  public function generatePdf(Request $request)
-{
-    try {
-        $content = $request->input('html');
+    public function generatePdf(Request $request)
+    {
+        try {
+            $content = $request->input('html');
 
-        // 1️⃣ Convert company logo to Base64
-        $logoPath = public_path('images/vacayguider.png');
-        if (file_exists($logoPath)) {
-            $type = pathinfo($logoPath, PATHINFO_EXTENSION);
-            $logoData = file_get_contents($logoPath);
-            $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($logoData);
-            $content = str_replace(
-                '{{ asset(\'images/vacayguider.png\') }}',
-                $logoBase64,
-                $content
-            );
-        }
+            // 1️⃣ Convert company logo to Base64
+            $logoPath = public_path('images/vacayguider.png');
+            if (file_exists($logoPath)) {
+                $type = pathinfo($logoPath, PATHINFO_EXTENSION);
+                $logoData = file_get_contents($logoPath);
+                $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($logoData);
+                $content = str_replace(
+                    '{{ asset(\'images/vacayguider.png\') }}',
+                    $logoBase64,
+                    $content
+                );
+            }
 
-        // 2️⃣ Fix all other <img> src paths
-        $content = preg_replace_callback('/<img[^>]+src="([^"]+)"/', function ($matches) {
-            $src = $matches[1];
+            // 2️⃣ Fix all other <img> src paths
+            $content = preg_replace_callback('/<img[^>]+src="([^"]+)"/', function ($matches) {
+                $src = $matches[1];
 
-            // Skip if already base64
-            if (str_starts_with($src, 'data:image')) {
+                // Skip if already base64
+                if (str_starts_with($src, 'data:image')) {
+                    return $matches[0];
+                }
+
+                // Try converting relative/public path to file://
+                $path = public_path(ltrim(str_replace(url('/'), '', $src), '/'));
+                if (file_exists($path)) {
+                    return str_replace($src, 'file://' . $path, $matches[0]);
+                }
+
+                // Otherwise leave unchanged
                 return $matches[0];
-            }
+            }, $content);
 
-            // Try converting relative/public path to file://
-            $path = public_path(ltrim(str_replace(url('/'), '', $src), '/'));
-            if (file_exists($path)) {
-                return str_replace($src, 'file://' . $path, $matches[0]);
-            }
-
-            // Otherwise leave unchanged
-            return $matches[0];
-        }, $content);
-
-        // 3️⃣ Wrap content in proper HTML for DomPDF
-        $html = '<html>
+            // 3️⃣ Wrap content in proper HTML for DomPDF
+            $html = '<html>
                     <head>
                         <meta charset="utf-8">
                         <style>
@@ -227,15 +346,13 @@ class VisaBookingController extends Controller
                     <body>' . $content . '</body>
                 </html>';
 
-        // 4️⃣ Generate PDF
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('A4', 'portrait');
+            // 4️⃣ Generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html)->setPaper('A4', 'portrait');
 
-        // 5️⃣ Return as download
-        return $pdf->download("visa-booking.pdf");
-
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+            // 5️⃣ Return as download
+            return $pdf->download("visa-booking.pdf");
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-}
-
 }

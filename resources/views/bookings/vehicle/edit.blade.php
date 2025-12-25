@@ -7,9 +7,7 @@
     ])
 
     <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0">Edit Vehicle Booking</h5>
-        </div>
+
 
         <div class="card">
             <div class="card-header">
@@ -112,46 +110,7 @@
                                 <input type="number" name="total_km" id="totalKmInput" class="form-control"
                                     placeholder="Enter total KM" value="{{ $booking->total_km }}">
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Currency</label>
-                                <select name="currency" id="currency" class="form-select">
-                                    <option value="LKR" {{ $booking->currency == 'LKR' ? 'selected' : '' }}>LKR</option>
-                                    <option value="USD" {{ $booking->currency == 'USD' ? 'selected' : '' }}>USD</option>
-                                    <option value="EUR" {{ $booking->currency == 'EUR' ? 'selected' : '' }}>EUR</option>
-                                </select>
-                            </div>
-                        </div>
 
-                        <!-- Pricing -->
-                        <div class="col-md-2 mb-3">
-                            <label class="form-label">Base Price</label>
-                            <input type="number" step="0.01" name="price" id="price" class="form-control"
-                                value="{{ $booking->price ?? 0 }}">
-                        </div>
-                        <div class="col-md-2 mb-3">
-                            <label class="form-label">Additional Charges</label>
-                            <input type="number" step="0.01" name="additional_charges" id="additional_charges"
-                                class="form-control" value="{{ $booking->additional_charges ?? 0 }}">
-                        </div>
-                        <div class="col-md-2 mb-3">
-                            <label class="form-label">Discount</label>
-                            <input type="number" step="0.01" name="discount" id="discount" class="form-control"
-                                value="{{ $booking->discount ?? 0 }}">
-                        </div>
-                        <div class="col-md-2 mb-3">
-                            <label class="form-label">Advance Paid</label>
-                            <input type="number" step="0.01" name="advance_paid" id="advance_paid"
-                                class="form-control" value="{{ $booking->advance_paid ?? 0 }}">
-                        </div>
-                        <div class="col-md-2 mb-3">
-                            <label class="form-label">Total Price</label>
-                            <input type="number" step="0.01" name="total_price" id="total_price"
-                                class="form-control" readonly value="{{ $booking->total_price ?? 0 }}">
-                        </div>
-                        <div class="col-md-2 mb-3">
-                            <label class="form-label">Balance</label>
-                            <input type="number" step="0.01" name="balance" id="balance" class="form-control"
-                                readonly value="{{ $booking->balance ?? 0 }}">
                         </div>
 
                         <!-- Payment & Status -->
@@ -181,6 +140,93 @@
                             <label class="form-label">Note</label>
                             <textarea name="note" id="note" class="form-control" rows="3">{{ $booking->note }}</textarea>
                         </div>
+
+                        {{-- Price & Payment Details --}}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-secondary">
+                                <div class="card-header bg-light">
+                                    <strong>Price & Payment Details</strong>
+                                </div>
+                                <div class="card-body">
+
+                                    {{-- Currency --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Currency</label>
+                                        <div class="col-sm-10">
+                                            <select name="currency" id="currency" class="form-select">
+                                                <option value="LKR"
+                                                    {{ $booking->currency == 'LKR' ? 'selected' : '' }}>LKR</option>
+                                                <option value="USD"
+                                                    {{ $booking->currency == 'USD' ? 'selected' : '' }}>USD</option>
+                                                <option value="EUR"
+                                                    {{ $booking->currency == 'EUR' ? 'selected' : '' }}>EUR</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {{-- Base Price --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Base Price</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="price" id="price"
+                                                class="form-control calc" value="{{ $booking->price ?? 0 }}">
+                                        </div>
+                                    </div>
+
+                                    {{-- Additional Charges --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Additional Charges</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="additional_charges"
+                                                id="additional_charges" class="form-control calc"
+                                                value="{{ $booking->additional_charges ?? 0 }}">
+                                        </div>
+                                    </div>
+
+                                    {{-- Discount --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Discount</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="discount" id="discount"
+                                                class="form-control calc" value="{{ $booking->discount ?? 0 }}">
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    {{-- Advance Paid --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Advance Paid</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="advance_paid" id="advance_paid"
+                                                class="form-control calc" value="{{ $booking->advance_paid ?? 0 }}">
+                                        </div>
+                                    </div>
+
+                                    {{-- Total Price --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Total Price</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="total_price" id="total_price"
+                                                class="form-control" value="{{ $booking->total_price ?? 0 }}" readonly>
+                                        </div>
+                                    </div>
+
+                                    {{-- Balance --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Balance</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="balance" id="balance"
+                                                class="form-control"
+                                                value="{{ $booking->balance ?? $booking->total_price - $booking->advance_paid }}"
+                                                readonly>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="text-end gap-2 d-flex justify-content-end">
@@ -214,107 +260,111 @@
             </div>
         </div>
 
-     <script>
-document.addEventListener("DOMContentLoaded", function() {
-    // Mileage toggle
-    const mileageSelect = document.getElementById("mileageSelect");
-    const totalKmField = document.getElementById("totalKmField");
-    const totalKmInput = document.getElementById("totalKmInput");
-    if (mileageSelect) {
-        function toggleTotalKm() {
-            if (mileageSelect.value === "limited") {
-                totalKmField.style.display = "block";
-            } else {
-                totalKmField.style.display = "none";
-                totalKmInput.value = "";
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Mileage toggle
+                const mileageSelect = document.getElementById("mileageSelect");
+                const totalKmField = document.getElementById("totalKmField");
+                const totalKmInput = document.getElementById("totalKmInput");
+                if (mileageSelect) {
+                    function toggleTotalKm() {
+                        if (mileageSelect.value === "limited") {
+                            totalKmField.style.display = "block";
+                        } else {
+                            totalKmField.style.display = "none";
+                            totalKmInput.value = "";
+                        }
+                    }
+                    mileageSelect.addEventListener("change", toggleTotalKm);
+                    toggleTotalKm();
+                }
+
+                // Total price & balance calculation
+                const priceInput = document.getElementById("price");
+                const additionalInput = document.getElementById("additional_charges");
+                const discountInput = document.getElementById("discount");
+                const advanceInput = document.getElementById("advance_paid");
+                const totalInput = document.getElementById("total_price");
+                const balanceInput = document.getElementById("balance");
+
+                function calculateTotal() {
+                    const price = parseFloat(priceInput.value) || 0;
+                    const add = parseFloat(additionalInput.value) || 0;
+                    const discount = parseFloat(discountInput.value) || 0;
+                    const advance = parseFloat(advanceInput.value) || 0;
+
+                    const total = (price + add) - discount;
+                    totalInput.value = total.toFixed(2);
+
+                    const balance = Math.max(0, total - advance);
+                    balanceInput.value = balance.toFixed(2);
+                }
+
+                [priceInput, additionalInput, discountInput, advanceInput].forEach(el =>
+                    el.addEventListener('input', calculateTotal)
+                );
+
+                calculateTotal(); // initial calculation
+            });
+
+            const STORAGE_BASE = "{{ asset('storage') }}";
+
+            function getImageUrl(imagePath) {
+                if (imagePath && imagePath.trim() !== '') return STORAGE_BASE + "/" + imagePath.replace(/^\/+/, '');
+                return "https://via.placeholder.com/280x180?text=No+Image";
             }
-        }
-        mileageSelect.addEventListener("change", toggleTotalKm);
-        toggleTotalKm();
-    }
 
-    // Total price & balance calculation
-    const priceInput = document.getElementById("price");
-    const additionalInput = document.getElementById("additional_charges");
-    const discountInput = document.getElementById("discount");
-    const advanceInput = document.getElementById("advance_paid");
-    const totalInput = document.getElementById("total_price");
-    const balanceInput = document.getElementById("balance");
+            // Preview function
+            function previewBooking() {
+                const customerSelect = document.getElementById('customer_id');
+                const vehicleSelect = document.getElementById('vehicle_id');
+                const mileageSelect = document.getElementById('mileageSelect');
+                const totalKmInput = document.getElementById('totalKmInput');
 
-    function calculateTotal() {
-        const price = parseFloat(priceInput.value) || 0;
-        const add = parseFloat(additionalInput.value) || 0;
-        const discount = parseFloat(discountInput.value) || 0;
-        const advance = parseFloat(advanceInput.value) || 0;
+                const customerOption = customerSelect.options[customerSelect.selectedIndex];
+                const vehicleOption = vehicleSelect.options[vehicleSelect.selectedIndex];
 
-        const total = (price + add) - discount;
-        totalInput.value = total.toFixed(2);
+                const customerName = customerOption ? customerOption.text : '-';
+                const customerEmail = customerOption ? customerOption.dataset.email : '-';
+                const customerPhone = customerOption ? customerOption.dataset.phone : '-';
+                const vehicleName = vehicleOption ? vehicleOption.text : '-';
 
-        const balance = Math.max(0, total - advance);
-        balanceInput.value = balance.toFixed(2);
-    }
+                const mileage = mileageSelect ? mileageSelect.value : 'unlimited';
+                const totalKm = totalKmInput ? totalKmInput.value : 0;
 
-    [priceInput, additionalInput, discountInput, advanceInput].forEach(el =>
-        el.addEventListener('input', calculateTotal)
-    );
+                let images = [];
+                if (vehicleOption && vehicleOption.dataset.images) {
+                    try {
+                        images = JSON.parse(vehicleOption.dataset.images);
+                    } catch (e) {
+                        images = [];
+                    }
+                }
 
-    calculateTotal(); // initial calculation
-});
+                const mainImage = images.length ? getImageUrl(images[0]) : "https://via.placeholder.com/300x200?text=No+Image";
 
-const STORAGE_BASE = "{{ asset('storage') }}";
+                const pickupLocation = document.getElementById('pickup_location')?.value || '-';
+                const pickupDatetime = document.getElementById('pickup_datetime')?.value || '-';
+                const dropoffLocation = document.getElementById('dropoff_location')?.value || '-';
+                const dropoffDatetime = document.getElementById('dropoff_datetime')?.value || '-';
 
-function getImageUrl(imagePath) {
-    if (imagePath && imagePath.trim() !== '') return STORAGE_BASE + "/" + imagePath.replace(/^\/+/, '');
-    return "https://via.placeholder.com/280x180?text=No+Image";
-}
+                const price = parseFloat(document.getElementById('price')?.value) || 0;
+                const addCharges = parseFloat(document.getElementById('additional_charges')?.value) || 0;
+                const discount = parseFloat(document.getElementById('discount')?.value) || 0;
+                const advancePaid = parseFloat(document.getElementById('advance_paid')?.value) || 0;
 
-// Preview function
-function previewBooking() {
-    const customerSelect = document.getElementById('customer_id');
-    const vehicleSelect = document.getElementById('vehicle_id');
-    const mileageSelect = document.getElementById('mileageSelect');
-    const totalKmInput = document.getElementById('totalKmInput');
+                const total = Math.max(0, (price + addCharges) - discount);
+                const balance = Math.max(0, total - advancePaid);
 
-    const customerOption = customerSelect.options[customerSelect.selectedIndex];
-    const vehicleOption = vehicleSelect.options[vehicleSelect.selectedIndex];
+                const currency = document.getElementById('currency')?.value || 'LKR';
+                const paymentStatus = document.getElementById('payment_status')?.value || '-';
+                const status = document.getElementById('status')?.value || '-';
+                const note = document.getElementById('note')?.value || '';
 
-    const customerName = customerOption ? customerOption.text : '-';
-    const customerEmail = customerOption ? customerOption.dataset.email : '-';
-    const customerPhone = customerOption ? customerOption.dataset.phone : '-';
-    const vehicleName = vehicleOption ? vehicleOption.text : '-';
+                const invoiceNo = document.getElementById('invoice_no')?.value || '-';
+                const invoiceDate = new Date().toLocaleDateString('en-GB');
 
-    const mileage = mileageSelect ? mileageSelect.value : 'unlimited';
-    const totalKm = totalKmInput ? totalKmInput.value : 0;
-
-    let images = [];
-    if (vehicleOption && vehicleOption.dataset.images) {
-        try { images = JSON.parse(vehicleOption.dataset.images); } catch (e) { images = []; }
-    }
-
-    const mainImage = images.length ? getImageUrl(images[0]) : "https://via.placeholder.com/300x200?text=No+Image";
-
-    const pickupLocation = document.getElementById('pickup_location')?.value || '-';
-    const pickupDatetime = document.getElementById('pickup_datetime')?.value || '-';
-    const dropoffLocation = document.getElementById('dropoff_location')?.value || '-';
-    const dropoffDatetime = document.getElementById('dropoff_datetime')?.value || '-';
-
-    const price = parseFloat(document.getElementById('price')?.value) || 0;
-    const addCharges = parseFloat(document.getElementById('additional_charges')?.value) || 0;
-    const discount = parseFloat(document.getElementById('discount')?.value) || 0;
-    const advancePaid = parseFloat(document.getElementById('advance_paid')?.value) || 0;
-
-    const total = Math.max(0, (price + addCharges) - discount);
-    const balance = Math.max(0, total - advancePaid);
-
-    const currency = document.getElementById('currency')?.value || 'LKR';
-    const paymentStatus = document.getElementById('payment_status')?.value || '-';
-    const status = document.getElementById('status')?.value || '-';
-    const note = document.getElementById('note')?.value || '';
-
-    const invoiceNo = document.getElementById('invoice_no')?.value || '-';
-    const invoiceDate = new Date().toLocaleDateString('en-GB');
-
-    const html = `
+                const html = `
 <div style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
     <!-- Header -->
     <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
@@ -415,34 +465,35 @@ function previewBooking() {
     </div>
 </div>`;
 
-    document.getElementById('bookingPreviewBody').innerHTML = html;
-    new bootstrap.Modal(document.getElementById('bookingPreviewModal')).show();
-}
+                document.getElementById('bookingPreviewBody').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('bookingPreviewModal')).show();
+            }
 
-// PDF generation
-function generatePdf() {
-    const htmlContent = document.getElementById('bookingPreviewBody').innerHTML;
-    fetch("{{ route('admin.vehicle-bookings.generatePdf') }}", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ html: htmlContent })
-    })
-    .then(response => response.blob())
-    .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `vehicle_booking_{{ $booking->inv_no ?? 'invoice' }}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-    })
-    .catch(err => alert('PDF generation failed: ' + err));
-}
-</script>
-
+            // PDF generation
+            function generatePdf() {
+                const htmlContent = document.getElementById('bookingPreviewBody').innerHTML;
+                fetch("{{ route('admin.vehicle-bookings.generatePdf') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            html: htmlContent
+                        })
+                    })
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `vehicle_booking_{{ $booking->inv_no ?? 'invoice' }}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    })
+                    .catch(err => alert('PDF generation failed: ' + err));
+            }
+        </script>
     @endsection

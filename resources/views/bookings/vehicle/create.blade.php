@@ -99,98 +99,140 @@
                                 placeholder="Enter total KM">
                         </div>
 
+
+
+                        <!-- Status / Payment -->
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Currency</label>
-                            <select name="currency" id="currency" class="form-select">
-                                <option value="LKR">LKR</option>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
+                            <label class="form-label">Payment Status</label>
+                            <select name="payment_status" id="payment_status" class="form-select">
+                                <option value="pending">Pending</option>
+                                <option value="partial">Partial</option>
+                                <option value="paid">Paid</option>
                             </select>
                         </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Status</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="Quotation" selected>Quotation</option>
+                                <option value="Accepted">Accepted</option>
+                                <option value="Invoiced">Invoiced</option>
+                                <option value="Partially Paid">Partially Paid</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+
+
+
+                        <!-- Note -->
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Note</label>
+                            <textarea name="note" id="note" class="form-control" rows="3"></textarea>
+                        </div>
+
+                        {{-- Price & Payment Details --}}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-secondary">
+                                <div class="card-header bg-light">
+                                    <strong>Price & Payment Details</strong>
+                                </div>
+                                <div class="card-body">
+
+                                    {{-- Currency --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Currency</label>
+                                        <div class="col-sm-10">
+                                            <select name="currency" id="currency" class="form-select">
+                                                <option value="LKR"
+                                                    {{ ($booking->currency ?? 'LKR') == 'LKR' ? 'selected' : '' }}>LKR
+                                                </option>
+                                                <option value="USD"
+                                                    {{ ($booking->currency ?? '') == 'USD' ? 'selected' : '' }}>USD
+                                                </option>
+                                                <option value="EUR"
+                                                    {{ ($booking->currency ?? '') == 'EUR' ? 'selected' : '' }}>EUR
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {{-- Base Price --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Base Price</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="price" id="price"
+                                                class="form-control calc" value="{{ $booking->price ?? 0 }}">
+                                        </div>
+                                    </div>
+
+                                    {{-- Additional Charges --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Additional Charges</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="additional_charges"
+                                                id="additional_charges" class="form-control calc"
+                                                value="{{ $booking->additional_charges ?? 0 }}">
+                                        </div>
+                                    </div>
+
+                                    {{-- Discount --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Discount</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="discount" id="discount"
+                                                class="form-control calc" value="{{ $booking->discount ?? 0 }}">
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    {{-- Advance Paid --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Advance Paid</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="advance_paid" id="advance_paid"
+                                                class="form-control calc" value="{{ $booking->advance_paid ?? 0 }}">
+                                        </div>
+                                    </div>
+
+                                    {{-- Total Price --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Total Price</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="total_price" id="total_price"
+                                                class="form-control" value="{{ $booking->total_price ?? 0 }}" readonly>
+                                        </div>
+                                    </div>
+
+                                    {{-- Balance --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Balance</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" step="0.01" name="balance" id="balance"
+                                                class="form-control"
+                                                value="{{ ($booking->total_price ?? 0) - ($booking->advance_paid ?? 0) }}"
+                                                readonly>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                    <!-- Pricing -->
-                    <!-- Pricing -->
+
+                    <div class="text-end gap-2 d-flex justify-content-end">
+                        <button type="button" class="btn btn-warning" style="width:120px;"
+                            onclick="window.location='{{ route('admin.vehicle-bookings.index') }}'">
+                            Back
+                        </button>
 
 
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Base Price</label>
-                        <input type="number" step="0.01" name="price" id="price" class="form-control"
-                            value="0">
+                        <button type="button" class="btn btn-secondary" onclick="previewBooking()"
+                            style="width:120px;">Preview</button>
+                        <button type="submit" class="btn btn-primary" style="width:120px;">Save </button>
                     </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Additional Charges</label>
-                        <input type="number" step="0.01" name="additional_charges" id="additional_charges"
-                            class="form-control" value="0">
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Discount</label>
-                        <input type="number" step="0.01" name="discount" id="discount" class="form-control"
-                            value="0">
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Advance Paid</label>
-                        <input type="number" step="0.01" name="advance_paid" id="advance_paid" class="form-control"
-                            value="0">
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Total Price</label>
-                        <input type="number" step="0.01" name="total_price" id="total_price" class="form-control"
-                            readonly>
-                    </div>
-
-                    <div class="col-md-2 mb-3">
-                        <label class="form-label">Balance</label>
-                        <input type="number" step="0.01" name="balance" id="balance" class="form-control"
-                            readonly>
-                    </div>
-
-
-                    <!-- Status / Payment -->
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Payment Status</label>
-                        <select name="payment_status" id="payment_status" class="form-select">
-                            <option value="pending">Pending</option>
-                            <option value="partial">Partial</option>
-                            <option value="paid">Paid</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Status</label>
-                        <select name="status" id="status" class="form-select">
-                            <option value="Quotation" selected>Quotation</option>
-                            <option value="Accepted">Accepted</option>
-                            <option value="Invoiced">Invoiced</option>
-                            <option value="Partially Paid">Partially Paid</option>
-                            <option value="Paid">Paid</option>
-                            <option value="Cancelled">Cancelled</option>
-                        </select>
-                    </div>
-
-
-
-                    <!-- Note -->
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Note</label>
-                        <textarea name="note" id="note" class="form-control" rows="3"></textarea>
-                    </div>
-                </div>
-
-                <div class="text-end gap-2 d-flex justify-content-end">
-                    <button type="button" class="btn btn-warning" style="width:120px;"
-                        onclick="window.location='{{ route('admin.vehicle-bookings.index') }}'">
-                        Back
-                    </button>
-
-
-                    <button type="button" class="btn btn-secondary" onclick="previewBooking()"
-                        style="width:120px;">Preview</button>
-                    <button type="submit" class="btn btn-primary" style="width:120px;">Save </button>
-                </div>
             </form>
         </div>
     </div>

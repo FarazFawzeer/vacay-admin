@@ -147,7 +147,7 @@ class VehicleInvBookingController extends Controller
     {
         // Validate request
         $request->validate([
-            'customer_id'        => 'required|exists:customers,id',
+             'customer_id'        => 'required|exists:customers,id',
             'vehicle_id'         => 'required|exists:vehicle_details,id',
             'pickup_location'    => 'required|string',
             'pickup_datetime'    => 'required|date',
@@ -156,11 +156,12 @@ class VehicleInvBookingController extends Controller
             'price'              => 'required|numeric|min:0',
             'additional_charges' => 'nullable|numeric|min:0',
             'discount'           => 'nullable|numeric|min:0',
+            'advance_paid'       => 'nullable|numeric|min:0', // <-- added validation
             'currency'           => 'required|string|max:5',
-            'status'             => 'required|in:quotation,invoice,confirmed,completed,cancelled',
-            'payment_status'     => 'required|in:unpaid,partial,paid',
+            'status'             => 'required',
             'mileage'            => 'required|in:unlimited,limited',
             'total_km'           => 'required_if:mileage,limited|nullable|numeric|min:1',
+            'note'               => 'nullable|string|max:1000', // optional note
         ]);
 
         // Recalculate total
