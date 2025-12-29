@@ -24,6 +24,7 @@ class VehicleDetail extends Model
     protected $fillable = [
         'make',
         'model',
+        'vehicle_number',
         'condition',
         'seats',
         'max_seating_capacity',

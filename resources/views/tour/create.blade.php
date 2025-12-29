@@ -31,24 +31,15 @@
                 {{-- Main Info --}}
                 {{-- Country / Category / Type --}}
                 <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label for="country" class="form-label">Country</label>
                         <input type="text" name="country" id="country" class="form-control"
                             placeholder="e.g., Sri Lanka">
                     </div>
 
-                    <div class="col-md-4 mb-3">
-                        <label for="category" class="form-label">Category</label>
-                        <select name="category" id="category" class="form-select">
-                            <option value="">-- Select Category --</option>
-                            <option value="special">Special</option>
-                            <option value="city">City</option>
-                            <option value="tailor">Tailor Made</option>
-                            <option value="custom">Custom</option>
-                        </select>
-                    </div>
 
-                    <div class="col-md-4 mb-3">
+
+                    <div class="col-md-6 mb-3">
                         <label for="type" class="form-label">Type</label>
                         <select name="type" id="type" class="form-select">
                             <option value="">-- Select Tour Type --</option>
@@ -60,13 +51,29 @@
 
                 {{-- Heading / Reference --}}
                 <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="heading" class="form-label">Heading</label>
-                        <input type="text" name="heading" id="heading" class="form-control"
-                            placeholder="e.g., Explore Sri Lanka in 7 Days" required>
+                    <div class="col-md-4 mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select name="category" id="category" class="form-select">
+                            <option value="">-- Select Category --</option>
+                            <option value="special">Special</option>
+                            <option value="city">City</option>
+                            <option value="tailor">Tailor Made</option>
+
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3 d-none" id="headingSection">
+                        <label class="form-label">Heading</label>
+
+                        <select id="headingSelect" class="form-select" onchange="handleHeadingChange(this)">
+                            <option value="">-- Select Heading --</option>
+                        </select>
+
+                        <input type="text" name="heading" id="customHeadingInput" class="form-control mt-2 d-none"
+                            placeholder="Enter custom heading">
                     </div>
 
-                    <div class="col-md-6 mb-3">
+
+                    <div class="col-md-4 mb-3">
                         <label for="tour_ref_no" class="form-label">Reference No</label>
                         <input type="text" name="tour_ref_no" id="tour_ref_no" class="form-control"
                             placeholder="e.g., SLT-001" required>
@@ -310,6 +317,88 @@
         </div>
     </div>
 
+    <script>
+        const categoryHeadings = {
+            special: [
+                ' Highland Escapes',
+                'Ancient Heritage',
+                'Heritage & Highlands Adventure',
+                'Sri Lanka Grand Explorer'
+            ],
+            city: [
+                'Negombo',
+                'Colombo',
+                '⁠Sigiriya',
+                'Kandy',
+                'Kithulgala',
+                'Trincomalee',
+                '⁠Kalpitiya'
+
+            ],
+            tailor: [
+                'Cultural Treasures SriLanka',
+                'Scenic Hill Country',
+                'Beaches Heritage Trail',
+                'Grand SriLanka Explorer',
+                'Ultimate Island Journey',
+                'Paradise Cultural Coast',
+                'Ancient Shores Journey',
+                'Ancient Shores Journey'
+            ]
+        };
+
+        const categorySelect = document.getElementById('category');
+        const headingSection = document.getElementById('headingSection');
+        const headingSelect = document.getElementById('headingSelect');
+        const customHeadingInput = document.getElementById('customHeadingInput');
+
+        categorySelect.addEventListener('change', function() {
+            const category = this.value;
+
+            // Reset
+            headingSelect.innerHTML = '<option value="">-- Select Heading --</option>';
+            customHeadingInput.value = '';
+            customHeadingInput.classList.add('d-none');
+
+            if (!categoryHeadings[category]) {
+                headingSection.classList.add('d-none');
+                return;
+            }
+
+            // Populate category-based headings
+            categoryHeadings[category].forEach(h => {
+                headingSelect.insertAdjacentHTML(
+                    'beforeend',
+                    `<option value="${h}">${h}</option>`
+                );
+            });
+
+            // Add custom option
+            headingSelect.insertAdjacentHTML(
+                'beforeend',
+                `<option value="__custom__">➕ Custom heading</option>`
+            );
+
+            headingSection.classList.remove('d-none');
+        });
+
+        function handleHeadingChange(select) {
+            if (select.value === '__custom__') {
+                customHeadingInput.classList.remove('d-none');
+                customHeadingInput.focus();
+                customHeadingInput.required = true;
+            } else {
+                customHeadingInput.classList.add('d-none');
+                customHeadingInput.required = false;
+                customHeadingInput.value = '';
+
+                // Copy selected heading into hidden input
+                customHeadingInput.value = select.value;
+            }
+        }
+    </script>
+
+
     {{-- Scripts --}}
     <script>
         // Define hotelCities just like hotels and vehicles
@@ -474,7 +563,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                                                                                             <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                                                                                                             <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>
@@ -696,6 +785,8 @@
                 populateHotels(e.target);
             }
         });
+
+
 
         // Initial population for any existing city selects on page load (if any)
         document.querySelectorAll('.itinerary-city-select').forEach(select => {

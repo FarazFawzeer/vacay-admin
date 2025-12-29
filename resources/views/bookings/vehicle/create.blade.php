@@ -59,7 +59,7 @@
                                     $imagesJson = json_encode($images); // no htmlspecialchars
                                 @endphp
                                 <option value="{{ $vehicle->id }}" data-images='@json($images)'>
-                                    {{ $vehicle->name }} - {{ $vehicle->model }}
+                                    {{ $vehicle->name }} - {{ $vehicle->vehicle_number }}
                                 </option>
                             @endforeach
                         </select>

@@ -3,7 +3,9 @@
         <tr>
             <th>Invoice No</th>
             <th>Customer</th>
+            <th>Agent</th> <!-- New Column -->
             <th>Vehicle</th>
+            <th>Vehicle Number</th> <!-- New Column -->
             <th>Pickup Location</th>
             <th>Dropoff Location</th>
             <th>Total KM</th>
@@ -23,6 +25,9 @@
                 {{-- Customer --}}
                 <td>{{ $booking->customer->name ?? ($booking->customer_name ?? '-') }}</td>
 
+                {{-- Agent / Owner --}}
+                <td>{{ $booking->vehicle->agent->name ?? '-' }} - {{ $booking->vehicle->agent->company_name ?? '-' }}</td>
+
                 {{-- Vehicle --}}
                 <td>
                     {{ $booking->vehicle->name ?? ($booking->vehicle_model ?? '-') }}
@@ -31,16 +36,17 @@
                     @endif
                 </td>
 
+                {{-- Vehicle Number --}}
+                <td>{{ $booking->vehicle->vehicle_number ?? '-' }}</td>
+
                 {{-- Pickup Location --}}
                 <td>{{ $booking->pickup_location }} <br>
-                    <small
-                        class="text-muted">{{ \Carbon\Carbon::parse($booking->pickup_datetime)->format('d M Y, h:i A') }}</small>
+                    <small class="text-muted">{{ \Carbon\Carbon::parse($booking->pickup_datetime)->format('d M Y, h:i A') }}</small>
                 </td>
 
                 {{-- Dropoff Location --}}
                 <td>{{ $booking->dropoff_location }} <br>
-                    <small
-                        class="text-muted">{{ \Carbon\Carbon::parse($booking->dropoff_datetime)->format('d M Y, h:i A') }}</small>
+                    <small class="text-muted">{{ \Carbon\Carbon::parse($booking->dropoff_datetime)->format('d M Y, h:i A') }}</small>
                 </td>
 
                 {{-- Total KM --}}
@@ -86,7 +92,6 @@
                             @endforeach
                         </ul>
                     </div>
-
                 </td>
 
                 {{-- Actions --}}
@@ -109,7 +114,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="9" class="text-center">No vehicle bookings found.</td>
+                <td colspan="11" class="text-center">No vehicle bookings found.</td>
             </tr>
         @endforelse
     </tbody>

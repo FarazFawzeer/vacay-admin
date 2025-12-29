@@ -3,6 +3,9 @@
         <tr>
             <th>Booking Ref</th>
             <th>Customer</th>
+            <th>Nationality</th>
+            <th>Visit Country</th>
+            <th>Tour Category</th>
             <th>Package</th>
             <th>Travel Dates</th>
             <th>Passengers</th>
@@ -17,6 +20,15 @@
             <tr id="booking-{{ $booking->id }}">
                 <td>{{ $booking->booking_ref_no }}</td>
                 <td>{{ $booking->customer->name ?? '-' }}</td>
+
+                <td>
+                    {{ $booking->customer->country ?? '-' }}
+                </td>
+
+                <td>
+                    {{ $booking->visit_country ?? '-' }}
+                </td>
+                <td>{{ $booking->package->tour_category ?? '-' }}</td>
                 <td>{{ $booking->package->heading ?? '-' }}</td>
                 <td>{{ $booking->travel_date }} to {{ $booking->travel_end_date }}</td>
                 <td>{{ $booking->adults }}
@@ -78,7 +90,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="9" class="text-center">No bookings found.</td>
+                <td colspan="11" class="text-center">No bookings found.</td>
             </tr>
         @endforelse
     </tbody>

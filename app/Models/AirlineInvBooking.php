@@ -9,19 +9,16 @@ class AirlineInvBooking extends Model
 {
     use HasFactory;
 
-    // Table name
     protected $table = 'airline_inv_bookings';
 
-    // Fillable fields for mass assignment
     protected $fillable = [
-        'invoice_no',
-        'customer_id',
-        'agent',
-        'from_country',
-        'to_country',
-        'departure_datetime',
-        'arrival_datetime',
-        'airline',
+        'invoice_id',  
+        'business_type',
+        'company_name',
+        'ticket_type',
+        'return_type',
+        'status',
+        'payment_status',
         'currency',
         'base_price',
         'additional_price',
@@ -29,39 +26,34 @@ class AirlineInvBooking extends Model
         'total_amount',
         'advanced_paid',
         'balance',
-        'status',
-        'payment_status',
-        'created_by',
+           'created_by',
     ];
 
-    // Casts
-    protected $casts = [
-        'departure_datetime' => 'datetime',
-        'arrival_datetime'   => 'datetime',
-        'base_price'         => 'decimal:2',
-        'additional_price'   => 'decimal:2',
-        'discount'           => 'decimal:2',
-        'total_amount'       => 'decimal:2',
-        'advanced_paid'      => 'decimal:2',
-        'balance'            => 'decimal:2',
-    ];
+    /**
+     * One booking has many flight trips
+     */
+    public function trips()
+    {
+        return $this->hasMany(AirlineInvBookingTrip::class, 'airline_booking_id');
+    }
 
-    // Relationships
+       public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by'); // 'created_by' is FK to users table
+    }
 
     public function customer()
     {
-        return $this->belongsTo(Customer::class, 'customer_id');
+        return $this->hasManyThrough(
+            \App\Models\Customer::class,  // final model
+            \App\Models\Passport::class,  // intermediate model
+            'id',                          // passport.id (local key in passports)
+            'id',                          // customer.id (local key in customers)
+            'id',                          // booking.id (local key in bookings)
+            'customer_id'                  // passport.customer_id
+        )->join('airline_booking_trips', 'airline_booking_trips.passport_id', '=', 'passports.id')
+         ->where('airline_booking_trips.airline_booking_id', $this->id)
+         ->select('customers.*');
     }
 
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function agent()
-    {
-        return $this->belongsTo(Agent::class, 'agent');
-    }
-
-    
 }

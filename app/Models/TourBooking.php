@@ -18,6 +18,7 @@ class TourBooking extends Model
         'adults',
         'children',
         'infants',
+        'visit_country',
         'package_price',
         'discount',
         'tax',

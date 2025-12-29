@@ -219,7 +219,7 @@ class VehicleInvBookingController extends Controller
     public function destroy($id)
     {
         try {
-            $booking = VehicleBooking::findOrFail($id);
+            $booking = VehicleInvBooking::findOrFail($id);
             $booking->delete();
 
             return response()->json([

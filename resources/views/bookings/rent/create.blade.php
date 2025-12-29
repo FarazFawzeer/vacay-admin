@@ -50,7 +50,7 @@
                                 @endphp
                                 <option value="{{ $vehicle->id }}" data-images='@json($images)'>
                                     {{ $vehicle->vehicle_name ?? $vehicle->name }} -
-                                    {{ $vehicle->vehicle_number ?? $vehicle->model }}
+                                    {{ $vehicle->vehicle_number ?? $vehicle->vehicle_number  }}
                                 </option>
                             @endforeach
                         </select>

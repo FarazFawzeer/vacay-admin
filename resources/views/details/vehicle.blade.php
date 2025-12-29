@@ -105,14 +105,19 @@
                                 required>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Vehicle Name</label>
                             <input type="text" name="name" class="form-control" placeholder="Enter Vehicle Name"
                                 required>
                         </div>
 
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Vehicle Number</label>
+                            <input type="text" name="vehicle_number" class="form-control"
+                                placeholder="Enter Vehicle Number" required>
+                        </div>
                         {{-- Model --}}
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Model</label>
                             <input type="text" name="model" class="form-control" placeholder="Enter Vehicle Model"
                                 required>
@@ -120,7 +125,7 @@
 
 
                         {{-- Price --}}
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-3 mb-3">
                             <label class="form-label">Price</label>
                             <div class="input-group">
                                 <input type="number" step="0.01" name="price" class="form-control"
@@ -226,7 +231,8 @@
                             <select name="agent_id" class="form-select" required>
                                 <option value="">Select Agent</option>
                                 @foreach ($agents as $agent)
-                                    <option value="{{ $agent->id }}">{{ $agent->company_name }} - {{ $agent->name }}</option>
+                                    <option value="{{ $agent->id }}">{{ $agent->company_name }} - {{ $agent->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -287,15 +293,14 @@
                             <tr>
                                 <th>Image</th>
                                 <th>Name</th>
-                                         <th>Agent</th>
+                                <th>Vehicle Number</th>
+                                <th>Agent</th>
                                 <th>Manufacturer</th>
                                 <th>Model</th>
                                 <th>Condition</th>
-
                                 <th>Price </th>
                                 <th>Type</th>
                                 <th>Status</th>
-
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -312,11 +317,12 @@
                                         @endif
                                     </td>
                                     <td>{{ $vehicle->name }}</td>
-                                    <td>{{ $vehicle->agent->name ?? '-'}} - {{ $vehicle->agent->company_name ?? '-'}}</td>
+                                    <td>{{ $vehicle->vehicle_number ?? '-' }}</td>
+                                    <td>{{ $vehicle->agent->name ?? '-' }} - {{ $vehicle->agent->company_name ?? '-' }}
+                                    </td>
                                     <td>{{ $vehicle->make }}</td>
                                     <td>{{ $vehicle->model }}</td>
                                     <td>{{ ucfirst($vehicle->condition ?? '-') }}</td>
-
                                     <td>{{ number_format($vehicle->price, 2) }}</td>
                                     <td>{{ ucfirst($vehicle->type ?? '-') }}</td>
                                     <td>
@@ -328,7 +334,6 @@
                                     </td>
 
                                     <td class="text-center">
-
                                         <a href="{{ route('admin.vehicles.show', $vehicle->id) }}"
                                             class="icon-btn text-info" title="View Vehicle Details">
                                             <i class="bi bi-eye fs-5"></i>
@@ -338,15 +343,15 @@
                                         <button class="icon-btn text-primary editVehicleBtn"
                                             data-id="{{ $vehicle->id }}" data-name="{{ $vehicle->name }}"
                                             data-make="{{ $vehicle->make }}" data-model="{{ $vehicle->model }}"
+                                            data-vehicle_number="{{ $vehicle->vehicle_number }}"
                                             data-seats="{{ $vehicle->seats }}" data-milage="{{ $vehicle->milage }}"
                                             data-air_conditioned="{{ $vehicle->air_conditioned }}"
                                             data-helmet="{{ $vehicle->helmet }}"
                                             data-first_aid_kit="{{ $vehicle->first_aid_kit }}"
                                             data-condition="{{ $vehicle->condition }}"
                                             data-transmission="{{ $vehicle->transmission }}"
-                                            data-price="{{ $vehicle->price }}"
-                                            data-currency="{{ $vehicle->currency}}" data-type="{{ $vehicle->type }}"
-                                            data-status="{{ $vehicle->status }}"
+                                            data-price="{{ $vehicle->price }}" data-currency="{{ $vehicle->currency }}"
+                                            data-type="{{ $vehicle->type }}" data-status="{{ $vehicle->status }}"
                                             data-fuel_type="{{ $vehicle->fuel_type }}"
                                             data-luggage_space="{{ $vehicle->luggage_space }}"
                                             data-insurance_type="{{ $vehicle->insurance_type }}"
@@ -356,7 +361,6 @@
                                             data-bs-target="#editVehicleModal" title="Edit Vehicle">
                                             <i class="bi bi-pencil-square fs-5"></i>
                                         </button>
-
 
                                         {{-- Toggle Status --}}
                                         <button type="button"
@@ -375,10 +379,7 @@
                                             data-id="{{ $vehicle->id }}" title="Delete Vehicle">
                                             <i class="bi bi-trash-fill fs-5"></i>
                                         </button>
-
                                     </td>
-
-
                                 </tr>
                             @empty
                                 <tr>
@@ -386,8 +387,8 @@
                                 </tr>
                             @endforelse
                         </tbody>
-
                     </table>
+
 
                     <div class="d-flex justify-content-end mt-3">
                         {{ $vehicles->links() }}
@@ -437,13 +438,18 @@
                                 </div>
 
                                 {{-- Vehicle Name --}}
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label class="form-label">Vehicle Name</label>
                                     <input type="text" name="name" id="edit_name" class="form-control" required>
                                 </div>
 
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Vehicle Number</label>
+                                    <input type="text" name="vehicle_number" id="edit_vehicle_number"
+                                        class="form-control" placeholder="Enter Vehicle Number">
+                                </div>
                                 {{-- Model --}}
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-6 mb-3">
                                     <label class="form-label">Model</label>
                                     <input type="text" name="model" id="edit_model" class="form-control">
                                 </div>
@@ -557,7 +563,8 @@
                                     <select name="agent_id" id="edit_agent_id" class="form-select" required>
                                         <option value="">Select Agent</option>
                                         @foreach ($agents as $agent)
-                                            <option value="{{ $agent->id }}">{{ $agent->company_name }} - {{ $agent->name }}</option>
+                                            <option value="{{ $agent->id }}">{{ $agent->company_name }} -
+                                                {{ $agent->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -631,6 +638,7 @@
                     <tr id="vehicle-${vehicle.id}">
                         <td>${vehicle.vehicle_image ? `<img src="/storage/${vehicle.vehicle_image}" class="vehicle-img">` : '<span class="text-muted">No Image</span>'}</td>
                         <td>${vehicle.name}</td>
+                         data-vehicle_number="${vehicle.vehicle_number}"
                             <td>${vehicle.agent ? `${vehicle.agent.name} - ${vehicle.agent.company_name}` : '-'}</td>
                         <td>${vehicle.make}</td>
                         <td>${vehicle.model}</td>
@@ -711,6 +719,7 @@
 
                     // Populate fields (same as your existing logic)
                     document.getElementById('edit_name').value = editBtn.dataset.name || '';
+                    document.getElementById('edit_vehicle_number').value = btn.dataset.vehicle_number || '';
                     document.getElementById('edit_make').value = editBtn.dataset.make || '';
                     document.getElementById('edit_model').value = editBtn.dataset.model || '';
                     document.getElementById('edit_milage').value = editBtn.dataset.milage || '';
@@ -1059,6 +1068,8 @@
 
                     // Input fields
                     document.getElementById('edit_name').value = btn.dataset.name || '';
+                    document.getElementById('edit_vehicle_number').value = btn.dataset
+                        .vehicle_number || '';
                     document.getElementById('edit_make').value = btn.dataset.make || '';
                     document.getElementById('edit_model').value = btn.dataset.model || '';
                     document.getElementById('edit_milage').value = btn.dataset.milage || '';

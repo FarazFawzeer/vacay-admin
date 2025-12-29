@@ -53,7 +53,7 @@
                                 <option value="{{ $vehicle->id }}" data-images='@json($images)'
                                     {{ $booking->vehicle_id == $vehicle->id ? 'selected' : '' }}>
                                     {{ $vehicle->vehicle_name ?? $vehicle->name }} -
-                                    {{ $vehicle->vehicle_number ?? $vehicle->model }}
+                                    {{ $vehicle->vehicle_number ?? $vehicle->vehicle_number}}
                                 </option>
                             @endforeach
                         </select>

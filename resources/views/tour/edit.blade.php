@@ -19,12 +19,23 @@
 
                 {{-- Main Info --}}
                 <div class="row">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
                         <label class="form-label">Country</label>
                         <input type="text" name="country" class="form-control"
                             value="{{ old('country', $package->country_name) }}">
                     </div>
 
+
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Type</label>
+                        <select name="type" class="form-select">
+                            <option value="inbound" {{ $package->type == 'inbound' ? 'selected' : '' }}>Inbound</option>
+                            <option value="outbound" {{ $package->type == 'outbound' ? 'selected' : '' }}>Outbound</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Category</label>
                         <select name="category" class="form-select">
@@ -35,23 +46,23 @@
                             </option>
                         </select>
                     </div>
+                    <div class="col-md-4 mb-3" id="headingSection">
+                        <label class="form-label">Heading</label>
+
+                        <select id="headingSelect" class="form-select" onchange="handleHeadingChange(this)">
+                            <option value="">-- Select Heading --</option>
+                        </select>
+
+                        <input type="text" id="customHeadingInput" class="form-control mt-2 d-none"
+                            placeholder="Enter custom heading">
+
+                        {{-- FINAL value submitted --}}
+                        <input type="hidden" name="heading" id="finalHeading"
+                            value="{{ old('heading', $package->heading) }}">
+                    </div>
+
 
                     <div class="col-md-4 mb-3">
-                        <label class="form-label">Type</label>
-                        <select name="type" class="form-select">
-                            <option value="inbound" {{ $package->type == 'inbound' ? 'selected' : '' }}>Inbound</option>
-                            <option value="outbound" {{ $package->type == 'outbound' ? 'selected' : '' }}>Outbound</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Heading</label>
-                        <input type="text" name="heading" class="form-control"
-                            value="{{ old('heading', $package->heading) }}" required>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
                         <label class="form-label">Reference No</label>
                         <input type="text" name="tour_ref_no" class="form-control"
                             value="{{ old('tour_ref_no', $package->tour_ref_no) }}" required>
@@ -115,7 +126,8 @@
                         <label class="form-label">Main Picture</label>
                         <input type="file" name="main_picture" class="form-control">
                         @if ($package->picture)
-                            <img src="{{ asset('admin/storage/' . $package->picture) }}" width="120" class="mt-2 rounded">
+                            <img src="{{ asset('admin/storage/' . $package->picture) }}" width="120"
+                                class="mt-2 rounded">
                         @endif
                     </div>
 
@@ -204,8 +216,8 @@
                                         <input type="file" name="itineraries[{{ $i }}][pictures]"
                                             class="form-control">
                                         @if ($itinerary->pictures)
-                                            <img src="{{ asset('admin/storage/' . $itinerary->pictures) }}" width="100"
-                                                class="mt-2 rounded">
+                                            <img src="{{ asset('admin/storage/' . $itinerary->pictures) }}"
+                                                width="100" class="mt-2 rounded">
                                         @endif
                                     </div>
 
@@ -504,6 +516,100 @@
 
     {{-- Scripts --}}
     <script>
+        const categoryHeadings = {
+            special: [
+                ' Highland Escapes',
+                'Ancient Heritage',
+                'Heritage & Highlands Adventure',
+                'Sri Lanka Grand Explorer'
+            ],
+            city: [
+                'Negombo',
+                'Colombo',
+                '⁠Sigiriya',
+                'Kandy',
+                'Kithulgala',
+                'Trincomalee',
+                '⁠Kalpitiya'
+
+            ],
+            tailor: [
+                'Cultural Treasures SriLanka',
+                'Scenic Hill Country',
+                'Beaches Heritage Trail',
+                'Grand SriLanka Explorer',
+                'Ultimate Island Journey',
+                'Paradise Cultural Coast',
+                'Ancient Shores Journey',
+                'Ancient Shores Journey'
+            ]
+        };
+
+        const categorySelect = document.querySelector('select[name="category"]');
+        const headingSelect = document.getElementById('headingSelect');
+        const customHeadingInput = document.getElementById('customHeadingInput');
+        const finalHeadingInput = document.getElementById('finalHeading');
+
+        // Populate headings based on category
+        function populateHeadingDropdown(category, selectedHeading = '') {
+            headingSelect.innerHTML = '<option value="">-- Select Heading --</option>';
+            customHeadingInput.classList.add('d-none');
+            customHeadingInput.value = '';
+
+            if (!categoryHeadings[category]) return;
+
+            let matched = false;
+
+            categoryHeadings[category].forEach(h => {
+                const selected = h === selectedHeading ? 'selected' : '';
+                if (selected) matched = true;
+                headingSelect.insertAdjacentHTML(
+                    'beforeend',
+                    `<option value="${h}" ${selected}>${h}</option>`
+                );
+            });
+
+            // Add custom option
+            headingSelect.insertAdjacentHTML(
+                'beforeend',
+                `<option value="__custom__">➕ Custom Heading</option>`
+            );
+
+            // If existing heading does NOT match predefined → custom
+            if (selectedHeading && !matched) {
+                headingSelect.value = '__custom__';
+                customHeadingInput.classList.remove('d-none');
+                customHeadingInput.value = selectedHeading;
+            }
+        }
+
+        // Handle dropdown change
+        function handleHeadingChange(select) {
+            if (select.value === '__custom__') {
+                customHeadingInput.classList.remove('d-none');
+                customHeadingInput.required = true;
+                finalHeadingInput.value = '';
+                customHeadingInput.focus();
+            } else {
+                customHeadingInput.classList.add('d-none');
+                customHeadingInput.required = false;
+                customHeadingInput.value = '';
+                finalHeadingInput.value = select.value;
+            }
+        }
+
+        // Sync custom input → hidden field
+        customHeadingInput.addEventListener('input', function() {
+            finalHeadingInput.value = this.value;
+        });
+
+        // Category change
+        categorySelect.addEventListener('change', function() {
+            populateHeadingDropdown(this.value);
+            finalHeadingInput.value = '';
+        });
+
+
         // ======= HOTEL LIST (from backend) =======
         // **THIS IS CAUSING THE BLADE PARSE ERROR**
         const hotels = <?php
@@ -616,6 +722,13 @@
             if (select.value) {
                 populateVehicleDetails();
             }
+
+            const existingCategory = categorySelect.value;
+            const existingHeading = finalHeadingInput.value;
+
+            if (existingCategory) {
+                populateHeadingDropdown(existingCategory, existingHeading);
+            }
         });
 
 
@@ -696,9 +809,9 @@
                         </div>
                         <div class="col-md-3">
                             ${h.image ? `
-                                                                                                                    <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
-                                                                                                                    <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
-                                                                                                                ` : ''}
+                                                                                                                            <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
+                                                                                                                            <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
+                                                                                                                        ` : ''}
                             <input type="file" 
                                 name="itineraries[${index}][highlights][${highlightCounter}][images]" 
                                 class="form-control">

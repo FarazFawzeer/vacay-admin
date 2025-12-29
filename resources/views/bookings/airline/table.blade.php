@@ -3,34 +3,71 @@
         <tr>
             <th>Invoice No</th>
             <th>Passenger / Customer</th>
+            <th>Trip Type</th>
+            <th>Agent</th>
             <th>From → To</th>
             <th>Airline / Flight</th>
             <th>Total</th>
             <th>Balance</th>
             <th>Payment</th>
             <th>Status</th>
-
             <th class="text-center">Action</th>
         </tr>
     </thead>
 
     <tbody>
         @forelse($bookings as $booking)
+            @php
+                $firstTrip = $booking->trips->first();
+            @endphp
             <tr id="booking-{{ $booking->id }}">
 
                 {{-- Invoice --}}
-                <td class="fw-bold">{{ $booking->invoice_no }}</td>
+                <td class="fw-bold">{{ $booking->invoice_id }}</td>
 
                 {{-- Passenger / Customer --}}
-                <td>
-                    {{ $booking->customer ? $booking->customer->name : '-' }}
-                </td>
+<td>
+    @foreach($booking->trips as $trip)
+        @if ($trip->passport)
+            {{ $trip->passport->first_name }} {{ $trip->passport->second_name }}<br>
+        @endif
+    @endforeach
+</td>
 
+
+
+                {{-- Trip Type --}}
+                <td>
+                    @php
+                        $tripTypes = $booking->trips->pluck('trip_type')->unique();
+
+                        if ($tripTypes->contains('round_trip')) {
+                            $tripLabel = 'Round Trip';
+                        } elseif ($tripTypes->contains('going') && $tripTypes->contains('return')) {
+                            $tripLabel = 'Return Ticket';
+                        } elseif ($tripTypes->contains('dummy')) {
+                            $tripLabel = 'Return (Dummy)';
+                        } elseif ($tripTypes->contains('one_way')) {
+                            $tripLabel = 'One Way';
+                        } else {
+                            $tripLabel = '-';
+                        }
+                    @endphp
+
+                    <span class="fw-semibold">{{ $tripLabel }}</span>
+                </td>
+                <td>
+                    @if ($firstTrip && $firstTrip->agent)
+                        {{ $firstTrip->agent->company_name }} - {{ $firstTrip->agent->name }}
+                    @else
+                        -
+                    @endif
+                </td>
                 {{-- Route From → To --}}
-                <td>{{ $booking->from_country ?? '-' }} → {{ $booking->to_country ?? '-' }}</td>
+                <td>{{ optional($firstTrip)->from_country ?? '-' }} → {{ optional($firstTrip)->to_country ?? '-' }}</td>
 
                 {{-- Airline / Flight --}}
-                <td>{{ $booking->airline ?? '-' }}</td>
+                <td>{{ optional($firstTrip)->airline ?? '-' }}</td>
 
                 {{-- Total --}}
                 <td>{{ $booking->currency }} {{ number_format($booking->total_amount, 2) }}</td>
@@ -39,27 +76,26 @@
                 <td class="{{ $booking->balance > 0 ? 'text-danger' : 'text-success' }}">
                     {{ $booking->currency }} {{ number_format($booking->balance, 2) }}
                 </td>
+
                 {{-- Payment Status --}}
                 <td>{{ ucfirst($booking->payment_status) }}</td>
-
 
                 {{-- Booking Status --}}
                 <td>
                     <div class="dropdown">
                         <button
                             class="btn btn-sm dropdown-toggle
-                @switch($booking->status)
-                    @case('Quotation') btn-secondary @break
-                    @case('Accepted') btn-primary @break
-                    @case('Invoiced') btn-info @break
-                    @case('Partially Paid') btn-warning @break
-                    @case('Paid') btn-success @break
-                    @case('Cancelled') btn-danger @break
-                    @default btn-secondary
-                @endswitch"
+                            @switch($booking->status)
+                                @case('Quotation') btn-secondary @break
+                                @case('Accepted') btn-primary @break
+                                @case('Invoiced') btn-info @break
+                                @case('Partially Paid') btn-warning @break
+                                @case('Paid') btn-success @break
+                                @case('Cancelled') btn-danger @break
+                                @default btn-secondary
+                            @endswitch"
                             type="button" id="statusDropdown{{ $booking->id }}" data-bs-toggle="dropdown"
                             aria-expanded="false">
-
                             {{ ucwords(str_replace('_', ' ', $booking->status)) }}
                         </button>
 
@@ -75,10 +111,6 @@
                         </ul>
                     </div>
                 </td>
-
-
-
-
 
                 {{-- Actions --}}
                 <td class="text-center">

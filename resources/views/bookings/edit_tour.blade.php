@@ -49,7 +49,7 @@
 
                 {{-- Customer & Package Info --}}
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="customer_id" class="form-label">Customer</label>
                         <select name="customer_id" id="customer_id" class="form-select" required>
                             <option value="">-- Select Customer --</option>
@@ -62,13 +62,26 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label for="tour_category" class="form-label">Tour Category</label>
+                        <select id="tour_category" class="form-select">
+                            <option value="">-- Select Category --</option>
+                            @foreach ($packages->pluck('tour_category')->unique()->filter() as $category)
+                                <option value="{{ $category }}"
+                                    {{ $booking->package?->tour_category == $category ? 'selected' : '' }}>
+                                    {{ ucfirst($category) }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
                         <label for="package_id" class="form-label">Tour Package</label>
                         <select name="package_id" id="package_id" class="form-select" required>
                             <option value="">-- Select Package --</option>
                             @foreach ($packages as $package)
-                                <option value="{{ $package->id }}" data-price="{{ $package->price }}"
-                                    data-tour-ref="{{ $package->tour_ref_no }}"
+                                <option value="{{ $package->id }}" data-category="{{ $package->tour_category }}"
+                                    data-price="{{ $package->price }}" data-tour-ref="{{ $package->tour_ref_no }}"
                                     {{ $booking->package_id == $package->id ? 'selected' : '' }}>
                                     {{ $package->heading }}
                                 </option>
@@ -106,13 +119,11 @@
                             value="{{ $booking->infants }}" min="0">
                     </div>
                     <div class="col-md-2">
-                        <label for="currency" class="form-label">Currency</label>
-                        <select name="currency" id="currency" class="form-select">
-                            <option value="USD" {{ $booking->currency == 'USD' ? 'selected' : '' }}>USD</option>
-                            <option value="LKR" {{ $booking->currency == 'LKR' ? 'selected' : '' }}>LKR</option>
-                            <option value="EUR" {{ $booking->currency == 'EUR' ? 'selected' : '' }}>EUR</option>
-                        </select>
+                        <label for="visit_country" class="form-label">Visit Country</label>
+                        <input type="text" name="visit_country" id="visit_country" class="form-control"
+                            placeholder="e.g. Sri Lanka" value="{{ $booking->visit_country }}" required>
                     </div>
+
                 </div>
 
 
@@ -161,6 +172,19 @@
                             <strong>Price & Payment Details</strong>
                         </div>
                         <div class="card-body">
+                            <div class="mb-2 row">
+                                <label class="col-sm-4 col-form-label"> Currency</label>
+                                <div class="col-sm-8">
+                                    <select name="currency" id="currency" class="form-select">
+                                        <option value="USD" {{ $booking->currency == 'USD' ? 'selected' : '' }}>USD
+                                        </option>
+                                        <option value="LKR" {{ $booking->currency == 'LKR' ? 'selected' : '' }}>LKR
+                                        </option>
+                                        <option value="EUR" {{ $booking->currency == 'EUR' ? 'selected' : '' }}>EUR
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
 
                             {{-- Package Price --}}
                             <div class="mb-2 row">
@@ -464,22 +488,22 @@
             <tr>
                 <td style="padding:15px 12px; border-bottom:1px solid #eee;">
                     <strong>Travel Package Arrangement</strong><br>
-                    <small style="color:#888;">Comprehensive tour package including accommodation and transport.</small>
+
                 </td>
                 <td style="padding:15px 12px; text-align:right; border-bottom:1px solid #eee; vertical-align:top;">
                     ${packagePriceVal.toFixed(2)}
                 </td>
             </tr>
             ${addChargesVal > 0 ? `
-                    <tr>
-                        <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
-                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
-                    </tr>` : ''}
+                                    <tr>
+                                        <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
+                                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
+                                    </tr>` : ''}
             ${discountVal > 0 ? `
-                    <tr>
-                        <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
-                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
-                    </tr>` : ''}
+                                    <tr>
+                                        <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
+                                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
+                                    </tr>` : ''}
         </tbody>
     </table>
 
@@ -501,10 +525,10 @@
     </div>
 
     ${specialReq ? `
-            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
-                <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
-                <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
-            </div>` : ''}
+                            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
+                                <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
+                                <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
+                            </div>` : ''}
 
     <div style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
         <p style="margin-bottom:5px;">This is a computer-generated document. No signature is required.</p>
@@ -515,5 +539,53 @@
             document.getElementById('quotationPreviewBody').innerHTML = html;
             new bootstrap.Modal(document.getElementById('quotationPreviewModal')).show();
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('tour_category');
+            const packageSelect = document.getElementById('package_id');
+
+            function filterPackages() {
+                const selectedCategory = categorySelect.value;
+
+                Array.from(packageSelect.options).forEach(option => {
+                    if (!option.value) return;
+
+                    option.style.display =
+                        option.dataset.category === selectedCategory ? 'block' : 'none';
+                });
+            }
+
+            categorySelect.addEventListener('change', function() {
+                packageSelect.value = '';
+                document.getElementById('package_price').value = 0;
+                calculateTotal();
+                filterPackages();
+            });
+
+            // Run once on page load (EDIT mode)
+            if (categorySelect.value) {
+                filterPackages();
+            }
+        });
+
+        document.getElementById('package_id').addEventListener('change', function() {
+            const option = this.options[this.selectedIndex];
+            if (!option || !option.dataset.price) return;
+
+            document.getElementById('package_price').value =
+                parseFloat(option.dataset.price).toFixed(2);
+
+            calculateTotal();
+        });
+
+        document.getElementById('advance_paid').addEventListener('input', function() {
+            const total = parseFloat(document.getElementById('total_price').value) || 0;
+            const advance = parseFloat(this.value) || 0;
+            const paymentStatus = document.getElementById('payment_status');
+
+            if (advance <= 0) paymentStatus.value = 'pending';
+            else if (advance < total) paymentStatus.value = 'partial';
+            else paymentStatus.value = 'paid';
+        });
     </script>
 @endsection

@@ -3,14 +3,15 @@
         <tr>
             <th>Invoice No</th>
             <th>Customer</th>
+            <th>Agent</th> <!-- New Column -->
             <th>Vehicle</th>
+            <th>Vehicle Number</th> <!-- New Column -->
             <th>Start</th>
             <th>End</th>
             <th>Total Price</th>
             <th>Payment</th>
             <th>Created By</th>
             <th>Status</th>
-
             <th>Action</th>
         </tr>
     </thead>
@@ -23,16 +24,17 @@
 
                 <td>{{ $booking->customer->name ?? '-' }}</td>
 
+                {{-- Agent / Owner --}}
+                <td>{{ $booking->vehicle->agent->name ?? '-' }} - {{ $booking->vehicle->agent->company_name ?? '-' }}
+                </td>
+
                 <td>{{ $booking->vehicle->name ?? '-' }}</td>
 
-                <td>
-                    {{ $booking->start_datetime?->format('d M Y h:i A') ?? '-' }}
-                </td>
+                {{-- Vehicle Number --}}
+                <td>{{ $booking->vehicle->vehicle_number ?? '-' }}</td>
 
-                <td>
-                    {{ $booking->end_datetime?->format('d M Y h:i A') ?? '-' }}
-                </td>
-
+                <td>{{ $booking->start_datetime?->format('d M Y h:i A') ?? '-' }}</td>
+                <td>{{ $booking->end_datetime?->format('d M Y h:i A') ?? '-' }}</td>
                 <td>{{ $booking->currency }} {{ number_format($booking->total_price, 2) }}</td>
                 <td>{{ ucfirst($booking->payment_status) }}</td>
                 <td> {{ $booking->created_by ?? '-' }} - {{ $booking->creator->name ?? '-' }}</td>
@@ -64,15 +66,10 @@
                                 </li>
                             @endforeach
                         </ul>
-
                     </div>
                 </td>
 
-
-
-
                 <td class="text-center">
-
                     <a href="{{ route('admin.rent-vehicle-bookings.show', $booking->id) }}" class="icon-btn text-info">
                         <i class="bi bi-eye-fill fs-5"></i>
                     </a>
@@ -85,13 +82,12 @@
                     <button data-id="{{ $booking->id }}" class="icon-btn text-danger delete-booking">
                         <i class="bi bi-trash-fill fs-5"></i>
                     </button>
-
                 </td>
 
             </tr>
         @empty
             <tr>
-                <td colspan="9" class="text-center">No rent vehicle bookings found.</td>
+                <td colspan="12" class="text-center">No rent vehicle bookings found.</td>
             </tr>
         @endforelse
     </tbody>
