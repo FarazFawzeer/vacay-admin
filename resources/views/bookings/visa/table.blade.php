@@ -5,11 +5,11 @@
             <th>Passport Holder</th>
             <th>Passport No</th>
             <th>Visa</th>
+            <th>Agent</th>
             <th>Total</th>
             <th>Balance</th>
             <th>Status</th>
             <th>Payment</th>
-            <th>Created</th>
             <th class="text-center">Action</th>
         </tr>
     </thead>
@@ -37,6 +37,12 @@
                     {{ $booking->visa->to_country ?? '-' }} <br>
                     <small class="text-muted">{{ $booking->visa->visa_type ?? '-' }}</small>
                 </td>
+
+                {{-- Agent --}}
+                <td>
+                    {{ $booking->agent?->name ?? '-' }} - {{ $booking->agent?->company_name ?? '-' }}
+                </td>
+
 
                 {{-- Total --}}
                 <td>
@@ -92,8 +98,6 @@
                     </span>
                 </td>
 
-                {{-- Created --}}
-                <td>{{ $booking->created_at->format('d M Y') }}</td>
 
                 {{-- Actions --}}
                 <td class="text-center">

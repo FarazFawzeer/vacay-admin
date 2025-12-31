@@ -183,7 +183,7 @@
                                 <label class="form-label">Agent</label>
                                 <select name="going_agent_id" class="form-select">
                                     @foreach ($agents as $agent)
-                                        <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                                        <option value="{{ $agent->id }}">{{ $agent->name }} - {{ $agent->company_name ?? '' }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -259,7 +259,7 @@
                                 <label class="form-label">Agent</label>
                                 <select name="coming_agent_id" class="form-select">
                                     @foreach ($agents as $agent)
-                                        <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                                        <option value="{{ $agent->id }}">{{ $agent->name }} - {{ $agent->company_name ?? '' }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -342,6 +342,11 @@
                                 <option value="paid">Paid</option>
                             </select>
                         </div>
+
+                            <div class="col-md-6 mb-3">
+        <label class="form-label">Note</label>
+        <textarea name="note" class="form-control" rows="3" placeholder="Enter any additional note"></textarea>
+    </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -567,7 +572,7 @@
                 <label class="form-label">Agent</label>
                 <select name="round_trip_${tripIndex}_agent_id" class="form-select">
                     @foreach ($agents as $agent)
-                    <option value="{{ $agent->id }}">{{ $agent->name }}</option>
+                    <option value="{{ $agent->id }}">{{ $agent->name }} - {{ $agent->company_name ?? '' }}</option>
                     @endforeach
                 </select>
             </div>

@@ -15,22 +15,22 @@
             <form id="visaBookingForm" action="{{ route('admin.visa-bookings.update', $booking->id) }}" method="POST">
                 @csrf
                 @method('PUT')
-     @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            @endif
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
-          @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul class="mb-0">
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <div class="row">
 
                     {{-- Passport --}}
@@ -103,6 +103,26 @@
                             @endforeach
                         </select>
                     </div>
+
+                    {{-- Agent --}}
+<div class="col-md-3 mb-3">
+    <label class="form-label">Agent</label>
+    <select name="agent_id" id="agent_id" class="form-select" required>
+        <option value="">Select Agent</option>
+        @if($booking->agent)
+            <option value="{{ $booking->agent->id }}" selected>
+                {{ $booking->agent->name }} ({{ $booking->agent->company_name ?? 'N/A' }})
+            </option>
+        @endif
+    </select>
+</div>
+
+{{-- Note --}}
+<div class="col-md-6 mb-3">
+    <label class="form-label">Note</label>
+    <textarea name="note" id="note" class="form-control" rows="3"
+        placeholder="Add any special notes or remarks (optional)">{{ $booking->note }}</textarea>
+</div>
 
                     {{-- Price & Payment Details --}}
                     <div class="col-md-6 mb-3">
@@ -220,47 +240,71 @@
     </div>
 
     <script>
-document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function() {
 
-    function calculate() {
-        const basePrice = parseFloat(document.getElementById('base_price').value) || 0;
-        const additional = parseFloat(document.getElementById('additional_price').value) || 0;
-        const discount = parseFloat(document.getElementById('discount').value) || 0;
-        const advanced = parseFloat(document.getElementById('advanced_paid').value) || 0;
+            function calculate() {
+                const basePrice = parseFloat(document.getElementById('base_price').value) || 0;
+                const additional = parseFloat(document.getElementById('additional_price').value) || 0;
+                const discount = parseFloat(document.getElementById('discount').value) || 0;
+                const advanced = parseFloat(document.getElementById('advanced_paid').value) || 0;
 
-        const total = basePrice + additional - discount;
-        const balance = total - advanced;
+                const total = basePrice + additional - discount;
+                const balance = total - advanced;
 
-        document.getElementById('total_amount').value = total.toFixed(2);
-        document.getElementById('balance').value = balance.toFixed(2);
-    }
+                document.getElementById('total_amount').value = total.toFixed(2);
+                document.getElementById('balance').value = balance.toFixed(2);
+            }
 
-    // Recalculate on input changes
-    document.getElementById('additional_price').addEventListener('input', calculate);
-    document.getElementById('discount').addEventListener('input', calculate);
-    document.getElementById('advanced_paid').addEventListener('input', calculate);
+            // Recalculate on input changes
+            document.getElementById('additional_price').addEventListener('input', calculate);
+            document.getElementById('discount').addEventListener('input', calculate);
+            document.getElementById('advanced_paid').addEventListener('input', calculate);
 
-    // Recalculate when category changes (already in your code)
-    const categorySelect = document.getElementById('visa_category_id');
-    categorySelect.addEventListener('change', function() {
-        const opt = this.options[this.selectedIndex];
-        document.getElementById('base_price').value = opt.dataset.price || 0;
-        document.getElementById('currency').value = opt.dataset.currency || '';
-        calculate();
-    });
+            // Recalculate when category changes (already in your code)
+            const categorySelect = document.getElementById('visa_category_id');
+            categorySelect.addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                document.getElementById('base_price').value = opt.dataset.price || 0;
+                document.getElementById('currency').value = opt.dataset.currency || '';
+                calculate();
+            });
 
-    // Initial calculation on page load
-    calculate();
-});
-</script>
+            // Initial calculation on page load
+            calculate();
+        });
+    </script>
 
 
     <script>
-
-        
         document.addEventListener('DOMContentLoaded', function() {
 
-            
+
+            function loadAgents(selectedAgentId = null) {
+    if (!countryPair.value) return;
+
+    const [from, to] = countryPair.value.split('|');
+
+    fetch(`/admin/ajax/agents/by-country?from_country=${from}&to_country=${to}`)
+        .then(res => res.json())
+        .then(data => {
+            const agentSelect = document.getElementById('agent_id');
+            agentSelect.innerHTML = '<option value="">Select Agent</option>';
+
+            if (!data.length) {
+                agentSelect.innerHTML += `<option disabled>No agents available</option>`;
+                return;
+            }
+
+            data.forEach(agent => {
+                const selected = selectedAgentId && agent.id == selectedAgentId ? 'selected' : '';
+                agentSelect.innerHTML += `
+                    <option value="${agent.id}" ${selected}>
+                        ${agent.name} (${agent.company_name ?? 'N/A'})
+                    </option>
+                `;
+            });
+        });
+}
 
             const bookingVisaId = {{ $booking->visa_id }};
             const bookingCategoryId = {{ $booking->visa_category_id }};
@@ -319,7 +363,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // EVENTS
-            countryPair.addEventListener('change', () => loadVisas());
+      countryPair.addEventListener('change', () => {
+    loadVisas();
+    loadAgents(); // Load agents whenever the route changes
+});
+
+// INIT LOAD FOR EDIT
+loadVisas(true);
+loadAgents({{ $booking->agent_id ?? 'null' }}); // Load selected agent on edit
             visaSelect.addEventListener('change', () => loadCategories());
 
             categorySelect.addEventListener('change', function() {

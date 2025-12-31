@@ -19,7 +19,8 @@
                             <div style="margin-top:15px; font-size:12px; line-height:1.4; color:#666;">
                                 <strong>Vacay Guider (Pvt) Ltd.</strong><br>
                                 22/14 C Asarappa Rd, Negombo 11400<br>
-                                +94 114 272 372 | info@vacayguider.com
+                                +94 114 272 372 | +94 711 999 444 |  +94 777 035 325 <br>
+                                    info@vacayguider.com
                             </div>
                         </td>
                         <td style="text-align:right; vertical-align: top;">

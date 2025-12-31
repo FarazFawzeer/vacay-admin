@@ -26,18 +26,25 @@ class Agent extends Model
         'status',
     ];
 
-
     protected $casts = [
         'service' => 'array',
     ];
 
+    // Vehicles
     public function vehicles()
     {
         return $this->hasMany(VehicleDetail::class, 'agent_id');
     }
 
+    // ❗ Keep this (primary agent logic)
     public function visas()
     {
         return $this->hasMany(Visa::class, 'agent_id');
+    }
+
+    // ✅ NEW: Pivot-based visa relationship
+    public function visaPivots()
+    {
+        return $this->belongsToMany(Visa::class, 'agent_visa');
     }
 }

@@ -29,7 +29,8 @@
                                 <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
                                     <strong>Vacay Guider (Pvt) Ltd.</strong><br>
                                     Negombo, Sri Lanka<br>
-                                    +94 114 272 372 | info@vacayguider.com
+                                    +94 114 272 372 | +94 711 999 444 |  +94 777 035 325 <br>
+                                    info@vacayguider.com
                                 </div>
                             </td>
                             <td style="width:50%;text-align:right;vertical-align:top;">
@@ -244,6 +245,18 @@
                             </tr>
                         </table>
                     </div>
+
+                    {{-- NOTE SECTION --}}
+                    @if ($airline_booking->note)
+                        <div style="margin-top:30px;">
+                            <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
+                                Note
+                            </h4>
+                            <div style="font-size:14px; padding:12px; border:1px solid #eee; background:#f9f9f9;">
+                                {{ $airline_booking->note }}
+                            </div>
+                        </div>
+                    @endif
 
                     {{-- FOOTER --}}
                     <div

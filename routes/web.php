@@ -133,8 +133,15 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::post('visa-bookings/generate-pdf', [VisaBookingController::class, 'generatePdf'])->name('visa-bookings.generatePdf');
     Route::get('/ajax/visas/by-country', [VisaBookingController::class, 'getVisasByCountry']);
     Route::get('/ajax/visa/{visa}/categories', [VisaBookingController::class, 'getVisaCategories']);
+    Route::get(
+        '/ajax/agents/by-country',
+        [VisaBookingController::class, 'getAgentsByCountry']
+    )->name('ajax.agents.by-country');
 
     Route::resource('airline-bookings', AirlineInvBookingController::class);
+
+    Route::post('airline-bookings/{id}/status', [AirlineInvBookingController::class, 'updateStatus'])
+        ->name('airline-bookings.updateStatus');
 
     // Additional routes
     Route::post('airline-bookings/generate-pdf', [AirlineInvBookingController::class, 'generatePdf'])->name('airline-bookings.generatePdf');

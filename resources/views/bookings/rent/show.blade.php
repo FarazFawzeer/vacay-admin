@@ -49,7 +49,8 @@
                             <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
                                 <strong>Vacay Guider (Pvt) Ltd.</strong><br>
                                 Negombo, Sri Lanka<br>
-                                +94 114 272 372 | info@vacayguider.com
+                              +94 114 272 372 | +94 711 999 444 |  +94 777 035 325 <br>
+                                    info@vacayguider.com
                             </div>
                         </td>
                         <td style="text-align:right;">

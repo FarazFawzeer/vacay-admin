@@ -12,7 +12,7 @@ class AirlineInvBooking extends Model
     protected $table = 'airline_inv_bookings';
 
     protected $fillable = [
-        'invoice_id',  
+        'invoice_id',
         'business_type',
         'company_name',
         'ticket_type',
@@ -26,7 +26,8 @@ class AirlineInvBooking extends Model
         'total_amount',
         'advanced_paid',
         'balance',
-           'created_by',
+        'created_by',
+        'note'
     ];
 
     /**
@@ -37,7 +38,7 @@ class AirlineInvBooking extends Model
         return $this->hasMany(AirlineInvBookingTrip::class, 'airline_booking_id');
     }
 
-       public function creator()
+    public function creator()
     {
         return $this->belongsTo(User::class, 'created_by'); // 'created_by' is FK to users table
     }
@@ -52,8 +53,7 @@ class AirlineInvBooking extends Model
             'id',                          // booking.id (local key in bookings)
             'customer_id'                  // passport.customer_id
         )->join('airline_booking_trips', 'airline_booking_trips.passport_id', '=', 'passports.id')
-         ->where('airline_booking_trips.airline_booking_id', $this->id)
-         ->select('customers.*');
+            ->where('airline_booking_trips.airline_booking_id', $this->id)
+            ->select('customers.*');
     }
-
 }

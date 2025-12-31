@@ -8,6 +8,7 @@ use App\Models\VisaBooking;
 use App\Models\Customer;
 use App\Models\Passport;
 use App\Models\Visa;
+use App\Models\Agent;
 use App\Models\VisaCategory;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
@@ -100,6 +101,40 @@ class VisaBookingController extends Controller
             $visa->categories()->get()
         );
     }
+    public function getAgentsByCountry(Request $request)
+    {
+        $request->validate([
+            'from_country' => 'required',
+            'to_country'   => 'required',
+        ]);
+
+        // 1️⃣ Get visa IDs for selected route
+        $visaIds = Visa::where('from_country', $request->from_country)
+            ->where('to_country', $request->to_country)
+            ->pluck('id');
+
+        if ($visaIds->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // 2️⃣ Get agent IDs ONLY from pivot table
+        $agentIds = \DB::table('agent_visa')
+            ->whereIn('visa_id', $visaIds)
+            ->pluck('agent_id')
+            ->unique();
+
+        if ($agentIds->isEmpty()) {
+            return response()->json([]);
+        }
+
+        // 3️⃣ Load agents using pivot IDs
+        $agents = Agent::whereIn('id', $agentIds)
+            ->select('id', 'name', 'company_name')
+            ->get();
+
+        return response()->json($agents);
+    }
+
 
 
     /**
@@ -111,6 +146,8 @@ class VisaBookingController extends Controller
             'passport_id'        => 'required|exists:passports,id',
             'visa_id'            => 'required|exists:visas,id',
             'visa_category_id'   => 'required|exists:visa_categories,id',
+            'agent_id'           => 'required|exists:agents,id', // ✅ new
+            'note'               => 'nullable|string|max:1000', // ✅ new
 
             'currency'           => 'required|string|max:10',
             'base_price'         => 'required|numeric|min:0',
@@ -145,6 +182,8 @@ class VisaBookingController extends Controller
             'passport_id'        => $request->passport_id,
             'visa_id'            => $request->visa_id,
             'visa_category_id'   => $request->visa_category_id,
+            'agent_id'           => $request->agent_id, // ✅ save agent
+            'note'               => $request->note,     // ✅ save note
 
             'currency'           => $request->currency,
             'base_price'         => $request->base_price,
@@ -164,6 +203,7 @@ class VisaBookingController extends Controller
             ->route('admin.visa-bookings.index')
             ->with('success', "Visa booking created successfully! Invoice No: {$invoiceNo}");
     }
+
 
     /**
      * Show booking
@@ -189,7 +229,8 @@ class VisaBookingController extends Controller
         $booking->load([
             'passport.customer',
             'visa',
-            'visaCategory'
+            'visaCategory',
+            'agent',
         ]);
 
         $passports = Passport::with('customer')->get();
@@ -215,7 +256,8 @@ class VisaBookingController extends Controller
             'passport_id'        => 'required|exists:passports,id',
             'visa_id'            => 'required|exists:visas,id',
             'visa_category_id'   => 'required|exists:visa_categories,id',
-
+            'agent_id'           => 'nullable|exists:agents,id',
+            'note'               => 'nullable|string|max:1000',
             'currency'           => 'required|string|max:10',
             'base_price'         => 'required|numeric|min:0',
             'additional_price'   => 'nullable|numeric|min:0',
@@ -238,7 +280,8 @@ class VisaBookingController extends Controller
             'passport_id'        => $request->passport_id,
             'visa_id'            => $request->visa_id,
             'visa_category_id'   => $request->visa_category_id,
-
+            'agent_id'           => $request->agent_id,  // new
+            'note'               => $request->note,      // new
             'currency'           => $request->currency,
             'base_price'         => $request->base_price,
             'additional_price'   => $request->additional_price ?? 0,

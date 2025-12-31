@@ -86,82 +86,100 @@
                         </select>
                     </div>
 
-                    {{-- Price & Payment Details --}}
+                    {{-- Agent --}}
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Agent</label>
+                        <select name="agent_id" id="agent_id" class="form-select" required>
+                            <option value="">Select Agent</option>
+                        </select>
+                    </div>
+
+
+                    {{-- Note --}}
                     <div class="col-md-6 mb-3">
-                        <div class="card border-secondary">
-                            <div class="card-header bg-light">
-                                <strong>Price & Payment Details</strong>
-                            </div>
-                            <div class="card-body">
+                        <label class="form-label">Note</label>
+                        <textarea name="note" id="note" class="form-control" rows="3"
+                            placeholder="Add any special notes or remarks (optional)"></textarea>
+                    </div>
 
-                                {{-- Currency --}}
-                                <div class="mb-2 row">
-                                    <label class="col-sm-2 col-form-label">Currency</label>
-                                    <div class="col-sm-10">
-                                        <input type="text" id="currency" name="currency" class="form-control" readonly>
-                                    </div>
+                    {{-- Price & Payment Details --}}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-secondary">
+                                <div class="card-header bg-light">
+                                    <strong>Price & Payment Details</strong>
                                 </div>
+                                <div class="card-body">
 
-                                {{-- Base Price --}}
-                                <div class="mb-2 row">
-                                    <label class="col-sm-2 col-form-label">Base Price</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" id="base_price" name="base_price" class="form-control"
-                                            readonly>
+                                    {{-- Currency --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Currency</label>
+                                        <div class="col-sm-10">
+                                            <input type="text" id="currency" name="currency" class="form-control"
+                                                readonly>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {{-- Additional Price --}}
-                                <div class="mb-2 row">
-                                    <label class="col-sm-2 col-form-label">Additional Price</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" id="additional_price" name="additional_price"
-                                            class="form-control" value="0">
+                                    {{-- Base Price --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Base Price</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" id="base_price" name="base_price" class="form-control"
+                                                readonly>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {{-- Discount --}}
-                                <div class="mb-2 row">
-                                    <label class="col-sm-2 col-form-label">Discount</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" id="discount" name="discount" class="form-control"
-                                            value="0">
+                                    {{-- Additional Price --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Additional Price</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" id="additional_price" name="additional_price"
+                                                class="form-control" value="0">
+                                        </div>
                                     </div>
-                                </div>
 
-                                <hr>
-
-                                {{-- Total --}}
-                                <div class="mb-2 row">
-                                    <label class="col-sm-2 col-form-label">Total</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" id="total_amount" name="total_amount" class="form-control"
-                                            readonly>
+                                    {{-- Discount --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Discount</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" id="discount" name="discount" class="form-control"
+                                                value="0">
+                                        </div>
                                     </div>
-                                </div>
 
-                                {{-- Advance Paid --}}
-                                <div class="mb-2 row">
-                                    <label class="col-sm-2 col-form-label">Advance Paid</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" id="advanced_paid" name="advanced_paid" class="form-control"
-                                            value="0">
+                                    <hr>
+
+                                    {{-- Total --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Total</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" id="total_amount" name="total_amount"
+                                                class="form-control" readonly>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {{-- Balance --}}
-                                <div class="mb-2 row">
-                                    <label class="col-sm-2 col-form-label">Balance</label>
-                                    <div class="col-sm-10">
-                                        <input type="number" id="balance" name="balance" class="form-control"
-                                            readonly>
+                                    {{-- Advance Paid --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Advance Paid</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" id="advanced_paid" name="advanced_paid"
+                                                class="form-control" value="0">
+                                        </div>
                                     </div>
-                                </div>
 
+                                    {{-- Balance --}}
+                                    <div class="mb-2 row">
+                                        <label class="col-sm-2 col-form-label">Balance</label>
+                                        <div class="col-sm-10">
+                                            <input type="number" id="balance" name="balance" class="form-control"
+                                                readonly>
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
                         </div>
                     </div>
-
 
                 </div>
 
@@ -203,22 +221,43 @@
     <script>
         // From → To change
         document.getElementById('country_pair').addEventListener('change', function() {
+
             const [from, to] = this.value.split('|');
 
+            // Load visa types
             fetch(`/admin/ajax/visas/by-country?from_country=${from}&to_country=${to}`)
                 .then(res => res.json())
                 .then(data => {
                     const visaSelect = document.getElementById('visa_id');
                     visaSelect.innerHTML = '<option value="">Select Visa Type</option>';
-
                     data.forEach(v => {
                         visaSelect.innerHTML += `<option value="${v.id}">${v.visa_type}</option>`;
                     });
-
-                    document.getElementById('visa_category_id').innerHTML =
-                        '<option value="">Select Category</option>';
                 });
+
+            // 🔥 Load agents ONLY via pivot
+            fetch(`/admin/ajax/agents/by-country?from_country=${from}&to_country=${to}`)
+                .then(res => res.json())
+                .then(data => {
+                    const agentSelect = document.getElementById('agent_id');
+                    agentSelect.innerHTML = '<option value="">Select Agent</option>';
+
+                    if (!data.length) {
+                        agentSelect.innerHTML += `<option disabled>No agents available</option>`;
+                        return;
+                    }
+
+                    data.forEach(agent => {
+                        agentSelect.innerHTML += `
+                    <option value="${agent.id}">
+                        ${agent.name} (${agent.company_name ?? 'N/A'})
+                    </option>
+                `;
+                    });
+                });
+
         });
+
 
         // Visa Type change
         document.getElementById('visa_id').addEventListener('change', function() {
@@ -279,6 +318,7 @@
             const toCountry = countryPair[1] || '-';
             const visaType = visaTypeOption ? visaTypeOption.text : '-';
             const visaCategory = visaCategoryOption ? visaCategoryOption.text : '-';
+            const note = document.getElementById('note')?.value || '';
 
             const basePrice = parseFloat(document.getElementById('base_price').value) || 0;
             const additionalPrice = parseFloat(document.getElementById('additional_price').value) || 0;
@@ -349,6 +389,17 @@
             <tr style="border-top:1px solid #333;"><td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance</td><td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">${currency} ${balance.toFixed(2)}</td></tr>
         </table>
     </div>
+
+    ${note ? `
+        <div style="margin-top:25px;padding:15px;border:1px dashed #ddd;background:#fafafa;">
+            <h4 style="margin:0 0 8px;font-size:12px;color:#888;text-transform:uppercase;">
+                Note
+            </h4>
+            <div style="font-size:14px;line-height:1.6;color:#333;">
+                ${note.replace(/\n/g, '<br>')}
+            </div>
+        </div>
+    ` : ''}
 
     <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
         This is a system generated invoice. No signature required.<br>

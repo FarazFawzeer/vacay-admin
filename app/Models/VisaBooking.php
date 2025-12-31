@@ -26,6 +26,7 @@ class VisaBooking extends Model
         'visa_expiry_date',
         'status',
         'payment_status',
+        'note',
     ];
 
 

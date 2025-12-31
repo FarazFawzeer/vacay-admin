@@ -42,7 +42,12 @@ class Visa extends Model
 
     public function agents()
     {
-        return $this->belongsToMany(Agent::class, 'agent_visa');
+        return $this->belongsToMany(
+            Agent::class,
+            'agent_visa',
+            'visa_id',
+            'agent_id'
+        );
     }
 
     // Visa belongs to a User (creator)

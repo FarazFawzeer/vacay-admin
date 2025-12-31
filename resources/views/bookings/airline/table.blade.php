@@ -2,9 +2,9 @@
     <thead>
         <tr>
             <th>Invoice No</th>
-            <th>Passenger / Customer</th>
             <th>Trip Type</th>
             <th>Agent</th>
+            <th>Passenger / Customer</th>
             <th>From → To</th>
             <th>Airline / Flight</th>
             <th>Total</th>
@@ -24,15 +24,6 @@
 
                 {{-- Invoice --}}
                 <td class="fw-bold">{{ $booking->invoice_id }}</td>
-
-                {{-- Passenger / Customer --}}
-<td>
-    @foreach($booking->trips as $trip)
-        @if ($trip->passport)
-            {{ $trip->passport->first_name }} {{ $trip->passport->second_name }}<br>
-        @endif
-    @endforeach
-</td>
 
 
 
@@ -63,8 +54,27 @@
                         -
                     @endif
                 </td>
+
+                {{-- Passenger / Customer --}}
+                <td>
+                    @foreach ($booking->trips as $trip)
+                        @if ($trip->passport)
+                            {{ $trip->passport->first_name }} {{ $trip->passport->second_name }}<br>
+                        @endif
+                    @endforeach
+                </td>
                 {{-- Route From → To --}}
-                <td>{{ optional($firstTrip)->from_country ?? '-' }} → {{ optional($firstTrip)->to_country ?? '-' }}</td>
+                {{-- Route From → To --}}
+                <td>
+                    @if ($booking->trips->count() > 0)
+                        @foreach ($booking->trips as $trip)
+                            {{ $trip->from_country ?? '-' }} → {{ $trip->to_country ?? '-' }}<br>
+                        @endforeach
+                    @else
+                        -
+                    @endif
+                </td>
+
 
                 {{-- Airline / Flight --}}
                 <td>{{ optional($firstTrip)->airline ?? '-' }}</td>

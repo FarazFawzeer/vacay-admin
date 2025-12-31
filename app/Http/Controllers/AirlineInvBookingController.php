@@ -89,6 +89,8 @@ class AirlineInvBookingController extends Controller
             'total_amount'    => 'required|numeric',
             'advanced_paid'   => 'nullable|numeric',
             'balance'         => 'required|numeric',
+            'note'             => 'nullable',
+
         ]);
 
         // 2️⃣ Generate invoice_id (AB0001, AB0002, ...)
@@ -118,6 +120,7 @@ class AirlineInvBookingController extends Controller
             'total_amount'     => $request->total_amount,
             'advanced_paid'    => $request->advanced_paid ?? 0,
             'balance'          => $request->balance,
+            'note'             => $request->note,
         ]);
 
         // 4️⃣ Prepare trips
@@ -241,19 +244,19 @@ class AirlineInvBookingController extends Controller
     /**
      * Show booking
      */
-public function show($id)
-{
-    // Load booking with trips → passport → customer, and trips → agent
-    $airline_booking = AirlineInvBooking::with([
-        'trips.passport.customer',
-        'trips.agent',
-    ])->findOrFail($id);
+    public function show($id)
+    {
+        // Load booking with trips → passport → customer, and trips → agent
+        $airline_booking = AirlineInvBooking::with([
+            'trips.passport.customer',
+            'trips.agent',
+        ])->findOrFail($id);
 
-    // Grab first trip for easier access in blade
-    $firstTrip = $airline_booking->trips->first();
+        // Grab first trip for easier access in blade
+        $firstTrip = $airline_booking->trips->first();
 
-    return view('bookings.airline.show', compact('airline_booking', 'firstTrip'));
-}
+        return view('bookings.airline.show', compact('airline_booking', 'firstTrip'));
+    }
 
 
 
@@ -291,6 +294,7 @@ public function show($id)
             'total_amount'    => 'required|numeric',
             'advanced_paid'   => 'nullable|numeric',
             'balance'         => 'required|numeric',
+            'note'             => 'nullable',
         ]);
 
         // 2️⃣ Find the booking
@@ -311,6 +315,7 @@ public function show($id)
             'total_amount'     => $request->total_amount,
             'advanced_paid'    => $request->advanced_paid ?? 0,
             'balance'          => $request->balance,
+            'note'             => $request->note,
         ]);
 
         // 4️⃣ Delete existing trips
@@ -447,6 +452,32 @@ public function show($id)
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
         }
+    }
+
+
+      public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required'
+        ]);
+
+        $booking = AirlineInvBooking::find($id);
+
+        if (!$booking) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Booking not found.'
+            ], 404);
+        }
+
+        $booking->status = $request->status;
+        $booking->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully.',
+            'status' => $booking->status
+        ]);
     }
 
     /**
