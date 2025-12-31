@@ -21,7 +21,7 @@
                 <td>{{ Str::limit($testimonial->message, 50) }}</td>
                 <td>
                     @if ($testimonial->image)
-                        <img src="{{ asset('storage/' . $testimonial->image) }}" alt="Customer Image">
+                        <img src="{{ asset('admin/storage/' . $testimonial->image) }}" alt="Customer Image">
                     @else
                         -
                     @endif

@@ -105,24 +105,24 @@
                     </div>
 
                     {{-- Agent --}}
-<div class="col-md-3 mb-3">
-    <label class="form-label">Agent</label>
-    <select name="agent_id" id="agent_id" class="form-select" required>
-        <option value="">Select Agent</option>
-        @if($booking->agent)
-            <option value="{{ $booking->agent->id }}" selected>
-                {{ $booking->agent->name }} ({{ $booking->agent->company_name ?? 'N/A' }})
-            </option>
-        @endif
-    </select>
-</div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Agent</label>
+                        <select name="agent_id" id="agent_id" class="form-select" required>
+                            <option value="">Select Agent</option>
+                            @if ($booking->agent)
+                                <option value="{{ $booking->agent->id }}" selected>
+                                    {{ $booking->agent->name }} ({{ $booking->agent->company_name ?? 'N/A' }})
+                                </option>
+                            @endif
+                        </select>
+                    </div>
 
-{{-- Note --}}
-<div class="col-md-6 mb-3">
-    <label class="form-label">Note</label>
-    <textarea name="note" id="note" class="form-control" rows="3"
-        placeholder="Add any special notes or remarks (optional)">{{ $booking->note }}</textarea>
-</div>
+                    {{-- Note --}}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Note</label>
+                        <textarea name="note" id="note" class="form-control" rows="3"
+                            placeholder="Add any special notes or remarks (optional)">{{ $booking->note }}</textarea>
+                    </div>
 
                     {{-- Price & Payment Details --}}
                     <div class="col-md-6 mb-3">
@@ -183,8 +183,8 @@
                                 <div class="mb-2 row">
                                     <label class="col-sm-2 col-form-label">Advance Paid</label>
                                     <div class="col-sm-10">
-                                        <input type="number" id="advanced_paid" name="advanced_paid" class="form-control"
-                                            value="{{ $booking->advanced_paid }}">
+                                        <input type="number" id="advanced_paid" name="advanced_paid"
+                                            class="form-control" value="{{ $booking->advanced_paid }}">
                                     </div>
                                 </div>
 
@@ -280,31 +280,32 @@
 
 
             function loadAgents(selectedAgentId = null) {
-    if (!countryPair.value) return;
+                if (!countryPair.value) return;
 
-    const [from, to] = countryPair.value.split('|');
+                const [from, to] = countryPair.value.split('|');
 
-    fetch(`/admin/ajax/agents/by-country?from_country=${from}&to_country=${to}`)
-        .then(res => res.json())
-        .then(data => {
-            const agentSelect = document.getElementById('agent_id');
-            agentSelect.innerHTML = '<option value="">Select Agent</option>';
+                fetch(`/admin/ajax/agents/by-country?from_country=${from}&to_country=${to}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const agentSelect = document.getElementById('agent_id');
+                        agentSelect.innerHTML = '<option value="">Select Agent</option>';
 
-            if (!data.length) {
-                agentSelect.innerHTML += `<option disabled>No agents available</option>`;
-                return;
-            }
+                        if (!data.length) {
+                            agentSelect.innerHTML += `<option disabled>No agents available</option>`;
+                            return;
+                        }
 
-            data.forEach(agent => {
-                const selected = selectedAgentId && agent.id == selectedAgentId ? 'selected' : '';
-                agentSelect.innerHTML += `
+                        data.forEach(agent => {
+                            const selected = selectedAgentId && agent.id == selectedAgentId ?
+                                'selected' : '';
+                            agentSelect.innerHTML += `
                     <option value="${agent.id}" ${selected}>
                         ${agent.name} (${agent.company_name ?? 'N/A'})
                     </option>
                 `;
-            });
-        });
-}
+                        });
+                    });
+            }
 
             const bookingVisaId = {{ $booking->visa_id }};
             const bookingCategoryId = {{ $booking->visa_category_id }};
@@ -363,14 +364,14 @@
             }
 
             // EVENTS
-      countryPair.addEventListener('change', () => {
-    loadVisas();
-    loadAgents(); // Load agents whenever the route changes
-});
+            countryPair.addEventListener('change', () => {
+                loadVisas();
+                loadAgents(); // Load agents whenever the route changes
+            });
 
-// INIT LOAD FOR EDIT
-loadVisas(true);
-loadAgents({{ $booking->agent_id ?? 'null' }}); // Load selected agent on edit
+            // INIT LOAD FOR EDIT
+            loadVisas(true);
+            loadAgents({{ $booking->agent_id ?? 'null' }}); // Load selected agent on edit
             visaSelect.addEventListener('change', () => loadCategories());
 
             categorySelect.addEventListener('change', function() {
@@ -401,7 +402,7 @@ loadAgents({{ $booking->agent_id ?? 'null' }}); // Load selected agent on edit
             const toCountry = countryPair[1] || '-';
             const visaType = visaTypeOption ? visaTypeOption.text : '-';
             const visaCategory = visaCategoryOption ? visaCategoryOption.text : '-';
-
+            const note = document.getElementById('note')?.value || '';
             const basePrice = parseFloat(document.getElementById('base_price').value) || 0;
             const additionalPrice = parseFloat(document.getElementById('additional_price').value) || 0;
             const discount = parseFloat(document.getElementById('discount').value) || 0;
@@ -471,6 +472,17 @@ loadAgents({{ $booking->agent_id ?? 'null' }}); // Load selected agent on edit
             <tr style="border-top:1px solid #333;"><td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance</td><td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">${currency} ${balance.toFixed(2)}</td></tr>
         </table>
     </div>
+
+     ${note ? `
+            <div style="margin-top:25px;padding:15px;border:1px dashed #ddd;background:#fafafa;">
+                <h4 style="margin:0 0 8px;font-size:12px;color:#888;text-transform:uppercase;">
+                    Note
+                </h4>
+                <div style="font-size:14px;line-height:1.6;color:#333;">
+                    ${note.replace(/\n/g, '<br>')}
+                </div>
+            </div>
+        ` : ''}
 
     <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
         This is a system generated invoice. No signature required.<br>

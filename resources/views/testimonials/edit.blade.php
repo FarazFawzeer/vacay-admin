@@ -82,7 +82,7 @@
 
                     @if ($testimonial->image)
                         <div class="mt-2">
-                            <img src="{{ asset('storage/' . $testimonial->image) }}" alt="Customer Image" width="80" height="80" style="object-fit: cover; border-radius: 6px;">
+                            <img src="{{ asset('admin/storage/' . $testimonial->image) }}" alt="Customer Image" width="80" height="80" style="object-fit: cover; border-radius: 6px;">
                         </div>
                     @endif
                 </div>

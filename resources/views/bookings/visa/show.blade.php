@@ -17,149 +17,165 @@
             </div>
         </div>
         <div class="card-body">
-           <div id="invoiceContent">
-@php
-    $fromCountry   = $booking->visa->from_country ?? '-';
-    $toCountry     = $booking->visa->to_country ?? '-';
-    $visaType      = $booking->visa->visa_type ?? '-';
-    $visaCategory  = $booking->visaCategory->visa_type ?? '-';
+            <div id="invoiceContent">
+                @php
+                    $fromCountry = $booking->visa->from_country ?? '-';
+                    $toCountry = $booking->visa->to_country ?? '-';
+                    $visaType = $booking->visa->visa_type ?? '-';
+                    $visaCategory = $booking->visaCategory->visa_type ?? '-';
 
-    $passportText  = $booking->passport->passport_number
-        . ' - ' . $booking->passport->first_name
-        . ' ' . $booking->passport->second_name;
+                    $passportText =
+                        $booking->passport->passport_number .
+                        ' - ' .
+                        $booking->passport->first_name .
+                        ' ' .
+                        $booking->passport->second_name;
 
-    $bookingDate   = $booking->created_at->format('d/m/Y');
-@endphp
+                    $bookingDate = $booking->created_at->format('d/m/Y');
+                @endphp
 
-<div style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
+                <div
+                    style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
 
-    {{-- Header --}}
-    <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
-        <tr>
-            <td>
-                <img src="{{ asset('images/vacayguider.png') }}" style="height:80px;">
-                <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
-                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
-                    Negombo, Sri Lanka<br>
-           +94 114 272 372 | +94 711 999 444 |  +94 777 035 325 <br>
+                    {{-- Header --}}
+                    <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
+                        <tr>
+                            <td>
+                                <img src="{{ asset('images/vacayguider.png') }}" style="height:80px;">
+                                <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
+                                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
+                                    Negombo, Sri Lanka<br>
+                                    +94 114 272 372 | +94 711 999 444 | +94 777 035 325 <br>
                                     info@vacayguider.com
+                                </div>
+                            </td>
+                            <td style="text-align:right;">
+                                <h1 style="margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">
+                                    {{ strtoupper(str_replace('_', ' ', $booking->status)) }}
+                                </h1>
+                                <table style="margin-left:auto;margin-top:10px;font-size:13px;">
+                                    <tr>
+                                        <td style="color:#888;padding:2px 10px;">Booking Date</td>
+                                        <td>{{ $bookingDate }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color:#888;padding:2px 10px;">Payment Status</td>
+                                        <td>{{ ucfirst($booking->payment_status) }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    {{-- Passport & Visa --}}
+                    <table style="width:100%;margin-bottom:35px;font-size:13px;">
+                        <tr>
+                            <td style="width:50%;vertical-align:top;">
+                                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
+                                    Passport Information
+                                </h4>
+                                <div style="font-size:15px;font-weight:bold;">
+                                    {{ $passportText }}
+                                </div>
+                            </td>
+
+                            <td style="width:50%;vertical-align:top;border-left:1px solid #eee;padding-left:25px;">
+                                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
+                                    Visa Details
+                                </h4>
+                                <div><strong>Route:</strong> {{ $fromCountry }} - {{ $toCountry }}</div>
+                                <div><strong>Visa Type:</strong> {{ $visaType }}</div>
+                                <div><strong>Visa Category:</strong> {{ $visaCategory }}</div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    {{-- Amount Table --}}
+                    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:30px;">
+                        <thead>
+                            <tr style="background:#f9f9f9;border-top:1px solid #333;border-bottom:1px solid #333;">
+                                <th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;">
+                                    Description
+                                </th>
+                                <th style="padding:12px;text-align:right;font-size:11px;text-transform:uppercase;">
+                                    Amount ({{ $booking->currency }})
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding:14px;border-bottom:1px solid #eee;">Base Price</td>
+                                <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">
+                                    {{ number_format($booking->base_price, 2) }}
+                                </td>
+                            </tr>
+
+                            @if ($booking->additional_price > 0)
+                                <tr>
+                                    <td style="padding:14px;border-bottom:1px solid #eee;">Additional Price</td>
+                                    <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">
+                                        {{ number_format($booking->additional_price, 2) }}
+                                    </td>
+                                </tr>
+                            @endif
+
+                            @if ($booking->discount > 0)
+                                <tr>
+                                    <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
+                                    <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">
+                                        ({{ number_format($booking->discount, 2) }})
+                                    </td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
+
+                    {{-- Totals --}}
+                    <div style="width:40%;margin-left:auto;">
+                        <table style="width:100%;font-size:14px;">
+                            <tr>
+                                <td style="padding:8px 0;color:#888;">Total</td>
+                                <td style="padding:8px 0;text-align:right;">
+                                    {{ number_format($booking->total_amount, 2) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px 0;color:#198754;">Advanced Paid</td>
+                                <td style="padding:8px 0;text-align:right;color:#198754;">
+                                    {{ number_format($booking->advanced_paid, 2) }}
+                                </td>
+                            </tr>
+                            <tr style="border-top:1px solid #333;">
+                                <td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance</td>
+                                <td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">
+                                    {{ $booking->currency }} {{ number_format($booking->balance, 2) }}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    @if (!empty($booking->note))
+                        <div style="margin-top:25px;padding:15px;border:1px dashed #ddd;background:#fafafa;">
+                            <h4 style="margin:0 0 8px;font-size:12px;color:#888;text-transform:uppercase;">
+                                Note
+                            </h4>
+                            <div style="font-size:14px;line-height:1.6;color:#333;">
+                                {!! nl2br(e($booking->note)) !!}
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Footer --}}
+                    <div
+                        style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
+                        This is a system generated invoice. No signature required.<br>
+                        <strong>Vacay Guider</strong> | www.vacayguider.com
+                    </div>
+
                 </div>
-            </td>
-            <td style="text-align:right;">
-                <h1 style="margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">
-                    {{ strtoupper(str_replace('_',' ', $booking->status)) }}
-                </h1>
-                <table style="margin-left:auto;margin-top:10px;font-size:13px;">
-                    <tr>
-                        <td style="color:#888;padding:2px 10px;">Booking Date</td>
-                        <td>{{ $bookingDate }}</td>
-                    </tr>
-                    <tr>
-                        <td style="color:#888;padding:2px 10px;">Payment Status</td>
-                        <td>{{ ucfirst($booking->payment_status) }}</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+            </div>
 
-    {{-- Passport & Visa --}}
-    <table style="width:100%;margin-bottom:35px;font-size:13px;">
-        <tr>
-            <td style="width:50%;vertical-align:top;">
-                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
-                    Passport Information
-                </h4>
-                <div style="font-size:15px;font-weight:bold;">
-                    {{ $passportText }}
-                </div>
-            </td>
 
-            <td style="width:50%;vertical-align:top;border-left:1px solid #eee;padding-left:25px;">
-                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
-                    Visa Details
-                </h4>
-                <div><strong>Route:</strong> {{ $fromCountry }} - {{ $toCountry }}</div>
-                <div><strong>Visa Type:</strong> {{ $visaType }}</div>
-                <div><strong>Visa Category:</strong> {{ $visaCategory }}</div>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Amount Table --}}
-    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:30px;">
-        <thead>
-            <tr style="background:#f9f9f9;border-top:1px solid #333;border-bottom:1px solid #333;">
-                <th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;">
-                    Description
-                </th>
-                <th style="padding:12px;text-align:right;font-size:11px;text-transform:uppercase;">
-                    Amount ({{ $booking->currency }})
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td style="padding:14px;border-bottom:1px solid #eee;">Base Price</td>
-                <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">
-                    {{ number_format($booking->base_price, 2) }}
-                </td>
-            </tr>
-
-            @if($booking->additional_price > 0)
-            <tr>
-                <td style="padding:14px;border-bottom:1px solid #eee;">Additional Price</td>
-                <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">
-                    {{ number_format($booking->additional_price, 2) }}
-                </td>
-            </tr>
-            @endif
-
-            @if($booking->discount > 0)
-            <tr>
-                <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
-                <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">
-                    ({{ number_format($booking->discount, 2) }})
-                </td>
-            </tr>
-            @endif
-        </tbody>
-    </table>
-
-    {{-- Totals --}}
-    <div style="width:40%;margin-left:auto;">
-        <table style="width:100%;font-size:14px;">
-            <tr>
-                <td style="padding:8px 0;color:#888;">Total</td>
-                <td style="padding:8px 0;text-align:right;">
-                    {{ number_format($booking->total_amount, 2) }}
-                </td>
-            </tr>
-            <tr>
-                <td style="padding:8px 0;color:#198754;">Advanced Paid</td>
-                <td style="padding:8px 0;text-align:right;color:#198754;">
-                    {{ number_format($booking->advanced_paid, 2) }}
-                </td>
-            </tr>
-            <tr style="border-top:1px solid #333;">
-                <td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance</td>
-                <td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">
-                    {{ $booking->currency }} {{ number_format($booking->balance, 2) }}
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    {{-- Footer --}}
-    <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
-        This is a system generated invoice. No signature required.<br>
-        <strong>Vacay Guider</strong> | www.vacayguider.com
-    </div>
-
-</div>
-</div>
-
-            
         </div>
     </div>
     <script>
