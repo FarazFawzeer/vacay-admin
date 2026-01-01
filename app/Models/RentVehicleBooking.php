@@ -29,12 +29,14 @@ class RentVehicleBooking extends Model
         'start_datetime',
         'end_datetime',
         'notes',
+        'published_at',   // ✅ added
         'created_by',
     ];
 
     protected $casts = [
         'start_datetime'   => 'datetime',
         'end_datetime'     => 'datetime',
+        'published_at'     => 'date',
         'price'            => 'decimal:2',
         'additional_price' => 'decimal:2',
         'discount'         => 'decimal:2',

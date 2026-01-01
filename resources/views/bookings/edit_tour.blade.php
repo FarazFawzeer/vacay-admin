@@ -130,7 +130,30 @@
 
                 {{-- Status --}}
                 <div class="row mb-3">
-                    <div class="col-md-6">
+                    {{-- Agent --}}
+                    <div class="col-md-3">
+                        <label for="agent_id" class="form-label">Agent</label>
+                        <select name="agent_id" id="agent_id" class="form-select">
+                            <option value="">-- Select Agent --</option>
+                            @foreach ($agents as $agent)
+                                <option value="{{ $agent->id }}"
+                                    {{ $booking->agent_id == $agent->id ? 'selected' : '' }}>
+                                    {{ $agent->name }}
+                                    @if ($agent->company_name)
+                                        - {{ $agent->company_name }}
+                                    @endif
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Published Date --}}
+                    <div class="col-md-3">
+                        <label for="published_at" class="form-label">Published Date</label>
+                        <input type="date" name="published_at" id="published_at" class="form-control"
+                            value="{{ $booking->published_at?->format('Y-m-d') }}">
+                    </div>
+                    <div class="col-md-3">
                         <label for="status" class="form-label">Status</label>
                         <select name="status" id="status" class="form-select" required>
                             <option value="quotation" {{ $booking->status == 'quotation' ? 'selected' : '' }}>Quotation
@@ -146,7 +169,7 @@
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label for="payment_status" class="form-label">Payment Status</label>
                         <select name="payment_status" id="payment_status" class="form-select" required>
                             <option value="pending" {{ $booking->payment_status == 'pending' ? 'selected' : '' }}>Pending
@@ -495,15 +518,15 @@
                 </td>
             </tr>
             ${addChargesVal > 0 ? `
-                                    <tr>
-                                        <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
-                                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
-                                    </tr>` : ''}
+                                        <tr>
+                                            <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
+                                            <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
+                                        </tr>` : ''}
             ${discountVal > 0 ? `
-                                    <tr>
-                                        <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
-                                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
-                                    </tr>` : ''}
+                                        <tr>
+                                            <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
+                                            <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
+                                        </tr>` : ''}
         </tbody>
     </table>
 
@@ -525,10 +548,10 @@
     </div>
 
     ${specialReq ? `
-                            <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
-                                <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
-                                <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
-                            </div>` : ''}
+                                <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
+                                    <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
+                                    <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
+                                </div>` : ''}
 
     <div style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
         <p style="margin-bottom:5px;">This is a computer-generated document. No signature is required.</p>

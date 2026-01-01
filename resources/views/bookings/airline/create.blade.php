@@ -102,23 +102,28 @@
                                 <input type="text" name="oneway_airline_no" class="form-control">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">From Country</label>
-                                <select name="oneway_from_country" class="form-select">
-                                    <option value="">Select Country</option>
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
+                                <label class="form-label">From Airport</label>
+                                <select name="oneway_from_airport" class="form-select ">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        <option value="{{ $airport['code'] }}">
+                                            {{ $airport['code'] }} - {{ $airport['name'] }} - {{ $airport['country'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">To Country</label>
-                                <select name="oneway_to_country" class="form-select">
-                                    <option value="">Select Country</option>
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
+                                <label class="form-label">To Airport</label>
+                                <select name="oneway_to_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        <option value="{{ $airport['code'] }}">
+                                            {{ $airport['code'] }} - {{ $airport['name'] }} - {{ $airport['country'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
+
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">PNR No</label>
                                 <input type="text" name="oneway_pnr" class="form-control">
@@ -183,7 +188,8 @@
                                 <label class="form-label">Agent</label>
                                 <select name="going_agent_id" class="form-select">
                                     @foreach ($agents as $agent)
-                                        <option value="{{ $agent->id }}">{{ $agent->name }} - {{ $agent->company_name ?? '' }}</option>
+                                        <option value="{{ $agent->id }}">{{ $agent->name }} -
+                                            {{ $agent->company_name ?? '' }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -196,21 +202,28 @@
                                 <input type="text" name="going_airline_no" class="form-control">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">From Country</label>
-                                <select name="going_from_country" class="form-select">
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
+                                <label class="form-label">From Airport</label>
+                                <select name="going_from_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        <option value="{{ $airport['code'] }}">
+                                            {{ $airport['code'] }} - {{ $airport['name'] }} - {{ $airport['country'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">To Country</label>
-                                <select name="going_to_country" class="form-select">
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
+                                <label class="form-label">To Airport</label>
+                                <select name="going_to_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        <option value="{{ $airport['code'] }}">
+                                            {{ $airport['code'] }} - {{ $airport['name'] }} - {{ $airport['country'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
+
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">PNR No</label>
                                 <input type="text" name="going_pnr" class="form-control">
@@ -259,7 +272,8 @@
                                 <label class="form-label">Agent</label>
                                 <select name="coming_agent_id" class="form-select">
                                     @foreach ($agents as $agent)
-                                        <option value="{{ $agent->id }}">{{ $agent->name }} - {{ $agent->company_name ?? '' }}</option>
+                                        <option value="{{ $agent->id }}">{{ $agent->name }} -
+                                            {{ $agent->company_name ?? '' }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -272,21 +286,28 @@
                                 <input type="text" name="coming_airline_no" class="form-control">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">From Country</label>
-                                <select name="coming_from_country" class="form-select">
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
+                                <label class="form-label">From Airport</label>
+                                <select name="coming_from_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        <option value="{{ $airport['code'] }}">
+                                            {{ $airport['code'] }} - {{ $airport['name'] }} - {{ $airport['country'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">To Country</label>
-                                <select name="coming_to_country" class="form-select">
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
+                                <label class="form-label">To Airport</label>
+                                <select name="coming_to_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        <option value="{{ $airport['code'] }}">
+                                            {{ $airport['code'] }} - {{ $airport['name'] }} - {{ $airport['country'] }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
+
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">PNR No</label>
                                 <input type="text" name="coming_pnr" class="form-control">
@@ -343,10 +364,17 @@
                             </select>
                         </div>
 
-                            <div class="col-md-6 mb-3">
-        <label class="form-label">Note</label>
-        <textarea name="note" class="form-control" rows="3" placeholder="Enter any additional note"></textarea>
-    </div>
+                        <div class="col-md-3">
+                            <label for="published_at" class="form-label">Published Date</label>
+                            <input type="date" name="published_at" id="published_at" class="form-control"
+                                value="{{ old('published_at', now()->toDateString()) }}">
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Note</label>
+                            <textarea name="note" class="form-control" rows="3" placeholder="Enter any additional note"></textarea>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -584,22 +612,23 @@
                 <label class="form-label">Airline No</label>
                 <input type="text" name="round_trip_${tripIndex}_airline_no" class="form-control">
             </div>
-            <div class="col-md-3 mb-3">
-                <label class="form-label">From Country</label>
-                <select name="round_trip_${tripIndex}_from_country" class="form-select">
-                    @foreach ($countries as $country)
-                    <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3 mb-3">
-                <label class="form-label">To Country</label>
-                <select name="round_trip_${tripIndex}_to_country" class="form-select">
-                    @foreach ($countries as $country)
-                    <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
-                    @endforeach
-                </select>
-            </div>
+      <div class="col-md-3 mb-3">
+    <label class="form-label">From Airport</label>
+    <select name="round_trip_${tripIndex}_from_airport" class="form-select">
+        @foreach ($airports as $airport)
+        <option value="{{ $airport['code'] }}">{{ $airport['code'] }}- {{ $airport['name'] }} - {{ $airport['country'] }}</option>
+        @endforeach
+    </select>
+</div>
+<div class="col-md-3 mb-3">
+    <label class="form-label">To Airport</label>
+    <select name="round_trip_${tripIndex}_to_airport" class="form-select">
+        @foreach ($airports as $airport)
+        <option value="{{ $airport['code'] }}">{{ $airport['code'] }}- {{ $airport['name'] }} - {{ $airport['country'] }}</option>
+        @endforeach
+    </select>
+</div>
+
             <div class="col-md-3 mb-3">
                 <label class="form-label">PNR No</label>
                 <input type="text" name="round_trip_${tripIndex}_pnr" class="form-control">

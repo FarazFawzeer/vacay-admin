@@ -32,7 +32,7 @@ class VehicleInvBookingController extends Controller
             $query->where('inv_no', 'like', '%' . $request->inv_no . '%');
         }
 
-        $bookings = $query->orderBy('created_at', 'desc')
+        $bookings = $query->orderBy('published_at', 'desc')
             ->paginate(10)
             ->appends($request->all());
 
@@ -88,6 +88,7 @@ class VehicleInvBookingController extends Controller
             'mileage'            => 'required|in:unlimited,limited',
             'total_km'           => 'required_if:mileage,limited|nullable|numeric|min:1',
             'note'               => 'nullable|string|max:1000', // optional note
+            'published_at' => 'nullable|date',
         ]);
 
         // Calculate total
@@ -122,6 +123,7 @@ class VehicleInvBookingController extends Controller
             'status'             => $request->status,
             'payment_status'     => 'unpaid',
             'payment_method'     => $request->payment_method,
+            'published_at' => $request->published_at,
         ]);
 
         return redirect()->back()->with('success', 'Vehicle Booking saved successfully!');
@@ -147,7 +149,7 @@ class VehicleInvBookingController extends Controller
     {
         // Validate request
         $request->validate([
-             'customer_id'        => 'required|exists:customers,id',
+            'customer_id'        => 'required|exists:customers,id',
             'vehicle_id'         => 'required|exists:vehicle_details,id',
             'pickup_location'    => 'required|string',
             'pickup_datetime'    => 'required|date',
@@ -162,6 +164,7 @@ class VehicleInvBookingController extends Controller
             'mileage'            => 'required|in:unlimited,limited',
             'total_km'           => 'required_if:mileage,limited|nullable|numeric|min:1',
             'note'               => 'nullable|string|max:1000', // optional note
+            'published_at' => 'nullable|date',
         ]);
 
         // Recalculate total
@@ -186,6 +189,7 @@ class VehicleInvBookingController extends Controller
             'status'             => $request->status,
             'payment_status'     => $request->payment_status,
             'payment_method'     => $request->payment_method,
+            'published_at' => $request->published_at,
         ]);
 
         return redirect()->route('admin.vehicle-bookings.edit', $booking->id)

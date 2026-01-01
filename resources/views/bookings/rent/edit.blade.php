@@ -53,7 +53,7 @@
                                 <option value="{{ $vehicle->id }}" data-images='@json($images)'
                                     {{ $booking->vehicle_id == $vehicle->id ? 'selected' : '' }}>
                                     {{ $vehicle->vehicle_name ?? $vehicle->name }} -
-                                    {{ $vehicle->vehicle_number ?? $vehicle->vehicle_number}}
+                                    {{ $vehicle->vehicle_number ?? $vehicle->vehicle_number }}
                                 </option>
                             @endforeach
                         </select>
@@ -71,7 +71,7 @@
                             value="{{ date('Y-m-d\TH:i', strtotime($booking->end_datetime)) }}" required>
                     </div>
 
-                 
+
 
                     <!-- Booking & Payment Status -->
                     <div class="col-md-3 mb-3">
@@ -102,85 +102,94 @@
                         </select>
                     </div>
 
+                    <div class="col-md-3">
+                        <label for="published_at" class="form-label">Published Date</label>
+                        <input type="date" name="published_at" id="published_at" class="form-control"
+                            value="{{ $booking->published_at?->format('Y-m-d') }}">
+                    </div>
+
                     {{-- Price & Payment Details --}}
-<div class="col-md-6 mb-3">
-    <div class="card border-secondary">
-        <div class="card-header bg-light">
-            <strong>Price & Payment Details</strong>
-        </div>
-        <div class="card-body">
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-light">
+                                <strong>Price & Payment Details</strong>
+                            </div>
+                            <div class="card-body">
 
-            {{-- Currency --}}
-            <div class="mb-2 row">
-                <label class="col-sm-2 col-form-label">Currency</label>
-                <div class="col-sm-10">
-                    <select name="currency" id="currency" class="form-select" required>
-                        <option value="LKR" {{ $booking->currency == 'LKR' ? 'selected' : '' }}>LKR</option>
-                        <option value="USD" {{ $booking->currency == 'USD' ? 'selected' : '' }}>USD</option>
-                        <option value="EUR" {{ $booking->currency == 'EUR' ? 'selected' : '' }}>EUR</option>
-                    </select>
-                </div>
-            </div>
+                                {{-- Currency --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Currency</label>
+                                    <div class="col-sm-10">
+                                        <select name="currency" id="currency" class="form-select" required>
+                                            <option value="LKR" {{ $booking->currency == 'LKR' ? 'selected' : '' }}>LKR
+                                            </option>
+                                            <option value="USD" {{ $booking->currency == 'USD' ? 'selected' : '' }}>USD
+                                            </option>
+                                            <option value="EUR" {{ $booking->currency == 'EUR' ? 'selected' : '' }}>EUR
+                                            </option>
+                                        </select>
+                                    </div>
+                                </div>
 
-            {{-- Base Price --}}
-            <div class="mb-2 row">
-                <label class="col-sm-2 col-form-label">Base Price</label>
-                <div class="col-sm-10">
-                    <input type="number" step="0.01" name="price" id="price" class="form-control calc"
-                        value="{{ $booking->price }}" required>
-                </div>
-            </div>
+                                {{-- Base Price --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Base Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" name="price" id="price"
+                                            class="form-control calc" value="{{ $booking->price }}" required>
+                                    </div>
+                                </div>
 
-            {{-- Additional Charges --}}
-            <div class="mb-2 row">
-                <label class="col-sm-2 col-form-label">Additional Charges</label>
-                <div class="col-sm-10">
-                    <input type="number" step="0.01" name="additional_price" id="additional_price"
-                        class="form-control calc" value="{{ $booking->additional_price }}">
-                </div>
-            </div>
+                                {{-- Additional Charges --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Additional Charges</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" name="additional_price" id="additional_price"
+                                            class="form-control calc" value="{{ $booking->additional_price }}">
+                                    </div>
+                                </div>
 
-            {{-- Discount --}}
-            <div class="mb-2 row">
-                <label class="col-sm-2 col-form-label">Discount</label>
-                <div class="col-sm-10">
-                    <input type="number" step="0.01" name="discount" id="discount" class="form-control calc"
-                        value="{{ $booking->discount }}">
-                </div>
-            </div>
+                                {{-- Discount --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Discount</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" name="discount" id="discount"
+                                            class="form-control calc" value="{{ $booking->discount }}">
+                                    </div>
+                                </div>
 
-            <hr>
+                                <hr>
 
-            {{-- Total Price --}}
-            <div class="mb-2 row">
-                <label class="col-sm-2 col-form-label">Total Price</label>
-                <div class="col-sm-10">
-                    <input type="number" step="0.01" name="total_price" id="total_price"
-                        class="form-control" value="{{ $booking->total_price }}" readonly>
-                </div>
-            </div>
+                                {{-- Total Price --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Total Price</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" name="total_price" id="total_price"
+                                            class="form-control" value="{{ $booking->total_price }}" readonly>
+                                    </div>
+                                </div>
 
-            {{-- Advance Paid --}}
-            <div class="mb-2 row">
-                <label class="col-sm-2 col-form-label">Advance Paid</label>
-                <div class="col-sm-10">
-                    <input type="number" step="0.01" name="advance_paid" id="advance_paid"
-                        class="form-control calc" value="{{ $booking->advance_paid }}">
-                </div>
-            </div>
+                                {{-- Advance Paid --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Advance Paid</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" name="advance_paid" id="advance_paid"
+                                            class="form-control calc" value="{{ $booking->advance_paid }}">
+                                    </div>
+                                </div>
 
-            {{-- Balance Amount --}}
-            <div class="mb-2 row">
-                <label class="col-sm-2 col-form-label">Balance Amount</label>
-                <div class="col-sm-10">
-                    <input type="number" step="0.01" id="balance_amount" class="form-control"
-                        value="{{ $booking->total_price - $booking->advance_paid }}" readonly>
-                </div>
-            </div>
+                                {{-- Balance Amount --}}
+                                <div class="mb-2 row">
+                                    <label class="col-sm-2 col-form-label">Balance Amount</label>
+                                    <div class="col-sm-10">
+                                        <input type="number" step="0.01" id="balance_amount" class="form-control"
+                                            value="{{ $booking->total_price - $booking->advance_paid }}" readonly>
+                                    </div>
+                                </div>
 
-        </div>
-    </div>
-</div>
+                            </div>
+                        </div>
+                    </div>
 
 
                     <!-- Notes -->
@@ -370,8 +379,8 @@
     for (let i = 0; i < subImages.length; i++) {
         if (i % 2 === 0) html += '<tr>';
         html += `<td style="padding:2px;">
-                    <img src="${getImageUrl(subImages[i])}" style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
-                 </td>`;
+                        <img src="${getImageUrl(subImages[i])}" style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+                     </td>`;
         if (i % 2 === 1) html += '</tr>';
     }
     if (subImages.length % 2 !== 0) html += '<td></td></tr>'; // close last row if odd
@@ -399,15 +408,15 @@
                 <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${price.toFixed(2)}</td>
             </tr>
             ${addCharges > 0 ? `
-                <tr>
-                    <td style="padding:14px;border-bottom:1px solid #eee;">Additional Charges</td>
-                    <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${addCharges.toFixed(2)}</td>
-                </tr>` : ''}
+                    <tr>
+                        <td style="padding:14px;border-bottom:1px solid #eee;">Additional Charges</td>
+                        <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${addCharges.toFixed(2)}</td>
+                    </tr>` : ''}
             ${discount > 0 ? `
-                <tr>
-                    <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
-                    <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">(${discount.toFixed(2)})</td>
-                </tr>` : ''}
+                    <tr>
+                        <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
+                        <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">(${discount.toFixed(2)})</td>
+                    </tr>` : ''}
         </tbody>
     </table>
 

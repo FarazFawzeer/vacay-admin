@@ -27,6 +27,7 @@ class TransportationBooking extends Model
         'hour_count',
         'message',
         'status',
+        'published_at'
     ];
 
     // Cast date/time fields to appropriate types
@@ -34,6 +35,7 @@ class TransportationBooking extends Model
         'start_date' => 'date',
         'start_time' => 'datetime:H:i:s',
         'end_date' => 'date',
+        'published_at'     => 'date',
         'end_time' => 'datetime:H:i:s',
     ];
 

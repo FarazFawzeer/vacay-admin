@@ -135,32 +135,54 @@
                                 <input type="text" name="oneway_airline_no" class="form-control"
                                     value="{{ $firstTrip->airline_no ?? '' }}">
                             </div>
+                            @php
+                                $firstTrip = $booking->trips->first();
+                            @endphp
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">From Country</label>
-                                <select name="oneway_from_country" class="form-select">
-                                    <option value="">Select Country</option>
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}"
-                                            {{ ($firstTrip->from_country ?? '') == $country['en'] ? 'selected' : '' }}>
-                                            {{ $country['en'] }}
+                                <label class="form-label">From Airport</label>
+                                <select name="oneway_from_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        @php
+                                            $fullString =
+                                                $airport['code'] .
+                                                ' | ' .
+                                                $airport['name'] .
+                                                ' | ' .
+                                                $airport['country'];
+                                        @endphp
+                                        <option value="{{ $fullString }}"
+                                            {{ ($firstTrip->from_country ?? '') === $fullString ? 'selected' : '' }}>
+                                            {{ $fullString }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">To Country</label>
-                                <select name="oneway_to_country" class="form-select">
-                                    <option value="">Select Country</option>
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}"
-                                            {{ ($firstTrip->to_country ?? '') == $country['en'] ? 'selected' : '' }}>
-                                            {{ $country['en'] }}
+                                <label class="form-label">To Airport</label>
+                                <select name="oneway_to_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        @php
+                                            $fullString =
+                                                $airport['code'] .
+                                                ' | ' .
+                                                $airport['name'] .
+                                                ' | ' .
+                                                $airport['country'];
+                                        @endphp
+                                        <option value="{{ $fullString }}"
+                                            {{ ($firstTrip->to_country ?? '') === $fullString ? 'selected' : '' }}>
+                                            {{ $fullString }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
+
+
+
 
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">PNR No</label>
@@ -257,29 +279,53 @@
                                     value="{{ $goingTrip->airline_no ?? '' }}">
                             </div>
 
+                            @php
+                                $goingTrip = $booking->trips->where('trip_type', 'going')->first();
+                            @endphp
+
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">From Country</label>
-                                <select name="going_from_country" class="form-select">
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}"
-                                            {{ ($goingTrip->from_country ?? '') == $country['en'] ? 'selected' : '' }}>
-                                            {{ $country['en'] }}
+                                <label class="form-label">From Airport</label>
+                                <select name="going_from_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        @php
+                                            $fullString =
+                                                $airport['code'] .
+                                                ' | ' .
+                                                $airport['name'] .
+                                                ' | ' .
+                                                $airport['country'];
+                                        @endphp
+                                        <option value="{{ $fullString }}"
+                                            {{ ($goingTrip->from_country ?? '') == $fullString ? 'selected' : '' }}>
+                                            {{ $fullString }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">To Country</label>
-                                <select name="going_to_country" class="form-select">
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}"
-                                            {{ ($goingTrip->to_country ?? '') == $country['en'] ? 'selected' : '' }}>
-                                            {{ $country['en'] }}
+                                <label class="form-label">To Airport</label>
+                                <select name="going_to_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        @php
+                                            $fullString =
+                                                $airport['code'] .
+                                                ' | ' .
+                                                $airport['name'] .
+                                                ' | ' .
+                                                $airport['country'];
+                                        @endphp
+                                        <option value="{{ $fullString }}"
+                                            {{ ($goingTrip->to_country ?? '') == $fullString ? 'selected' : '' }}>
+                                            {{ $fullString }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
+
+
 
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">PNR No</label>
@@ -357,30 +403,53 @@
                                 <input type="text" name="coming_airline_no" class="form-control"
                                     value="{{ $returnTrip->airline_no ?? '' }}">
                             </div>
+                            @php
+                                $returnTrip = $booking->trips->where('trip_type', 'return')->first();
+                            @endphp
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">From Country</label>
-                                <select name="coming_from_country" class="form-select">
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}"
-                                            {{ ($returnTrip->from_country ?? '') == $country['en'] ? 'selected' : '' }}>
-                                            {{ $country['en'] }}
+                                <label class="form-label">From Airport</label>
+                                <select name="coming_from_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        @php
+                                            $fullString =
+                                                $airport['code'] .
+                                                ' | ' .
+                                                $airport['name'] .
+                                                ' | ' .
+                                                $airport['country'];
+                                        @endphp
+                                        <option value="{{ $fullString }}"
+                                            {{ ($returnTrip->from_country ?? '') == $fullString ? 'selected' : '' }}>
+                                            {{ $fullString }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">To Country</label>
-                                <select name="coming_to_country" class="form-select">
-                                    @foreach ($countries as $country)
-                                        <option value="{{ $country['en'] }}"
-                                            {{ ($returnTrip->to_country ?? '') == $country['en'] ? 'selected' : '' }}>
-                                            {{ $country['en'] }}
+                                <label class="form-label">To Airport</label>
+                                <select name="coming_to_airport" class="form-select">
+                                    <option value="">Select Airport</option>
+                                    @foreach ($airports as $airport)
+                                        @php
+                                            $fullString =
+                                                $airport['code'] .
+                                                ' | ' .
+                                                $airport['name'] .
+                                                ' | ' .
+                                                $airport['country'];
+                                        @endphp
+                                        <option value="{{ $fullString }}"
+                                            {{ ($returnTrip->to_country ?? '') == $fullString ? 'selected' : '' }}>
+                                            {{ $fullString }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
+
+
 
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">PNR No</label>
@@ -470,31 +539,54 @@
                                                     class="form-control" value="{{ $trip->airline_no }}">
                                             </div>
 
+                                            @php
+                                                $returnTrip = $booking->trips->where('trip_type', 'return')->first();
+                                            @endphp
+
                                             <div class="col-md-3 mb-3">
-                                                <label class="form-label">From Country</label>
-                                                <select name="round_trip_{{ $index + 1 }}_from_country"
+                                                <label class="form-label">From Airport</label>
+                                                <select name="round_trip_{{ $index + 1 }}_from_airport"
                                                     class="form-select">
-                                                    @foreach ($countries as $country)
-                                                        <option value="{{ $country['en'] }}"
-                                                            {{ $trip->from_country == $country['en'] ? 'selected' : '' }}>
-                                                            {{ $country['en'] }}
+                                                    <option value="">Select Airport</option>
+                                                    @foreach ($airports as $airport)
+                                                        @php
+                                                            $fullString =
+                                                                $airport['code'] .
+                                                                ' | ' .
+                                                                $airport['name'] .
+                                                                ' | ' .
+                                                                $airport['country'];
+                                                        @endphp
+                                                        <option value="{{ $fullString }}"
+                                                            {{ $trip->from_country == $fullString ? 'selected' : '' }}>
+                                                            {{ $fullString }}
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </div>
 
                                             <div class="col-md-3 mb-3">
-                                                <label class="form-label">To Country</label>
-                                                <select name="round_trip_{{ $index + 1 }}_to_country"
+                                                <label class="form-label">To Airport</label>
+                                                <select name="round_trip_{{ $index + 1 }}_to_airport"
                                                     class="form-select">
-                                                    @foreach ($countries as $country)
-                                                        <option value="{{ $country['en'] }}"
-                                                            {{ $trip->to_country == $country['en'] ? 'selected' : '' }}>
-                                                            {{ $country['en'] }}
+                                                    <option value="">Select Airport</option>
+                                                    @foreach ($airports as $airport)
+                                                        @php
+                                                            $fullString =
+                                                                $airport['code'] .
+                                                                ' | ' .
+                                                                $airport['name'] .
+                                                                ' | ' .
+                                                                $airport['country'];
+                                                        @endphp
+                                                        <option value="{{ $fullString }}"
+                                                            {{ $trip->to_country == $fullString ? 'selected' : '' }}>
+                                                            {{ $fullString }}
                                                         </option>
                                                     @endforeach
                                                 </select>
                                             </div>
+
 
                                             <div class="col-md-3 mb-3">
                                                 <label class="form-label">PNR No</label>
@@ -568,6 +660,12 @@
                                 <option value="paid" {{ $booking->payment_status == 'paid' ? 'selected' : '' }}>Paid
                                 </option>
                             </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="published_at" class="form-label">Published Date</label>
+                            <input type="date" name="published_at" id="published_at" class="form-control"
+                                value="{{ $booking->published_at?->format('Y-m-d') }}">
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -657,6 +755,10 @@
 @endsection
 
 @section('scripts')
+    <script>
+        const airports = @json($airports); // Convert PHP $airports to JS array
+    </script>
+
     <script>
         // Initialize tripIndex from existing round trips
         let tripIndex = {{ $isRoundTrip ? $roundTrips->count() : 0 }};
@@ -766,6 +868,13 @@
             });
         }
 
+        function generateAirportOptions(selected = '') {
+            return airports.map(a => {
+                const fullString = `${a.code} | ${a.name} | ${a.country}`;
+                const isSelected = fullString === selected ? 'selected' : '';
+                return `<option value="${fullString}" ${isSelected}>${fullString}</option>`;
+            }).join('');
+        }
         // Bind existing selects on page load
         document.querySelectorAll('.customer_select').forEach(bindPassportAutofill);
 
@@ -808,22 +917,24 @@
                 <label class="form-label">Airline No</label>
                 <input type="text" name="round_trip_${tripIndex}_airline_no" class="form-control">
             </div>
-            <div class="col-md-3 mb-3">
-                <label class="form-label">From Country</label>
-                <select name="round_trip_${tripIndex}_from_country" class="form-select">
-                    @foreach ($countries as $country)
-                    <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3 mb-3">
-                <label class="form-label">To Country</label>
-                <select name="round_trip_${tripIndex}_to_country" class="form-select">
-                    @foreach ($countries as $country)
-                    <option value="{{ $country['en'] }}">{{ $country['en'] }}</option>
-                    @endforeach
-                </select>
-            </div>
+      <div class="col-md-3 mb-3">
+    <label class="form-label">From Airport</label>
+    <select name="round_trip_${tripIndex}_from_airport" class="form-select">
+        <option value="">Select Airport</option>
+        ${generateAirportOptions()}
+    </select>
+</div>
+
+<div class="col-md-3 mb-3">
+    <label class="form-label">To Airport</label>
+    <select name="round_trip_${tripIndex}_to_airport" class="form-select">
+        <option value="">Select Airport</option>
+        ${generateAirportOptions()}
+    </select>
+</div>
+
+
+
             <div class="col-md-3 mb-3">
                 <label class="form-label">PNR No</label>
                 <input type="text" name="round_trip_${tripIndex}_pnr" class="form-control">

@@ -34,6 +34,7 @@ class VehicleInvBooking extends Model
         'payment_status',
         'payment_method',
         'currency',
+        'published_at', 
     ];
 
     protected $casts = [
@@ -41,6 +42,7 @@ class VehicleInvBooking extends Model
         'dropoff_datetime' => 'datetime',
         'price' => 'decimal:2',
         'additional_charges' => 'decimal:2',
+         'published_at'     => 'date',
         'discount' => 'decimal:2',
         'total_price' => 'decimal:2',
     ];

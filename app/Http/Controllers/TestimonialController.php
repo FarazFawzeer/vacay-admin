@@ -67,6 +67,7 @@ class TestimonialController extends Controller
             'rating'    => 'nullable|integer|min:1|max:5',
             'message'   => 'required|string',
             'postedate' => 'nullable|date',
+            'link'      => 'nullable|url|max:255', // <-- added
         ]);
 
         // Handle image upload
@@ -80,6 +81,7 @@ class TestimonialController extends Controller
         return redirect()->route('admin.testimonials.create')
             ->with('success', 'Testimonial added successfully!');
     }
+
 
     /**
      * Show edit form.
@@ -101,6 +103,7 @@ class TestimonialController extends Controller
             'rating'    => 'nullable|integer|min:1|max:5',
             'message'   => 'required|string',
             'postedate' => 'nullable|date',
+            'link'      => 'nullable|url|max:255', // <-- added
         ]);
 
         // Handle new image (delete old if replaced)
@@ -116,6 +119,7 @@ class TestimonialController extends Controller
         return redirect()->route('admin.testimonials.index')
             ->with('success', 'Testimonial updated successfully!');
     }
+
 
     /**
      * Delete a testimonial (AJAX or standard).

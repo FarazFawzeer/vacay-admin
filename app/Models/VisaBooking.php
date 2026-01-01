@@ -27,8 +27,14 @@ class VisaBooking extends Model
         'status',
         'payment_status',
         'note',
+        'published_at',
     ];
 
+    protected $casts = [
+
+        'published_at'     => 'date',
+
+    ];
 
     public function passport()
     {

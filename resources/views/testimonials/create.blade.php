@@ -54,23 +54,32 @@
                     </div>
                 </div>
 
-                {{-- Rating --}}
-                <div class="mb-3 col-md-3">
-                    <label for="rating" class="form-label">Rating (1 - 5)</label>
-                    <select name="rating" id="rating" class="form-select">
-                        <option value="" selected disabled>Select Rating</option>
-                        @for ($i = 1; $i <= 5; $i++)
-                            <option value="{{ $i }}">{{ $i }} ★</option>
-                        @endfor
-                    </select>
-                </div>
+                <div class="row">
+                    {{-- Rating --}}
+                    <div class="mb-3 col-md-3">
+                        <label for="rating" class="form-label">Rating (1 - 5)</label>
+                        <select name="rating" id="rating" class="form-select">
+                            <option value="" selected disabled>Select Rating</option>
+                            @for ($i = 1; $i <= 5; $i++)
+                                <option value="{{ $i }}">{{ $i }} ★</option>
+                            @endfor
+                        </select>
+                    </div>
 
+                    <div class="mb-3 col-md-3">
+                        <label for="link" class="form-label">Link (optional)</label>
+                        <input type="url" name="link" id="link" class="form-control"
+                            placeholder="Enter link (e.g., https://example.com)">
+                        <small class="text-muted">Optional: Add a website or profile link.</small>
+                    </div>
+                </div>
                 {{-- Message --}}
                 <div class="mb-3">
                     <label for="message" class="form-label">Testimonial Message</label>
-                    <textarea name="message" id="message" class="form-control" rows="4"
-                        placeholder="Write customer feedback..." required></textarea>
+                    <textarea name="message" id="message" class="form-control" rows="4" placeholder="Write customer feedback..."
+                        required></textarea>
                 </div>
+
 
                 {{-- Image Upload --}}
                 <div class="mb-3">

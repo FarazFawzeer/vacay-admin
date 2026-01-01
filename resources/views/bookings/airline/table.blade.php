@@ -5,7 +5,8 @@
             <th>Trip Type</th>
             <th>Agent</th>
             <th>Passenger / Customer</th>
-            <th>From → To</th>
+            <th>From Airport</th>
+            <th>To Airport</th>
             <th>Airline / Flight</th>
             <th>Total</th>
             <th>Balance</th>
@@ -21,17 +22,13 @@
                 $firstTrip = $booking->trips->first();
             @endphp
             <tr id="booking-{{ $booking->id }}">
-
                 {{-- Invoice --}}
                 <td class="fw-bold">{{ $booking->invoice_id }}</td>
-
-
 
                 {{-- Trip Type --}}
                 <td>
                     @php
                         $tripTypes = $booking->trips->pluck('trip_type')->unique();
-
                         if ($tripTypes->contains('round_trip')) {
                             $tripLabel = 'Round Trip';
                         } elseif ($tripTypes->contains('going') && $tripTypes->contains('return')) {
@@ -44,9 +41,10 @@
                             $tripLabel = '-';
                         }
                     @endphp
-
                     <span class="fw-semibold">{{ $tripLabel }}</span>
                 </td>
+
+                {{-- Agent --}}
                 <td>
                     @if ($firstTrip && $firstTrip->agent)
                         {{ $firstTrip->agent->company_name }} - {{ $firstTrip->agent->name }}
@@ -63,18 +61,34 @@
                         @endif
                     @endforeach
                 </td>
-                {{-- Route From → To --}}
-                {{-- Route From → To --}}
+
+                {{-- From Airport --}}
                 <td>
-                    @if ($booking->trips->count() > 0)
-                        @foreach ($booking->trips as $trip)
-                            {{ $trip->from_country ?? '-' }} → {{ $trip->to_country ?? '-' }}<br>
-                        @endforeach
-                    @else
-                        -
-                    @endif
+                    @foreach ($booking->trips as $trip)
+                        @php
+                            $parts = explode('|', $trip->from_country ?? '');
+                            $code = $parts[0] ?? '-';
+                            $fullName = $parts[1] ?? '';
+                            $country = $parts[2] ?? '';
+                        @endphp
+                        <span data-bs-toggle="tooltip"
+                            title="{{ $fullName }} | {{ $country }}">{{ $code }}</span><br>
+                    @endforeach
                 </td>
 
+                {{-- To Airport --}}
+                <td>
+                    @foreach ($booking->trips as $trip)
+                        @php
+                            $parts = explode('|', $trip->to_country ?? '');
+                            $code = $parts[0] ?? '-';
+                            $fullName = $parts[1] ?? '';
+                            $country = $parts[2] ?? '';
+                        @endphp
+                        <span data-bs-toggle="tooltip"
+                            title="{{ $fullName }} | {{ $country }}">{{ $code }}</span><br>
+                    @endforeach
+                </td>
 
                 {{-- Airline / Flight --}}
                 <td>{{ optional($firstTrip)->airline ?? '-' }}</td>
@@ -142,7 +156,7 @@
             </tr>
         @empty
             <tr>
-                <td colspan="10" class="text-center text-muted">
+                <td colspan="12" class="text-center text-muted">
                     No airline bookings found.
                 </td>
             </tr>
@@ -150,4 +164,6 @@
     </tbody>
 </table>
 
-{{ $bookings->links() }}
+<div class="mt-3">
+    {{ $bookings->appends(request()->query())->links() }}
+</div>

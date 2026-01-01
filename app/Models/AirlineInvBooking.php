@@ -27,9 +27,15 @@ class AirlineInvBooking extends Model
         'advanced_paid',
         'balance',
         'created_by',
-        'note'
+        'note',
+        'published_at',
     ];
 
+    protected $casts = [
+
+        'published_at'     => 'date',
+
+    ];
     /**
      * One booking has many flight trips
      */

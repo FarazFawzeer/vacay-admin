@@ -29,7 +29,7 @@
                                 <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
                                     <strong>Vacay Guider (Pvt) Ltd.</strong><br>
                                     Negombo, Sri Lanka<br>
-                                    +94 114 272 372 | +94 711 999 444 |  +94 777 035 325 <br>
+                                    +94 114 272 372 | +94 711 999 444 | +94 777 035 325 <br>
                                     info@vacayguider.com
                                 </div>
                             </td>
@@ -155,11 +155,42 @@
                                                         ({{ $trip->passport_no ?? '-' }})
                                                     </div>
 
-                                                    <div><strong>Agent:</strong> {{ optional($trip->agent)->name ?? '-' }}
+                                
+                                                    @php
+                                                        // Decode from_country
+                                                        $fromParts = explode('|', $trip->from_country ?? '');
+                                                        $fromCode = $fromParts[0] ?? null;
+                                                        $fromAirport = $airports[$fromCode] ?? null;
+                                                        $fromDisplay = $fromAirport
+                                                            ? $fromAirport['code'] .
+                                                                ' (' .
+                                                                $fromAirport['name'] .
+                                                                ' | ' .
+                                                                $fromAirport['country'] .
+                                                                ')'
+                                                            : $fromCode ?? '-';
+
+                                                        // Decode to_country
+                                                        $toParts = explode('|', $trip->to_country ?? '');
+                                                        $toCode = $toParts[0] ?? null;
+                                                        $toAirport = $airports[$toCode] ?? null;
+                                                        $toDisplay = $toAirport
+                                                            ? $toAirport['code'] .
+                                                                ' (' .
+                                                                $toAirport['name'] .
+                                                                ' | ' .
+                                                                $toAirport['country'] .
+                                                                ')'
+                                                            : $toCode ?? '-';
+                                                    @endphp
+
+                                                    <div style="margin-bottom:0px;">
+                                                        <strong>From:</strong> {{ $fromDisplay }}
+                                                    </div>
+                                                    <div>
+                                                        <strong>To:</strong> {{ $toDisplay }}
                                                     </div>
 
-                                                    <div><strong>Route:</strong> {{ $trip->from_country ?? '-' }} →
-                                                        {{ $trip->to_country ?? '-' }}</div>
 
                                                     <div><strong>Airline / Flight:</strong> {{ $trip->airline ?? '-' }} /
                                                         {{ $trip->airline_no ?? '-' }}</div>

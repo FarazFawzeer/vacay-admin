@@ -32,7 +32,7 @@ class RentVehicleBookingController extends Controller
             $query->where('inv_no', 'like', '%' . $request->inv_no . '%');
         }
 
-        $bookings = $query->orderBy('created_at', 'desc')
+        $bookings = $query->orderBy('published_at', 'desc')
             ->paginate(10)
             ->appends($request->all());
 
@@ -83,6 +83,7 @@ class RentVehicleBookingController extends Controller
             'payment_status'   => 'required',
             'payment_method'   => 'nullable|string|max:50',
             'notes'            => 'nullable|string',
+            'published_at'     => 'nullable|date',
         ]);
 
         // ✅ Calculate total amount
@@ -119,8 +120,10 @@ class RentVehicleBookingController extends Controller
             'payment_status'   => $request->payment_status,
             'payment_method'   => $request->payment_method,
             'notes'            => $request->notes,
+                        'published_at' => $request->published_at,
             'auth_id'          => Auth::id(),
             'created_by'       => Auth::id(),
+
         ]);
 
         return redirect()
@@ -168,6 +171,7 @@ class RentVehicleBookingController extends Controller
             'payment_status'   => 'required',
             'payment_method'   => 'nullable|string|max:50',
             'notes'            => 'nullable|string',
+            'published_at'     => 'nullable|date',
         ]);
 
         // ✅ Recalculate total
@@ -193,8 +197,10 @@ class RentVehicleBookingController extends Controller
             'payment_status'   => $request->payment_status,
             'payment_method'   => $request->payment_method,
             'notes'            => $request->notes,
+             'published_at' => $request->published_at,
             'auth_id'          => Auth::id(),
             'updated_by'       => Auth::id(),
+           
         ]);
 
         return redirect()

@@ -24,7 +24,8 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.testimonials.update', $testimonial->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.testimonials.update', $testimonial->id) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
@@ -40,8 +41,9 @@
                         <label for="source" class="form-label">Source</label>
                         <select name="source" id="source" class="form-select">
                             <option value="" disabled>Select Source</option>
-                            @foreach(['Website', 'Google Review', 'Facebook', 'TripAdvisor', 'Other'] as $source)
-                                <option value="{{ $source }}" {{ old('source', $testimonial->source) == $source ? 'selected' : '' }}>
+                            @foreach (['Website', 'Google Review', 'Facebook', 'TripAdvisor', 'Other'] as $source)
+                                <option value="{{ $source }}"
+                                    {{ old('source', $testimonial->source) == $source ? 'selected' : '' }}>
                                     {{ $source }}
                                 </option>
                             @endforeach
@@ -55,17 +57,29 @@
                     </div>
                 </div>
 
-                {{-- Rating --}}
-                <div class="mb-3 col-md-3">
-                    <label for="rating" class="form-label">Rating (1 - 5)</label>
-                    <select name="rating" id="rating" class="form-select">
-                        <option value="" disabled>Select Rating</option>
-                        @for ($i = 1; $i <= 5; $i++)
-                            <option value="{{ $i }}" {{ old('rating', $testimonial->rating) == $i ? 'selected' : '' }}>
-                                {{ $i }} ★
-                            </option>
-                        @endfor
-                    </select>
+                <div class="row">
+
+                    {{-- Rating --}}
+                    <div class="mb-3 col-md-3">
+                        <label for="rating" class="form-label">Rating (1 - 5)</label>
+                        <select name="rating" id="rating" class="form-select">
+                            <option value="" disabled>Select Rating</option>
+                            @for ($i = 1; $i <= 5; $i++)
+                                <option value="{{ $i }}"
+                                    {{ old('rating', $testimonial->rating) == $i ? 'selected' : '' }}>
+                                    {{ $i }} ★
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div class="mb-3 col-md-3">
+                        <label for="link" class="form-label">Link (optional)</label>
+                        <input type="url" name="link" id="link" class="form-control"
+                            value="{{ old('link', $testimonial->link) }}"
+                            placeholder="Enter link (e.g., https://example.com)">
+                        <small class="text-muted">Optional: Add a website or profile link.</small>
+                    </div>
                 </div>
 
                 {{-- Message --}}
@@ -82,7 +96,8 @@
 
                     @if ($testimonial->image)
                         <div class="mt-2">
-                            <img src="{{ asset('admin/storage/' . $testimonial->image) }}" alt="Customer Image" width="80" height="80" style="object-fit: cover; border-radius: 6px;">
+                            <img src="{{ asset('admin/storage/' . $testimonial->image) }}" alt="Customer Image"
+                                width="80" height="80" style="object-fit: cover; border-radius: 6px;">
                         </div>
                     @endif
                 </div>
@@ -91,8 +106,10 @@
                 <div class="mb-3 col-md-3">
                     <label for="status" class="form-label">Status</label>
                     <select name="status" id="status" class="form-select">
-                        <option value="1" {{ old('status', $testimonial->status) == 1 ? 'selected' : '' }}>Active</option>
-                        <option value="0" {{ old('status', $testimonial->status) == 0 ? 'selected' : '' }}>Inactive</option>
+                        <option value="1" {{ old('status', $testimonial->status) == 1 ? 'selected' : '' }}>Active
+                        </option>
+                        <option value="0" {{ old('status', $testimonial->status) == 0 ? 'selected' : '' }}>Inactive
+                        </option>
                     </select>
                 </div>
 

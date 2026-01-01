@@ -94,6 +94,11 @@
                         </select>
                     </div>
 
+                  <div class="col-md-3">
+                            <label for="published_at" class="form-label">Published Date</label>
+                            <input type="date" name="published_at" id="published_at" class="form-control"
+                                value="{{ old('published_at', now()->toDateString()) }}">
+                        </div>
 
                     {{-- Note --}}
                     <div class="col-md-6 mb-3">

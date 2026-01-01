@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\TourBooking;
 use App\Models\Customer;
 use App\Models\Package;
+use App\Models\Agent;
+
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 
@@ -16,7 +18,7 @@ class TourQuotationController extends Controller
 
     public function index(Request $request)
     {
-        $query = TourBooking::with(['customer', 'package']);
+        $query = TourBooking::with(['customer', 'package', 'agent']);
 
         // 🔹 Filters
         if ($request->status) {
@@ -31,19 +33,19 @@ class TourQuotationController extends Controller
             $query->where('booking_ref_no', 'like', '%' . $request->booking_ref . '%');
         }
 
-        // 🔹 Pagination with filters
-        $bookings = $query->orderBy('created_at', 'desc')
+        // 🔹 Order by published date (latest first)
+        $bookings = $query
+            ->orderByDesc('published_at') // 👈 key line
             ->paginate(10)
             ->appends($request->all());
 
-        // 🔹 AJAX: return table only
         if ($request->ajax()) {
             return view('bookings.tour_table', compact('bookings'))->render();
         }
 
-        // 🔹 Get filter options for the view
         return view('bookings.tour_view', compact('bookings'));
     }
+
 
 
 
@@ -51,17 +53,19 @@ class TourQuotationController extends Controller
     public function create()
     {
         $customers = Customer::all();
-        $packages = Package::all();
+        $packages  = Package::all();
+        $agents    = Agent::where('status', 1)->orderBy('name')->get();
 
-        return view('bookings.tour', compact('customers', 'packages'));
+        return view('bookings.tour', compact('customers', 'packages', 'agents'));
     }
-
     // Store Quotation
     public function store(Request $request)
     {
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'package_id' => 'required|exists:packages,id',
+            'agent_id'     => 'nullable|exists:agents,id',
+            'published_at' => 'nullable|date',
             'travel_start_date' => 'required|date',
             'travel_end_date' => 'required|date',
             'adults' => 'required|integer|min:0',
@@ -110,6 +114,7 @@ class TourQuotationController extends Controller
         $booking = TourBooking::create([
             'package_id' => $request->package_id,
             'customer_id' => $request->customer_id,
+            'agent_id' => $request->agent_id,
             'booking_ref_no' => $bookingRefNo,
             'travel_date' => $request->travel_start_date,
             'travel_end_date' => $request->travel_end_date,
@@ -128,6 +133,7 @@ class TourQuotationController extends Controller
             'special_requirements' => $request->special_requirements,
             'invoice_number' => $invoiceNumber,
             'invoice_date' => now(),
+            'published_at' => $request->published_at ?? now()->toDateString(),
             'status' => $request->status,
             'created_by' => auth()->id(),
         ]);
@@ -140,19 +146,24 @@ class TourQuotationController extends Controller
     {
         $customers = Customer::all();
         $packages = Package::all();
+        $agents = Agent::where('status', 1)->get(); // ✅ added
 
         return view('bookings.edit_tour', [
             'booking' => $booking,
             'customers' => $customers,
             'packages' => $packages,
+            'agents' => $agents, // ✅ added
         ]);
     }
+
 
     public function update(Request $request, TourBooking $booking)
     {
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'package_id' => 'required|exists:packages,id',
+            'agent_id' => 'nullable|exists:agents,id',     // ✅ added
+            'published_at' => 'nullable|date',
             'travel_start_date' => 'required|date',
             'travel_end_date' => 'required|date|after_or_equal:travel_start_date',
             'adults' => 'required|integer|min:0',
@@ -187,6 +198,7 @@ class TourQuotationController extends Controller
         $booking->update([
             'customer_id' => $request->customer_id,
             'package_id' => $request->package_id,
+            'agent_id' => $request->agent_id, // ✅ added
             'travel_date' => $request->travel_start_date,
             'travel_end_date' => $request->travel_end_date,
             'adults' => $request->adults,
@@ -203,7 +215,8 @@ class TourQuotationController extends Controller
             'currency' => $request->currency,
             'status' => $request->status,
             'special_requirements' => $request->special_requirements,
-            //'updated_by' => auth()->id(), // optional
+            'published_at' => $request->published_at,
+            'updated_by' => auth()->id(), // optional
         ]);
 
         return redirect()->route('admin.tour-bookings.edit', $booking)

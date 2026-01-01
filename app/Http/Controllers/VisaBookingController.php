@@ -38,7 +38,7 @@ class VisaBookingController extends Controller
         }
 
         $bookings = $query
-            ->orderBy('created_at', 'desc')
+            ->orderBy('published_at', 'desc')
             ->paginate(10)
             ->appends($request->all());
 
@@ -159,6 +159,7 @@ class VisaBookingController extends Controller
 
             'status'             => 'required',
             'payment_status'     => 'required',
+                'published_at'     => 'nullable|date',
         ]);
 
         // Ensure the selected category belongs to the selected visa
@@ -195,6 +196,7 @@ class VisaBookingController extends Controller
 
             'status'             => $request->status,
             'payment_status'     => $request->payment_status,
+            'published_at'       => $request->published_at,
 
             'created_by'         => Auth::id(),
         ]);
@@ -268,6 +270,7 @@ class VisaBookingController extends Controller
 
             'status'             => 'required',
             'payment_status'     => 'required',
+                'published_at'     => 'nullable|date',
         ]);
 
         // Ensure the selected category belongs to the selected visa
@@ -292,6 +295,7 @@ class VisaBookingController extends Controller
 
             'status'             => $request->status,
             'payment_status'     => $request->payment_status,
+            'published_at'       => $request->published_at,
 
             'updated_by'         => Auth::id(),
         ]);

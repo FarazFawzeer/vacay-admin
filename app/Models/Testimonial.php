@@ -21,6 +21,7 @@ class Testimonial extends Model
         'source',
         'rating',
         'message',
+        'link',
         'postedate',
         'status',
     ];

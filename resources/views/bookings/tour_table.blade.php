@@ -2,6 +2,7 @@
     <thead>
         <tr>
             <th>Booking Ref</th>
+            <th>Agent</th>
             <th>Customer</th>
             <th>Nationality</th>
             <th>Visit Country</th>
@@ -19,6 +20,16 @@
         @forelse($bookings as $booking)
             <tr id="booking-{{ $booking->id }}">
                 <td>{{ $booking->booking_ref_no }}</td>
+                {{-- Agent Column --}}
+                <td>
+                    @if ($booking->agent)
+                        {{ $booking->agent->name }} - {{ $booking->agent->company_name }}
+                    @else
+                        -
+                    @endif
+
+                </td>
+
                 <td>{{ $booking->customer->name ?? '-' }}</td>
 
                 <td>

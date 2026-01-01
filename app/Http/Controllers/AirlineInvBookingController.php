@@ -20,8 +20,8 @@ class AirlineInvBookingController extends Controller
      */
     public function index(Request $request)
     {
-        // Load bookings with trips (first trip for display)
-        $query = AirlineInvBooking::with(['trips']);
+        // Load bookings with trips and related agent/passport
+        $query = AirlineInvBooking::with(['trips.agent', 'trips.passport']);
 
         // Status filter
         if ($request->filled('status')) {
@@ -33,16 +33,22 @@ class AirlineInvBookingController extends Controller
             $query->where('invoice_id', 'like', '%' . $request->inv_no . '%');
         }
 
-        $bookings = $query->orderBy('created_at', 'desc')
+        $bookings = $query->orderBy('published_at', 'desc')
             ->paginate(10)
             ->appends($request->all());
 
+        $airports = collect(
+            json_decode(file_get_contents(resource_path('data/airports.json')), true)
+        )->keyBy('code');
+
         if ($request->ajax()) {
-            return view('bookings.airline.table', compact('bookings'))->render();
+            // Ensure $airports is passed if the table needs to decode airport codes
+            return view('bookings.airline.table', compact('bookings', 'airports'))->render();
         }
 
-        return view('bookings.airline.index', compact('bookings'));
+        return view('bookings.airline.index', compact('bookings', 'airports'));
     }
+
     /**
      * Create booking form
      */
@@ -60,13 +66,24 @@ class AirlineInvBookingController extends Controller
         }
 
         // Load countries from JSON
-        $countries = json_decode(file_get_contents(resource_path('data/countries.json')), true);
+        $airports = json_decode(file_get_contents(resource_path('data/airports.json')), true);
+
 
         $agents = Agent::all();
 
         $passports = Passport::with('customer')->get();
 
-        return view('bookings.airline.create', compact('customers', 'nextInvoice', 'countries', 'agents', 'passports'));
+        return view('bookings.airline.create', compact('customers', 'nextInvoice', 'airports', 'agents', 'passports'));
+    }
+
+
+    private function airportString($code, $airports)
+    {
+        $airport = collect($airports)->firstWhere('code', $code);
+
+        return $airport
+            ? "{$airport['code']} | {$airport['name']} | {$airport['country']}"
+            : null;
     }
 
 
@@ -90,8 +107,14 @@ class AirlineInvBookingController extends Controller
             'advanced_paid'   => 'nullable|numeric',
             'balance'         => 'required|numeric',
             'note'             => 'nullable',
+            'published_at'     => 'nullable|date',
 
         ]);
+
+        $airports = json_decode(
+            file_get_contents(resource_path('data/airports.json')),
+            true
+        );
 
         // 2️⃣ Generate invoice_id (AB0001, AB0002, ...)
         $lastInvoice = AirlineInvBooking::orderBy('id', 'desc')->first();
@@ -121,6 +144,7 @@ class AirlineInvBookingController extends Controller
             'advanced_paid'    => $request->advanced_paid ?? 0,
             'balance'          => $request->balance,
             'note'             => $request->note,
+            'published_at'     => $request->published_at,
         ]);
 
         // 4️⃣ Prepare trips
@@ -137,8 +161,14 @@ class AirlineInvBookingController extends Controller
                 'agent_id'           => $request->oneway_agent_id,
                 'airline'            => $request->oneway_airline,
                 'airline_no'         => $request->oneway_airline_no,
-                'from_country'       => $request->oneway_from_country,
-                'to_country'         => $request->oneway_to_country,
+                'from_country' => $this->airportString(
+                    $request->oneway_from_airport,
+                    $airports
+                ),
+                'to_country' => $this->airportString(
+                    $request->oneway_to_airport,
+                    $airports
+                ),
                 'pnr'                => $request->oneway_pnr,
                 'departure_datetime' => $request->oneway_departure_datetime,
                 'arrival_datetime'   => $request->oneway_arrival_datetime,
@@ -158,8 +188,15 @@ class AirlineInvBookingController extends Controller
                 'agent_id'           => $request->oneway_agent_id,
                 'airline'            => $request->oneway_airline,
                 'airline_no'         => $request->oneway_airline_no,
-                'from_country'       => $request->oneway_from_country,
-                'to_country'         => $request->oneway_to_country,
+                'from_country' => $this->airportString(
+                    $request->oneway_from_airport,
+                    $airports
+                ),
+                'to_country' => $this->airportString(
+                    $request->oneway_to_airport,
+                    $airports
+                ),
+
                 'pnr'                => $request->oneway_pnr,
                 'departure_datetime' => $request->oneway_departure_datetime,
                 'arrival_datetime'   => $request->oneway_arrival_datetime,
@@ -181,8 +218,15 @@ class AirlineInvBookingController extends Controller
                 'agent_id'           => $request->going_agent_id,
                 'airline'            => $request->going_airline,
                 'airline_no'         => $request->going_airline_no,
-                'from_country'       => $request->going_from_country,
-                'to_country'         => $request->going_to_country,
+                'from_country' => $this->airportString(
+                    $request->going_from_airport,
+                    $airports
+                ),
+                'to_country' => $this->airportString(
+                    $request->going_to_airport,
+                    $airports
+                ),
+
                 'pnr'                => $request->going_pnr,
                 'departure_datetime' => $request->going_departure_datetime,
                 'arrival_datetime'   => $request->going_arrival_datetime,
@@ -198,8 +242,15 @@ class AirlineInvBookingController extends Controller
                 'agent_id'           => $request->coming_agent_id,
                 'airline'            => $request->coming_airline,
                 'airline_no'         => $request->coming_airline_no,
-                'from_country'       => $request->coming_from_country,
-                'to_country'         => $request->coming_to_country,
+                'from_country' => $this->airportString(
+                    $request->coming_from_airport,
+                    $airports
+                ),
+                'to_country' => $this->airportString(
+                    $request->coming_to_airport,
+                    $airports
+                ),
+
                 'pnr'                => $request->coming_pnr,
                 'departure_datetime' => $request->coming_departure_datetime,
                 'arrival_datetime'   => $request->coming_arrival_datetime,
@@ -222,8 +273,15 @@ class AirlineInvBookingController extends Controller
                     'agent_id'           => $request->input("round_trip_{$i}_agent_id"),
                     'airline'            => $request->input("round_trip_{$i}_airline"),
                     'airline_no'         => $request->input("round_trip_{$i}_airline_no"),
-                    'from_country'       => $request->input("round_trip_{$i}_from_country"),
-                    'to_country'         => $request->input("round_trip_{$i}_to_country"),
+                    'from_country' => $this->airportString(
+                        $request->input("round_trip_{$i}_from_airport"),
+                        $airports
+                    ),
+                    'to_country' => $this->airportString(
+                        $request->input("round_trip_{$i}_to_airport"),
+                        $airports
+                    ),
+
                     'pnr'                => $request->input("round_trip_{$i}_pnr"),
                     'departure_datetime' => $request->input("round_trip_{$i}_departure_datetime"),
                     'arrival_datetime'   => $request->input("round_trip_{$i}_arrival_datetime"),
@@ -255,8 +313,14 @@ class AirlineInvBookingController extends Controller
         // Grab first trip for easier access in blade
         $firstTrip = $airline_booking->trips->first();
 
-        return view('bookings.airline.show', compact('airline_booking', 'firstTrip'));
+        // Load airports data
+        $airports = collect(
+            json_decode(file_get_contents(resource_path('data/airports.json')), true)
+        )->keyBy('code');
+
+        return view('bookings.airline.show', compact('airline_booking', 'firstTrip', 'airports'));
     }
+
 
 
 
@@ -271,9 +335,9 @@ class AirlineInvBookingController extends Controller
         $passports = Passport::with('customer')->get();
 
         // Load countries from JSON
-        $countries = json_decode(file_get_contents(resource_path('data/countries.json')), true);
+        $airports = json_decode(file_get_contents(resource_path('data/airports.json')), true);
 
-        return view('bookings.airline.edit', compact('booking', 'customers', 'agents', 'passports', 'countries'));
+        return view('bookings.airline.edit', compact('booking', 'customers', 'agents', 'passports', 'airports'));
     }
 
     /**
@@ -294,18 +358,25 @@ class AirlineInvBookingController extends Controller
             'total_amount'    => 'required|numeric',
             'advanced_paid'   => 'nullable|numeric',
             'balance'         => 'required|numeric',
-            'note'             => 'nullable',
+            'note'            => 'nullable',
+            'published_at'    => 'nullable|date',
         ]);
 
-        // 2️⃣ Find the booking
+        // 2️⃣ Load airports data
+        $airports = json_decode(
+            file_get_contents(resource_path('data/airports.json')),
+            true
+        );
+
+        // 3️⃣ Find the booking
         $booking = AirlineInvBooking::findOrFail($id);
 
-        // 3️⃣ Update booking
+        // 4️⃣ Update booking
         $booking->update([
             'business_type'    => $request->business_type,
             'company_name'     => $request->company_name,
             'ticket_type'      => $request->ticket_type,
-            'return_type'      => $request->return_type, // ← dummy / return_ticket / round_trip
+            'return_type'      => $request->return_type,
             'status'           => $request->status,
             'payment_status'   => $request->payment_status,
             'currency'         => $request->currency,
@@ -316,17 +387,15 @@ class AirlineInvBookingController extends Controller
             'advanced_paid'    => $request->advanced_paid ?? 0,
             'balance'          => $request->balance,
             'note'             => $request->note,
+            'published_at'     => $request->published_at,
         ]);
 
-        // 4️⃣ Delete existing trips
+        // 5️⃣ Delete existing trips
         $booking->trips()->delete();
 
-        // 5️⃣ Prepare trips (EXACT SAME LOGIC AS STORE)
+        // 6️⃣ Prepare trips (same logic as store)
         $trips = [];
 
-        /**
-         * ONE WAY (normal)
-         */
         if ($request->ticket_type === 'one_way') {
             $trips[] = [
                 'trip_type'          => 'one_way',
@@ -335,20 +404,16 @@ class AirlineInvBookingController extends Controller
                 'agent_id'           => $request->oneway_agent_id,
                 'airline'            => $request->oneway_airline,
                 'airline_no'         => $request->oneway_airline_no,
-                'from_country'       => $request->oneway_from_country,
-                'to_country'         => $request->oneway_to_country,
+                'from_country' => $request->oneway_from_airport,
+                'to_country'   => $request->oneway_to_airport,
+
                 'pnr'                => $request->oneway_pnr,
                 'departure_datetime' => $request->oneway_departure_datetime,
                 'arrival_datetime'   => $request->oneway_arrival_datetime,
                 'baggage_qty'        => $request->oneway_baggage_qty ?? 0,
                 'handluggage_qty'    => $request->oneway_handluggage_qty ?? 0,
             ];
-        }
-
-        /**
-         * RETURN → DUMMY (uses One Way fields)
-         */
-        elseif ($request->ticket_type === 'return' && $request->return_type === 'dummy') {
+        } elseif ($request->ticket_type === 'return' && $request->return_type === 'dummy') {
             $trips[] = [
                 'trip_type'          => 'dummy',
                 'passport_id'        => $request->final_passport_id,
@@ -356,21 +421,16 @@ class AirlineInvBookingController extends Controller
                 'agent_id'           => $request->oneway_agent_id,
                 'airline'            => $request->oneway_airline,
                 'airline_no'         => $request->oneway_airline_no,
-                'from_country'       => $request->oneway_from_country,
-                'to_country'         => $request->oneway_to_country,
+                'from_country' => $request->going_from_airport,
+                'to_country'   => $request->going_to_airport,
+
                 'pnr'                => $request->oneway_pnr,
                 'departure_datetime' => $request->oneway_departure_datetime,
                 'arrival_datetime'   => $request->oneway_arrival_datetime,
                 'baggage_qty'        => $request->oneway_baggage_qty ?? 0,
                 'handluggage_qty'    => $request->oneway_handluggage_qty ?? 0,
             ];
-        }
-
-        /**
-         * RETURN → RETURN TICKET
-         */
-        elseif ($request->ticket_type === 'return' && $request->return_type === 'return_ticket') {
-
+        } elseif ($request->ticket_type === 'return' && $request->return_type === 'return_ticket') {
             // Going
             $trips[] = [
                 'trip_type'          => 'going',
@@ -379,15 +439,15 @@ class AirlineInvBookingController extends Controller
                 'agent_id'           => $request->going_agent_id,
                 'airline'            => $request->going_airline,
                 'airline_no'         => $request->going_airline_no,
-                'from_country'       => $request->going_from_country,
-                'to_country'         => $request->going_to_country,
+                'from_country' => $request->going_from_airport,
+                'to_country'   => $request->going_to_airport,
+
                 'pnr'                => $request->going_pnr,
                 'departure_datetime' => $request->going_departure_datetime,
                 'arrival_datetime'   => $request->going_arrival_datetime,
                 'baggage_qty'        => $request->going_baggage_qty ?? 0,
                 'handluggage_qty'    => $request->going_handluggage_qty ?? 0,
             ];
-
             // Return
             $trips[] = [
                 'trip_type'          => 'return',
@@ -396,8 +456,9 @@ class AirlineInvBookingController extends Controller
                 'agent_id'           => $request->coming_agent_id,
                 'airline'            => $request->coming_airline,
                 'airline_no'         => $request->coming_airline_no,
-                'from_country'       => $request->coming_from_country,
-                'to_country'         => $request->coming_to_country,
+                'from_country' => $request->going_from_airport,
+                'to_country'   => $request->going_to_airport,
+
                 'pnr'                => $request->coming_pnr,
                 'departure_datetime' => $request->coming_departure_datetime,
                 'arrival_datetime'   => $request->coming_arrival_datetime,
@@ -406,13 +467,10 @@ class AirlineInvBookingController extends Controller
             ];
         }
 
-        /**
-         * ROUND TRIP (dynamic)
-         */
+        // ROUND TRIP dynamic
         foreach ($request->all() as $key => $value) {
             if (preg_match('/round_trip_(\d+)_customer_id/', $key, $matches)) {
                 $i = $matches[1];
-
                 $trips[] = [
                     'trip_type'          => 'round_trip',
                     'passport_id'        => $request->input("round_trip_{$i}_customer_id"),
@@ -420,8 +478,9 @@ class AirlineInvBookingController extends Controller
                     'agent_id'           => $request->input("round_trip_{$i}_agent_id"),
                     'airline'            => $request->input("round_trip_{$i}_airline"),
                     'airline_no'         => $request->input("round_trip_{$i}_airline_no"),
-                    'from_country'       => $request->input("round_trip_{$i}_from_country"),
-                    'to_country'         => $request->input("round_trip_{$i}_to_country"),
+                    'from_country' => $request->input("round_trip_{$i}_from_airport"),
+                    'to_country'   => $request->input("round_trip_{$i}_to_airport"),
+
                     'pnr'                => $request->input("round_trip_{$i}_pnr"),
                     'departure_datetime' => $request->input("round_trip_{$i}_departure_datetime"),
                     'arrival_datetime'   => $request->input("round_trip_{$i}_arrival_datetime"),
@@ -431,7 +490,7 @@ class AirlineInvBookingController extends Controller
             }
         }
 
-        // 6️⃣ Insert trips
+        // 7️⃣ Insert trips
         $booking->trips()->createMany($trips);
 
         return redirect()
@@ -455,7 +514,7 @@ class AirlineInvBookingController extends Controller
     }
 
 
-      public function updateStatus(Request $request, $id)
+    public function updateStatus(Request $request, $id)
     {
         $request->validate([
             'status' => 'required'
