@@ -237,7 +237,7 @@
                             <a class="sub-nav-link" href="{{ route('admin.vehicle-bookings.index') }}">Transport
                                 Solutions</a>
                         </li>
-                         <li class="sub-nav-item">
+                        <li class="sub-nav-item">
                             <a class="sub-nav-link" href="{{ route('admin.airline-bookings.index') }}">AirLine</a>
                         </li>
                         <li class="sub-nav-item">
@@ -289,6 +289,17 @@
                     </ul>
                 </div>
             </li>
+
+            {{-- Notifications / Messages --}}
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('admin.messages.create') }}">
+                    <span class="nav-icon">
+                        <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Mail Template</span>
+                </a>
+            </li>
+
 
             {{-- Profile --}}
             <li class="nav-item">

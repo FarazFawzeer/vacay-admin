@@ -37,4 +37,10 @@ class Customer extends Model
         'date_of_entry' => 'datetime',
         'service' => 'array',
     ];
+
+    public function scopeWithEmail($query)
+    {
+        return $query->whereNotNull('email')
+            ->where('email', '!=', '');
+    }
 }

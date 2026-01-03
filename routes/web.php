@@ -23,6 +23,8 @@ use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\PassportController;
 use App\Http\Controllers\AirlineInvBookingController;
+use App\Http\Controllers\MessageController;
+use Illuminate\Support\Facades\Artisan;
 
 require __DIR__ . '/auth.php';
 
@@ -220,6 +222,18 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
         return response()->file($path);
     });
+
+
+    Route::get('messages/create', [MessageController::class, 'create'])
+        ->name('messages.create');
+
+    Route::post('messages/send', [MessageController::class, 'send'])
+        ->name('messages.send');
+
+    Route::get(
+        'messages/filter-customers',
+        [MessageController::class, 'filterCustomers']
+    )->name('messages.filterCustomers');
 });
 
 
