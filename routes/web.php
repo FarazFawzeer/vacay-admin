@@ -34,7 +34,9 @@ Route::get('/cc', function () {
     Artisan::call('config:clear');
 });
 
-
+Route::middleware(['auth', 'super.admin'])->group(function () {
+ 
+});
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
@@ -49,7 +51,10 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         return response()->file($fullPath, ['Content-Type' => $mime]);
     })->where('path', '.*');
 
-
+   Route::get('/online-users', [
+        App\Http\Controllers\Admin\OnlineUserController::class,
+        'index'
+    ])->name('users.online');
 
     //admin
     Route::resource('users', UserController::class);

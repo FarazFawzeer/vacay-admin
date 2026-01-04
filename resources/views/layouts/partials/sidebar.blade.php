@@ -31,26 +31,33 @@
                </li> --}}
 
             {{-- Admin --}}
-            <li class="nav-item">
-                <a class="nav-link menu-arrow" href="#sidebarAdmin" data-bs-toggle="collapse" role="button"
-                    aria-expanded="false" aria-controls="sidebarAdmin">
-                    <span class="nav-icon">
-                        <iconify-icon icon="mdi:account-cog-outline"></iconify-icon>
-                    </span>
-                    <span class="nav-text"> Admin</span>
-                </a>
-                <div class="collapse" id="sidebarAdmin">
-                    <ul class="nav sub-navbar-nav">
-                        <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="{{ route('second', ['admin', 'create']) }}">Create</a>
-                        </li>
-                        <li class="sub-nav-item">
-                            <a class="sub-nav-link" href="{{ route('admin.users.index') }}">View </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+            @if (auth()->user()->type === 'Super Admin')
+                <li class="nav-item">
+                    <a class="nav-link menu-arrow" href="#sidebarAdmin" data-bs-toggle="collapse" role="button"
+                        aria-expanded="false" aria-controls="sidebarAdmin">
+                        <span class="nav-icon">
+                            <iconify-icon icon="mdi:account-cog-outline"></iconify-icon>
+                        </span>
+                        <span class="nav-text"> Admin</span>
+                    </a>
+                    <div class="collapse" id="sidebarAdmin">
+                        <ul class="nav sub-navbar-nav">
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{{ route('second', ['admin', 'create']) }}">Create</a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{{ route('admin.users.index') }}">View </a>
+                            </li>
+                            <li class="sub-nav-item">
+                                <a class="sub-nav-link" href="{{ route('admin.users.online') }}">
 
+                                    Online Users
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            @endif
             {{-- Customer --}}
             <li class="nav-item">
                 <a class="nav-link menu-arrow" href="#sidebarCustomer" data-bs-toggle="collapse" role="button"
