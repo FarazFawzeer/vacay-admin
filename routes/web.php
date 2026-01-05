@@ -25,8 +25,19 @@ use App\Http\Controllers\PassportController;
 use App\Http\Controllers\AirlineInvBookingController;
 use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Admin\DashboardController;
 
 require __DIR__ . '/auth.php';
+
+Route::middleware('auth')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/index', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+
 
 Route::get('/cc', function () {
     Artisan::call('cache:clear');
@@ -34,9 +45,12 @@ Route::get('/cc', function () {
     Artisan::call('config:clear');
 });
 
-Route::middleware(['auth', 'super.admin'])->group(function () {
- 
-});
+Route::middleware(['auth', 'super.admin'])->group(function () {});
+
+Route::post('/notifications/clear-all', function () {
+    auth()->user()->notifications()->update(['is_read' => true]);
+    return back();
+})->name('notifications.clearAll')->middleware('auth');
 
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
@@ -51,7 +65,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         return response()->file($fullPath, ['Content-Type' => $mime]);
     })->where('path', '.*');
 
-   Route::get('/online-users', [
+    Route::get('/online-users', [
         App\Http\Controllers\Admin\OnlineUserController::class,
         'index'
     ])->name('users.online');
@@ -214,6 +228,18 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         ->name('testimonials.toggleStatus');
     Route::post('testimonials/toggle-status/{blog}', [TestimonialController::class, 'toggleStatus'])->name('blogs.status');
 
+
+    Route::resource('reminders', \App\Http\Controllers\Admin\ReminderController::class);
+
+    Route::post(
+        'reminders/{reminder}/complete',
+        [\App\Http\Controllers\Admin\ReminderController::class, 'complete']
+    )->name('reminders.complete');
+
+
+    Route::resource('notes', \App\Http\Controllers\Admin\NoteController::class);
+
+
     //profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -254,15 +280,14 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
-Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return view('index'); // create resources/views/dashboard.blade.php
-    });
-});
+// Route::middleware('auth')->group(function () {
+//     Route::get('/', function () {
+//         return view('index'); // create resources/views/dashboard.blade.php
+//     });
+// });
 
 
-Route::group(['prefix' => '/', 'middleware' => 'auth'], function () {
-    Route::get('', [RoutingController::class, 'index'])->name('root');
+Route::group(['middleware' => 'auth'], function () {
     Route::get('{first}/{second}/{third}', [RoutingController::class, 'thirdLevel'])->name('third');
     Route::get('{first}/{second}', [RoutingController::class, 'secondLevel'])->name('second');
     Route::get('{any}', [RoutingController::class, 'root'])->name('any');

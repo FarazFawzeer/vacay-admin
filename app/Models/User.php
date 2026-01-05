@@ -59,4 +59,20 @@ class User extends Authenticatable
     ];
 
 
+    
+    public function reminders()
+    {
+        return $this->hasMany(Reminder::class);
+    }
+
+    public function notes()
+    {
+        return $this->hasMany(Note::class);
+    }
+
+    public function adminNotifications()
+    {
+        return $this->hasMany(AdminNotification::class);
+    }
+
 }

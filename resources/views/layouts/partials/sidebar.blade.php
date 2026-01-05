@@ -308,6 +308,68 @@
             </li>
 
 
+            {{-- Reminders --}}
+            <li class="nav-item">
+                <a class="nav-link menu-arrow" href="#sidebarReminders" data-bs-toggle="collapse" role="button"
+                    aria-expanded="false" aria-controls="sidebarReminders">
+                    <span class="nav-icon">
+                        <iconify-icon icon="mdi:bell-outline"></iconify-icon>
+                    </span>
+                    <span class="nav-text"> Reminders</span>
+                </a>
+
+                <div class="collapse" id="sidebarReminders">
+                    <ul class="nav sub-navbar-nav">
+
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.reminders.create') }}">
+
+                                Create
+                            </a>
+                        </li>
+
+                        <li class="sub-nav-item">
+                            <a class="sub-nav-link" href="{{ route('admin.reminders.index') }}">
+
+                                View
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </li>
+
+            {{-- Notes --}}
+<li class="nav-item">
+    <a class="nav-link menu-arrow" href="#sidebarNotes" data-bs-toggle="collapse" role="button"
+        aria-expanded="false" aria-controls="sidebarNotes">
+        <span class="nav-icon">
+            <iconify-icon icon="mdi:note-outline"></iconify-icon>
+        </span>
+        <span class="nav-text"> Notes</span>
+    </a>
+
+    <div class="collapse" id="sidebarNotes">
+        <ul class="nav sub-navbar-nav">
+
+            <li class="sub-nav-item">
+                <a class="sub-nav-link" href="{{ route('admin.notes.create') }}">
+                    Create
+                </a>
+            </li>
+
+            <li class="sub-nav-item">
+                <a class="sub-nav-link" href="{{ route('admin.notes.index') }}">
+                    View
+                </a>
+            </li>
+
+        </ul>
+    </div>
+</li>
+
+            
+
             {{-- Profile --}}
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('admin.profile.edit') }}">
