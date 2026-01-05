@@ -16,6 +16,7 @@ class Reminder extends Model
         'user_id',
         'title',
         'description',
+        'attachments', // 👈 added
         'due_date',
         'remind_before_minutes',
         'status',
@@ -25,7 +26,9 @@ class Reminder extends Model
     protected $casts = [
         'due_date' => 'datetime',
         'is_notified' => 'boolean',
+        'attachments' => 'array', // 👈 VERY IMPORTANT
     ];
+
 
     /* =========================
      | Relationships
@@ -39,7 +42,7 @@ class Reminder extends Model
     public function notifications()
     {
         return $this->hasMany(AdminNotification::class, 'reference_id')
-                    ->where('type', 'reminder');
+            ->where('type', 'reminder');
     }
 
     /* =========================
@@ -59,21 +62,20 @@ class Reminder extends Model
     public function scopeOverdue($query)
     {
         return $query->where('due_date', '<', now())
-                     ->where('status', 'pending');
+            ->where('status', 'pending');
     }
 
     // App\Models\Reminder.php
-public function getComputedStatusAttribute()
-{
-    if ($this->status === 'completed') {
-        return 'completed';
+    public function getComputedStatusAttribute()
+    {
+        if ($this->status === 'completed') {
+            return 'completed';
+        }
+
+        if ($this->due_date < now()) {
+            return 'overdue';
+        }
+
+        return 'pending';
     }
-
-    if ($this->due_date < now()) {
-        return 'overdue';
-    }
-
-    return 'pending';
-}
-
 }

@@ -15,6 +15,11 @@ class Note extends Model
         'user_id',
         'title',
         'note',
+        'attachments', // 👈 added
+    ];
+
+    protected $casts = [
+        'attachments' => 'array', // 👈 important
     ];
 
     /* =========================
