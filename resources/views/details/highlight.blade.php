@@ -13,7 +13,7 @@
             text-align: center;
         }
 
-        
+
         .icon-btn {
             background: none;
             border: none;
@@ -95,8 +95,19 @@
 
         {{-- Highlight List --}}
         <div class="card">
+
             <div class="card-body">
                 <div class="table-responsive" id="highlightTable">
+
+                    <!-- Search Input -->
+                    <div class="row mb-3">
+                        <div class="col-md-12 d-flex justify-content-end">
+                            <input type="text" id="highlightSearch" class="form-control " style="width: 250px;"
+                                placeholder="Search highlights...">
+                        </div>
+                    </div>
+
+
                     <table class="table table-hover table-centered">
                         <thead class="table-light">
                             <tr>
@@ -123,28 +134,24 @@
                                         @endif
                                     </td>
                                     <td>{{ $highlight->updated_at->format('d M Y, h:i A') }}</td>
-                                   <td class="text-center">
+                                    <td class="text-center">
 
-    {{-- Edit Highlight --}}
-    <button type="button"
-        class="icon-btn text-primary edit-highlight"
-        data-id="{{ $highlight->id }}"
-        data-destination="{{ $highlight->destination_id }}"
-        data-place="{{ $highlight->place_name }}"
-        data-description="{{ $highlight->description }}"
-        title="Edit Highlight">
-        <i class="bi bi-pencil-square fs-5"></i>
-    </button>
+                                        {{-- Edit Highlight --}}
+                                        <button type="button" class="icon-btn text-primary edit-highlight"
+                                            data-id="{{ $highlight->id }}"
+                                            data-destination="{{ $highlight->destination_id }}"
+                                            data-place="{{ $highlight->place_name }}"
+                                            data-description="{{ $highlight->description }}" title="Edit Highlight">
+                                            <i class="bi bi-pencil-square fs-5"></i>
+                                        </button>
 
-    {{-- Delete Highlight --}}
-    <button type="button"
-        class="icon-btn text-danger delete-highlight"
-        data-id="{{ $highlight->id }}"
-        title="Delete Highlight">
-        <i class="bi bi-trash-fill fs-5"></i>
-    </button>
+                                        {{-- Delete Highlight --}}
+                                        <button type="button" class="icon-btn text-danger delete-highlight"
+                                            data-id="{{ $highlight->id }}" title="Delete Highlight">
+                                            <i class="bi bi-trash-fill fs-5"></i>
+                                        </button>
 
-</td>
+                                    </td>
 
                                 </tr>
                             @empty
@@ -323,6 +330,99 @@
                         }
                     })
                     .catch(err => console.error(err));
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+
+            document.querySelector("#highlightTable").addEventListener("click", function(e) {
+
+                const btn = e.target.closest(".delete-highlight");
+                if (!btn) return;
+
+                const id = btn.dataset.id;
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This highlight will be permanently deleted.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+
+                    if (!result.isConfirmed) return;
+
+                    fetch(`/admin/destination-highlights/${id}`, {
+                            method: "DELETE",
+                            headers: {
+                                "X-CSRF-TOKEN": document.querySelector('input[name="_token"]')
+                                    .value,
+                                "Accept": "application/json"
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+
+                                // Remove row
+                                const row = document.getElementById(`highlight-${id}`);
+                                if (row) row.remove();
+
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Deleted!',
+                                    text: data.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Failed',
+                                    text: data.message || 'Delete failed'
+                                });
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Something went wrong. Please try again.'
+                            });
+                        });
+
+                });
+
+            });
+
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById("highlightSearch");
+            const table = document.querySelector("#highlightTable table tbody");
+            const rows = table.querySelectorAll("tr");
+
+            searchInput.addEventListener("keyup", function() {
+                const filter = this.value.toLowerCase();
+
+                rows.forEach(row => {
+                    const destination = row.cells[0].textContent.toLowerCase();
+                    const placeName = row.cells[1].textContent.toLowerCase();
+
+                    if (destination.includes(filter) || placeName.includes(filter)) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
             });
         });
     </script>

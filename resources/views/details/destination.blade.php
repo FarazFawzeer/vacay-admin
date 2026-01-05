@@ -83,6 +83,13 @@
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive" id="destinationTable">
+                    <div class="row mb-3">
+                        <div class="col-md-12 d-flex justify-content-end">
+                            <input type="text" id="destinationSearch" class="form-control w-auto"
+                                placeholder="Search destinations..." style="width: 250px;">
+                        </div>
+                    </div>
+
                     <table class="table table-hover table-centered">
                         <thead class="table-light">
                             <tr>
@@ -211,7 +218,7 @@
                     body: formData,
                     headers: {
                         "X-CSRF-TOKEN": document.querySelector('input[name="_token"]').value,
-                                "Accept": "application/json"
+                        "Accept": "application/json"
                     }
                 })
                 .then(response => response.json())
@@ -400,5 +407,30 @@
                 })
                 .catch(err => console.error(err));
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById("destinationSearch");
+            searchInput.addEventListener("keyup", function() {
+                const filter = searchInput.value.toLowerCase();
+                const rows = document.querySelectorAll("#destinationTable tbody tr");
+
+                rows.forEach(row => {
+                    const name = row.cells[0].textContent.toLowerCase();
+                    let points = "";
+                    const pointsCell = row.cells[1];
+                    if (pointsCell) {
+                        points = pointsCell.textContent.toLowerCase();
+                    }
+
+                    if (name.includes(filter) || points.includes(filter)) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            });
+        });
     </script>
+
+
 @endsection
