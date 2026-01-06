@@ -78,10 +78,10 @@
                 </div>
 
                 {{-- Likes Count --}}
-                <div class="mb-3 col-md-3">
+                {{-- <div class="mb-3 col-md-3">
                     <label for="likes_count" class="form-label">Initial Likes</label>
                     <input type="number" name="likes_count" id="likes_count" class="form-control" value="0" min="0">
-                </div>
+                </div> --}}
 
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">

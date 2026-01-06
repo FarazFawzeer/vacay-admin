@@ -4,7 +4,6 @@
             <th>Title</th>
             <th>Type</th>
             <th>Posted On</th>
-            <th>Likes</th>
             <th>Hashtags</th>
             <th>Image</th>
             <th>Status</th>
@@ -17,11 +16,10 @@
                 <td>{{ $blog->title }}</td>
                 <td>{{ $blog->type ?? '-' }}</td>
                 <td>{{ \Carbon\Carbon::parse($blog->posted_time)->format('d M Y, h:i A') }}</td>
-                <td>{{ $blog->likes_count ?? 0 }}</td>
                 <td>
                     @if (!empty($blog->hashtags))
                         @foreach ($blog->hashtags as $tag)
-                            <span class="badge bg-light text-dark me-1">#{{ $tag }}</span>
+                            <span class="badge bg-light text-dark me-1">{{ $tag }}</span>
                         @endforeach
                     @else
                         -
@@ -29,7 +27,7 @@
                 </td>
                 <td>
                     @if (!empty($blog->image_post) && is_array($blog->image_post))
-                        <img src="{{ asset('storage/' . $blog->image_post[0]) }}" alt="Blog Image">
+                        <img src="{{ asset('admin/storage/' . $blog->image_post[0]) }}" alt="Blog Image">
                     @else
                         -
                     @endif

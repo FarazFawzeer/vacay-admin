@@ -76,7 +76,7 @@
                         <div class="d-flex flex-wrap gap-3">
                             @foreach ($images as $index => $img)
                                 <div class="position-relative border rounded p-1" style="width: 120px;">
-                                    <img src="{{ asset('storage/' . $img) }}" alt="Blog Image" class="img-thumbnail"
+                                    <img src="{{ asset('admin/storage/' . $img) }}" alt="Blog Image" class="img-thumbnail"
                                         style="width: 100%; height: 100px; object-fit: cover;">
                                     <button type="button"
                                         class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-image"
@@ -115,11 +115,11 @@
                 </div>
 
                 {{-- Likes Count --}}
-                <div class="mb-3 col-md-3">
+                {{-- <div class="mb-3 col-md-3">
                     <label for="likes_count" class="form-label">Likes Count</label>
                     <input type="number" name="likes_count" id="likes_count" class="form-control"
                         value="{{ old('likes_count', $blog->likes_count ?? 0) }}" min="0">
-                </div>
+                </div> --}}
 
                 {{-- Submit --}}
                 <div class="d-flex justify-content-end">
