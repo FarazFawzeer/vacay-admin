@@ -82,65 +82,18 @@
         {{-- Destination List --}}
         <div class="card">
             <div class="card-body">
-                <div class="table-responsive" id="destinationTable">
-                    <div class="row mb-3">
-                        <div class="col-md-12 d-flex justify-content-end">
-                            <input type="text" id="destinationSearch" class="form-control w-auto"
-                                placeholder="Search destinations..." style="width: 250px;">
-                        </div>
-                    </div>
+        {{-- Search bar (STATIC – never replaced) --}}
+<div class="row mb-3">
+    <div class="col-md-12 d-flex justify-content-end">
+        <input type="text" id="destinationSearch" class="form-control w-auto"
+            placeholder="Search destinations..." style="width: 250px;">
+    </div>
+</div>
 
-                    <table class="table table-hover table-centered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Name</th>
-                                <th>Program Points</th>
-                                <th>Updated At</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($destinations as $destination)
-                                <tr id="destination-{{ $destination->id }}">
-                                    <td>{{ $destination->name }}</td>
-                                    <td>
-                                        @if (is_array($destination->program_points))
-                                            <ul class="mb-0">
-                                                @foreach ($destination->program_points as $point)
-                                                    <li>{{ $point['point'] ?? '-' }}</li>
-                                                @endforeach
-                                            </ul>
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>{{ $destination->updated_at->format('d M Y, h:i A') }}</td>
-                                    <td>
-                                        <div class="d-flex gap-2">
-                                            <button type="button"
-                                                class="btn btn-sm p-0 text-info border-0 bg-transparent edit-destination"
-                                                data-id="{{ $destination->id }}" data-name="{{ $destination->name }}"
-                                                data-points='@json($destination->program_points)'>
-                                                <i class="fas fa-edit fa-lg"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                class="btn btn-sm p-0 text-danger border-0 bg-transparent delete-destination"
-                                                data-id="{{ $destination->id }}">
-                                                <i class="fas fa-trash-alt fa-lg"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-
-
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">No destinations found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+{{-- Table content (ONLY this will be replaced via AJAX) --}}
+<div class="table-responsive" id="destinationTable">
+    @include('details.partials.destination-table')
+</div>
 
                     <div class="modal fade" id="editDestinationModal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
@@ -177,10 +130,7 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Pagination -->
-                    <div class="d-flex justify-content-end mt-3">
-                        {{ $destinations->links() }}
-                    </div>
+                
                 </div>
             </div>
         </div>
@@ -408,29 +358,31 @@
                 .catch(err => console.error(err));
         });
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const searchInput = document.getElementById("destinationSearch");
-            searchInput.addEventListener("keyup", function() {
-                const filter = searchInput.value.toLowerCase();
-                const rows = document.querySelectorAll("#destinationTable tbody tr");
 
-                rows.forEach(row => {
-                    const name = row.cells[0].textContent.toLowerCase();
-                    let points = "";
-                    const pointsCell = row.cells[1];
-                    if (pointsCell) {
-                        points = pointsCell.textContent.toLowerCase();
-                    }
-
-                    if (name.includes(filter) || points.includes(filter)) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                });
-            });
-        });
     </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("destinationSearch");
+    let timeout = null;
+
+    searchInput.addEventListener("keyup", function () {
+        clearTimeout(timeout);
+
+        timeout = setTimeout(() => {
+            fetch(`{{ route('admin.destinations.index') }}?search=${encodeURIComponent(this.value)}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("destinationTable").innerHTML = html;
+            })
+            .catch(err => console.error(err));
+        }, 300); // debounce
+    });
+});
+</script>
 
 
 @endsection
