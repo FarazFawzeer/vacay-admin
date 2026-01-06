@@ -13,10 +13,27 @@ class DestinationHighlightController extends Controller
     /**
      * Display a listing of highlights.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $highlights = DestinationHighlight::with('destination')->latest()->paginate(10);
-        $destinations = Destination::all(); // for dropdown in create form
+        $search = $request->get('search');
+
+        $highlights = DestinationHighlight::with('destination')
+            ->when($search, function ($query) use ($search) {
+                $query->where('place_name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhereHas('destination', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            })
+            ->latest()
+            ->paginate(10);
+
+        $destinations = Destination::all();
+
+        // AJAX request → return only table HTML
+        if ($request->ajax()) {
+            return view('details.partials.highlight-table', compact('highlights'))->render();
+        }
 
         return view('details.highlight', compact('highlights', 'destinations'));
     }

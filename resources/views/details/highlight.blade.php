@@ -97,76 +97,23 @@
         <div class="card">
 
             <div class="card-body">
-                <div class="table-responsive" id="highlightTable">
+             
 
-                    <!-- Search Input -->
+                    {{-- Search bar (STATIC) --}}
                     <div class="row mb-3">
                         <div class="col-md-12 d-flex justify-content-end">
-                            <input type="text" id="highlightSearch" class="form-control " style="width: 250px;"
+                            <input type="text" id="highlightSearch" class="form-control" style="width: 250px;"
                                 placeholder="Search highlights...">
                         </div>
                     </div>
 
-
-                    <table class="table table-hover table-centered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Destination</th>
-                                <th>Place Name</th>
-                                <th>Description</th>
-                                <th>Image</th>
-                                <th>Updated At</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($highlights as $highlight)
-                                <tr id="highlight-{{ $highlight->id }}">
-                                    <td>{{ $highlight->destination->name ?? '-' }}</td>
-                                    <td>{{ $highlight->place_name }}</td>
-                                    <td>{{ $highlight->description ?? '-' }}</td>
-                                    <td>
-                                        @if ($highlight->image)
-                                            <img src="{{ asset('admin/storage/' . $highlight->image) }}"
-                                                alt="{{ $highlight->place_name }}" width="80">
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>{{ $highlight->updated_at->format('d M Y, h:i A') }}</td>
-                                    <td class="text-center">
-
-                                        {{-- Edit Highlight --}}
-                                        <button type="button" class="icon-btn text-primary edit-highlight"
-                                            data-id="{{ $highlight->id }}"
-                                            data-destination="{{ $highlight->destination_id }}"
-                                            data-place="{{ $highlight->place_name }}"
-                                            data-description="{{ $highlight->description }}" title="Edit Highlight">
-                                            <i class="bi bi-pencil-square fs-5"></i>
-                                        </button>
-
-                                        {{-- Delete Highlight --}}
-                                        <button type="button" class="icon-btn text-danger delete-highlight"
-                                            data-id="{{ $highlight->id }}" title="Delete Highlight">
-                                            <i class="bi bi-trash-fill fs-5"></i>
-                                        </button>
-
-                                    </td>
-
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">No highlights found.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-
-                    {{-- Pagination --}}
-                    <div class="d-flex justify-content-end mt-3">
-                        {{ $highlights->links() }}
+                    {{-- Table content (AJAX replaces ONLY this) --}}
+                    <div class="table-responsive" id="highlightTable">
+                        @include('details.partials.highlight-table')
                     </div>
-                </div>
+
+
+               
             </div>
 
             <!-- Edit Highlight Modal -->
@@ -403,26 +350,26 @@
 
         });
     </script>
-
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const searchInput = document.getElementById("highlightSearch");
-            const table = document.querySelector("#highlightTable table tbody");
-            const rows = table.querySelectorAll("tr");
+            let timeout = null;
 
             searchInput.addEventListener("keyup", function() {
-                const filter = this.value.toLowerCase();
+                clearTimeout(timeout);
 
-                rows.forEach(row => {
-                    const destination = row.cells[0].textContent.toLowerCase();
-                    const placeName = row.cells[1].textContent.toLowerCase();
-
-                    if (destination.includes(filter) || placeName.includes(filter)) {
-                        row.style.display = "";
-                    } else {
-                        row.style.display = "none";
-                    }
-                });
+                timeout = setTimeout(() => {
+                    fetch(`{{ route('admin.destination-highlights.index') }}?search=${encodeURIComponent(this.value)}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(res => res.text())
+                        .then(html => {
+                            document.getElementById("highlightTable").innerHTML = html;
+                        })
+                        .catch(err => console.error(err));
+                }, 300);
             });
         });
     </script>
