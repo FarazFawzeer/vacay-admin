@@ -110,6 +110,17 @@ class NoteController extends Controller
             ->with('success', 'Note updated!');
     }
 
+
+    public function show(Note $note)
+    {
+        // Optional security check (recommended)
+        if ($note->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access');
+        }
+
+        return view('notes.show', compact('note'));
+    }
+
     // Delete a note
     public function destroy(Note $note)
     {

@@ -28,13 +28,22 @@
                 </td>
                 <td>{{ $testimonial->status ? 'Active' : 'Inactive' }}</td>
                 <td class="text-center">
+
+                    <a href="{{ route('admin.testimonials.show', $testimonial->id) }}" class="icon-btn text-info"
+                        title="View Testimonial">
+                        <i class="bi bi-eye-fill fs-5"></i>
+                    </a>
+
                     {{-- Edit --}}
-                    <a href="{{ route('admin.testimonials.edit', $testimonial->id) }}" class="icon-btn text-primary" title="Edit">
+                    <a href="{{ route('admin.testimonials.edit', $testimonial->id) }}" class="icon-btn text-primary"
+                        title="Edit">
                         <i class="bi bi-pencil-square fs-5"></i>
                     </a>
 
                     {{-- Toggle Status --}}
-                    <button type="button" data-id="{{ $testimonial->id }}" class="icon-btn {{ $testimonial->status ? 'text-success' : 'text-warning' }} toggle-status" data-status="{{ $testimonial->status }}">
+                    <button type="button" data-id="{{ $testimonial->id }}"
+                        class="icon-btn {{ $testimonial->status ? 'text-success' : 'text-warning' }} toggle-status"
+                        data-status="{{ $testimonial->status }}">
                         @if ($testimonial->status)
                             <i class="bi bi-check-circle-fill fs-5"></i>
                         @else
@@ -43,7 +52,8 @@
                     </button>
 
                     {{-- Delete --}}
-                    <button type="button" data-id="{{ $testimonial->id }}" class="icon-btn text-danger delete-testimonial" title="Delete">
+                    <button type="button" data-id="{{ $testimonial->id }}"
+                        class="icon-btn text-danger delete-testimonial" title="Delete">
                         <i class="bi bi-trash-fill fs-5"></i>
                     </button>
                 </td>

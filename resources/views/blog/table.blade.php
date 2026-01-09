@@ -34,6 +34,12 @@
                 </td>
                 <td>{{ $blog->status ? 'Published' : 'Unpublished' }}</td>
                 <td class="text-center">
+
+                    <a href="{{ route('admin.blogs.show', $blog->id) }}"
+   class="icon-btn text-info" title="View Blog">
+    <i class="bi bi-eye-fill fs-5"></i>
+</a>
+
                    
                     {{-- Edit --}}
                     <a href="{{ route('admin.blogs.edit', $blog->id) }}" class="icon-btn text-primary" title="Edit Blog">

@@ -2,8 +2,8 @@
     <table class="table table-hover table-centered align-middle">
         <thead class="table-light">
             <tr>
-                <th>From → To</th>
-                <th>Visa Type</th>
+                <th>From Country</th>
+                <th>To Country</th>
                 <th>Categories</th>
                 <th>Agent</th>
                 <th>Action</th>
@@ -13,7 +13,8 @@
             @forelse($visas as $visa)
                 <tr>
                     {{-- From → To --}}
-                    <td>{{ $visa->from_country }} → {{ $visa->to_country }}</td>
+                    <td>{{ $visa->from_country }}</td>
+                    <td>{{ $visa->to_country }}</td>
 
                     {{-- Visa Type --}}
                     <td>
@@ -82,13 +83,13 @@
 
                         <!-- Delete Icon -->
                         <form action="{{ route('admin.visa.destroy', $visa->id) }}" method="POST"
-    class="d-inline-block deleteVisaForm" title="Delete">
-    @csrf
-    @method('DELETE')
-    <button type="submit" class="icon-btn text-danger">
-        <i class="bi bi-trash-fill fs-5"></i>
-    </button>
-</form>
+                            class="d-inline-block deleteVisaForm" title="Delete">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="icon-btn text-danger">
+                                <i class="bi bi-trash-fill fs-5"></i>
+                            </button>
+                        </form>
 
                     </td>
 

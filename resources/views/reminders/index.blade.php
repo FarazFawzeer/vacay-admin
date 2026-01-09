@@ -48,7 +48,8 @@
                 </div>
             @endif
             {{-- 🔍 Auto Filters --}}
-            <form id="filterForm" method="GET" action="{{ route('admin.reminders.index') }}" class="row g-2 mb-3 justify-content-end">
+            <form id="filterForm" method="GET" action="{{ route('admin.reminders.index') }}"
+                class="row g-2 mb-3 justify-content-end">
 
                 <div class="col-md-4">
                     <input type="text" name="search" id="searchInput" class="form-control"
@@ -150,6 +151,12 @@
                                 </td>
 
                                 <td class="text-center">
+
+                                    <a href="{{ route('admin.reminders.show', $reminder) }}" class="icon-btn text-info"
+                                        title="View">
+                                        <i class="bi bi-eye-fill fs-5"></i>
+                                    </a>
+
 
                                     {{-- Edit --}}
                                     <a href="{{ route('admin.reminders.edit', $reminder) }}" class="icon-btn text-primary"

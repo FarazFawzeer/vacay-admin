@@ -121,6 +121,11 @@ class TestimonialController extends Controller
     }
 
 
+    public function show(Testimonial $testimonial)
+    {
+        return view('testimonials.show', compact('testimonial'));
+    }
+
     /**
      * Delete a testimonial (AJAX or standard).
      */

@@ -159,6 +159,14 @@ class ReminderController extends Controller
         return back()->with('success', 'Reminder marked as completed.');
     }
 
+
+    public function show(Reminder $reminder)
+    {
+        $this->authorizeReminder($reminder);
+
+        return view('reminders.show', compact('reminder'));
+    }
+
     /**
      * Delete reminder
      */

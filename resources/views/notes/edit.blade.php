@@ -64,11 +64,11 @@
             </div>
 
             <div class="text-end">
-                <a href="{{ route('admin.notes.index') }}" class="btn btn-secondary">
+                <a href="{{ route('admin.notes.index') }}" class="btn btn-secondary" style="width: 120px;">
                     Cancel
                 </a>
-                <button type="submit" class="btn btn-primary">
-                    Update Note
+                <button type="submit" class="btn btn-primary" style="width: 120px;">
+                    Update 
                 </button>
             </div>
 
