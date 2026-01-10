@@ -76,7 +76,7 @@
                             @foreach ($packages as $package)
                                 <option value="{{ $package->id }}" data-category="{{ $package->tour_category }}"
                                     data-price="{{ $package->price }}" data-tour-ref="{{ $package->tour_ref_no }}">
-                                    {{ $package->heading }}
+                                 {{ $package->tour_ref_no }} - {{ $package->heading }}
                                 </option>
                             @endforeach
                         </select>
