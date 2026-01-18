@@ -4,11 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 
 class Package extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'heading',
@@ -78,9 +80,51 @@ class Package extends Model
 
 
     public function packageInclusions()
-{
-    return $this->hasMany(PackageInclusion::class, 'package_id');
-}
+    {
+        return $this->hasMany(PackageInclusion::class, 'package_id');
+    }
 
 
+    protected static function booted()
+    {
+        static::deleting(function ($package) {
+
+            // ================= Tour Summaries =================
+            $package->tourSummaries()->delete();
+
+            // ================= Detail Itineraries + Highlights =================
+            foreach ($package->detailItineraries as $itinerary) {
+
+                // Delete itinerary picture
+                if ($itinerary->pictures) {
+                    Storage::disk('public')->delete($itinerary->pictures);
+                }
+
+                // Delete highlights
+                foreach ($itinerary->highlights as $highlight) {
+                    if ($highlight->images) {
+                        Storage::disk('public')->delete($highlight->images);
+                    }
+                    $highlight->delete();
+                }
+
+                $itinerary->delete();
+            }
+
+            // ================= Package Vehicles =================
+            $package->packageVehicles()->delete();
+
+            // ================= Package Inclusions =================
+            $package->packageInclusions()->delete();
+
+            // ================= Package Images =================
+            if ($package->picture) {
+                Storage::disk('public')->delete($package->picture);
+            }
+
+            if ($package->map_image) {
+                Storage::disk('public')->delete($package->map_image);
+            }
+        });
+    }
 }

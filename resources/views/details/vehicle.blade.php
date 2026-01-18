@@ -446,7 +446,7 @@
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Vehicle Number</label>
                                     <input type="text" name="vehicle_number" id="edit_vehicle_number"
-                                        class="form-control" placeholder="Enter Vehicle Number">
+                                        class="form-control" placeholder="Enter Vehicle Number" required>
                                 </div>
                                 {{-- Model --}}
                                 <div class="col-md-6 mb-3">
@@ -560,7 +560,7 @@
                                 {{-- Agent --}}
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Agent</label>
-                                    <select name="agent_id" id="edit_agent_id" class="form-select" required>
+                                    <select name="agent_id" id="edit_agent_id" class="form-select" >
                                         <option value="">Select Agent</option>
                                         @foreach ($agents as $agent)
                                             <option value="{{ $agent->id }}">{{ $agent->company_name }} -
