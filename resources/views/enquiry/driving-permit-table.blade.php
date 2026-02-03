@@ -37,8 +37,7 @@
                     <td>
                         @if ($request->license_back)
                             <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal"
-                                data-src="{{ rtrim(config('app.fe_domain'), '/') }}/storage/{{ ltrim($request->license_back, '/') }}"
->
+                                data-src="{{ rtrim(config('app.fe_domain'), '/') }}/storage/{{ ltrim($request->license_back, '/') }}">
                                 View
                             </a>
                         @else
@@ -56,7 +55,7 @@
                             N/A
                         @endif
                     </td>
-<td>{{ $request->created_at->format('d M Y') }}</td>
+                    <td>{{ $request->created_at->format('d M Y') }}</td>
                     <td>
                         <select class="form-select form-select-sm changeStatus" data-id="{{ $request->id }}">
                             <option value="pending" {{ $request->status == 'pending' ? 'selected' : '' }}>Pending
@@ -66,7 +65,7 @@
                             </option>
                         </select>
                     </td>
-                             <td class="text-center">
+                    <td class="text-center">
                         <button type="button" class="icon-btn text-danger delete-row" data-id="{{ $request->id }}"
                             data-url="{{ route('admin.enquiry.drivingPermit.delete', $request->id) }}" title="Delete">
                             <i class="fa fa-trash fa-lg"></i>

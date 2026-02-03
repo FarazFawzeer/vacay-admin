@@ -14,6 +14,17 @@
                 </div>
             @endif
 
+            @if ($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
             <form action="{{ route('admin.messages.send') }}" method="POST">
                 @csrf
 
@@ -73,12 +84,27 @@
                 <h6 class="mb-3">Email Content</h6>
 
                 <div class="row">
+                    {{-- ✅ NEW: FROM EMAIL --}}
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">From Email</label>
+                        <select class="form-select" name="sender_id" required>
+                            @foreach ($senders as $sender)
+                                <option value="{{ $sender->id }}">
+                                    {{ $sender->name ? $sender->name . ' - ' : '' }}{{ $sender->email }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted">Choose which mailbox should send this email.</small>
+                    </div>
+
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Email Subject</label>
                         <input type="text" name="subject" class="form-control"
                             placeholder="Example: Booking Confirmation / Promotion" required>
                     </div>
+                </div>
 
+                <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Greeting Line</label>
                         <input type="text" name="greeting" class="form-control"
@@ -94,10 +120,10 @@
 
                 <div class="mb-3">
                     <label class="form-label">Email Footer</label>
-                    <textarea name="footer" rows="3" class="form-control" placeholder="Best regards, Vacay Guider Team">Best regards,
+                    <textarea name="footer" rows="3" class="form-control"
+                        placeholder="Best regards, Vacay Guider Team">Best regards,
 VacayGuider Team</textarea>
                 </div>
-
 
                 {{-- ================= ACTION ================= --}}
                 <div class="text-end">
@@ -112,8 +138,8 @@ VacayGuider Team</textarea>
                             Sending...
                         </span>
                     </button>
-
                 </div>
+
                 <div id="loadingOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-none"
                     style="background: rgba(255,255,255,0.7); z-index: 1050;">
                     <div class="d-flex justify-content-center align-items-center h-100">
@@ -170,7 +196,7 @@ VacayGuider Team</textarea>
 
                 if (sendMode.value === 'selected') {
                     selectedCustomersSection.classList.remove('d-none');
-                    loadAllCustomers(); // load all customers into searchable select
+                    loadAllCustomers();
                 }
             }
 
@@ -180,7 +206,6 @@ VacayGuider Team</textarea>
             filterType.addEventListener('change', loadFilteredCustomers);
             filterSubType.addEventListener('change', loadFilteredCustomers);
 
-            // Load filtered customers via AJAX
             function loadFilteredCustomers() {
                 const type = filterType.value;
                 const subType = filterSubType.value;
@@ -221,7 +246,6 @@ VacayGuider Team</textarea>
                     });
             }
 
-            // Load all customers for "Selected Customers"
             function loadAllCustomers() {
                 selectedChoices.clearStore();
                 const allCustomers = @json($customers);
@@ -241,14 +265,9 @@ VacayGuider Team</textarea>
         const loadingOverlay = document.getElementById('loadingOverlay');
 
         form.addEventListener('submit', function() {
-            // Disable button
             sendBtn.disabled = true;
-
-            // Switch text
             sendBtnText.classList.add('d-none');
             sendBtnLoading.classList.remove('d-none');
-
-            // Show overlay
             loadingOverlay.classList.remove('d-none');
         });
     </script>

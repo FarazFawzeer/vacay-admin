@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use App\Models\EmailSender;
 use App\Mail\CustomNotificationMail;
 use Illuminate\Support\Facades\Mail;
 
@@ -29,16 +30,19 @@ class MessageController extends Controller
             ->distinct()
             ->pluck('sub_type');
 
-        return view('messages.create', compact('customers', 'types', 'subTypes'));
-    }
+        // ✅ NEW: FROM EMAIL LIST
+        $senders = EmailSender::where('status', 1)
+            ->orderBy('email')
+            ->get(['id', 'name', 'email']);
 
+        return view('messages.create', compact('customers', 'types', 'subTypes', 'senders'));
+    }
 
     public function filterCustomers(Request $request)
     {
         $query = Customer::whereNotNull('email')
             ->where('email', '!=', '');
 
-        // Apply filters
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
@@ -52,10 +56,10 @@ class MessageController extends Controller
         return response()->json($customers);
     }
 
-
     public function send(Request $request)
     {
         $request->validate([
+            'sender_id' => 'required|exists:email_senders,id', // ✅ NEW
             'send_mode' => 'required|in:all,filter,selected',
             'customer_ids' => 'nullable|array',
             'type' => 'nullable|string',
@@ -66,44 +70,32 @@ class MessageController extends Controller
             'footer' => 'nullable|string',
         ]);
 
+        // ✅ get selected sender (only active)
+        $sender = EmailSender::where('status', 1)->findOrFail($request->sender_id);
+
         $customers = collect();
 
-        /**
-         * 1️⃣ ALL CUSTOMERS
-         */
         if ($request->send_mode === 'all') {
             $customers = Customer::withEmail()->get();
-        }
-
-        /**
-         * 2️⃣ FILTER MODE
-         */
-        elseif ($request->send_mode === 'filter') {
+        } elseif ($request->send_mode === 'filter') {
 
             $query = Customer::withEmail();
 
-            // Filter by type
             if ($request->filled('type')) {
                 $query->where('type', $request->type);
             }
 
-            // Filter by sub type
             if ($request->filled('sub_type')) {
                 $query->where('sub_type', $request->sub_type);
             }
 
-            // 🔑 If specific customers selected → override filters
             if (!empty($request->customer_ids)) {
                 $query->whereIn('id', $request->customer_ids);
             }
 
             $customers = $query->get();
-        }
+        } elseif ($request->send_mode === 'selected') {
 
-        /**
-         * 3️⃣ SELECTED MODE
-         */
-        elseif ($request->send_mode === 'selected') {
             if (empty($request->customer_ids)) {
                 return back()->withErrors(['customer_ids' => 'Please select at least one customer']);
             }
@@ -113,28 +105,21 @@ class MessageController extends Controller
                 ->get();
         }
 
-        /**
-         * ❌ Safety check
-         */
         if ($customers->isEmpty()) {
             return back()->withErrors(['customers' => 'No customers found for the selected criteria']);
         }
 
-        /**
-         * 📧 Queue Emails
-         */
         foreach ($customers as $customer) {
             Mail::to($customer->email)->send(
-                new CustomNotificationMail(
+                (new CustomNotificationMail(
                     $request->subject,
                     $request->greeting,
                     $request->message,
                     $request->footer
-                )
+                ))->from($sender->email, $sender->name ?? config('mail.from.name'))
             );
         }
 
-
-        return redirect()->back()->with('success', 'Emails queued successfully!');
+        return redirect()->back()->with('success', 'Emails sent successfully!');
     }
 }
