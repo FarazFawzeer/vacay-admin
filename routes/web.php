@@ -172,6 +172,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::prefix('enquiry')->name('enquiry.')->group(function () {
         Route::get('tours', [EnquiryController::class, 'tours'])->name('tours');
         Route::post('{id}/status', [EnquiryController::class, 'enquiryupdateStatus'])->name('enquiryupdateStatus');
+        Route::delete('{id}', [EnquiryController::class, 'destroy'])
+    ->name('destroy');
         Route::get('customer-tour', [EnquiryController::class, 'customerTour'])->name('customTour');
         Route::post('/custom-tour/update-status', [EnquiryController::class, 'updateCustomTourStatus'])->name('customTour.updateStatus');
         Route::get('rent-vehicle', [EnquiryController::class, 'rentVehicle'])->name('rentVehicle');
@@ -186,6 +188,27 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
         Route::post('contact-us/update-status', [EnquiryController::class, 'contactInforUpdateStatus'])->name('contactUs.updateStatus');
         Route::get('chatbot', [EnquiryController::class, 'chatbot'])->name('chatbot');
         Route::post('chatbot/update-status', [EnquiryController::class, 'chatbotUpdateStatus'])->name('chatbot.updateStatus');
+
+         // ✅ Custom Tour
+        Route::delete('customer-tour/{id}', [EnquiryController::class, 'deleteCustomTour'])->name('customTour.delete');
+
+        // ✅ Rent Vehicle
+        Route::delete('rent-vehicle/{id}', [EnquiryController::class, 'deleteRentVehicle'])->name('rentVehicle.delete');
+
+        // ✅ Transport
+        Route::delete('transport/{id}', [EnquiryController::class, 'deleteTransport'])->name('transport.delete');
+
+        // ✅ Air Ticket
+        Route::delete('air-ticket/{id}', [EnquiryController::class, 'deleteAirTicket'])->name('airTicket.delete');
+
+        // ✅ Driving Permit
+        Route::delete('driving-permit/{id}', [EnquiryController::class, 'deleteDrivingPermit'])->name('drivingPermit.delete');
+
+        // ✅ Contact Us
+        Route::delete('contact-us/{id}', [EnquiryController::class, 'deleteContact'])->name('contactUs.delete');
+
+        // ✅ Chatbot
+        Route::delete('chatbot/{id}', [EnquiryController::class, 'deleteChatbot'])->name('chatbot.delete');
     });
     //destination highlights
     Route::resource('destination-highlights', DestinationHighlightController::class)->only([

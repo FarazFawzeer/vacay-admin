@@ -45,6 +45,15 @@ class EnquiryController extends Controller
     }
 
 
+    public function destroy($id)
+    {
+        $booking = PackageBooking::findOrFail($id);
+        $booking->delete();
+
+        return response()->json(['success' => true]);
+    }
+
+
     public function customerTour(Request $request)
     {
         $query = CustomTourRequest::query();
@@ -236,7 +245,7 @@ class EnquiryController extends Controller
         $query = ChatbotLead::query();
 
         if ($request->name) {
-            $query->where('name', 'like', '%'.$request->name.'%');
+            $query->where('name', 'like', '%' . $request->name . '%');
         }
 
         $leads = $query->orderBy('id', 'DESC')->paginate(10);
@@ -250,7 +259,7 @@ class EnquiryController extends Controller
 
     public function chatbotUpdateStatus(Request $request)
     {
-        
+
         $lead = ChatbotLead::find($request->id);
 
         if (!$lead) {
@@ -260,6 +269,48 @@ class EnquiryController extends Controller
         $lead->status = $request->status;
         $lead->save();
 
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteCustomTour($id)
+    {
+        CustomTourRequest::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteRentVehicle($id)
+    {
+        VehicleBooking::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteTransport($id)
+    {
+        TransportationBooking::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteAirTicket($id)
+    {
+        AirlineBooking::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteDrivingPermit($id)
+    {
+        DrivingPermitRequest::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteContact($id)
+    {
+        ContactInfor::findOrFail($id)->delete();
+        return response()->json(['success' => true]);
+    }
+
+    public function deleteChatbot($id)
+    {
+        ChatbotLead::findOrFail($id)->delete();
         return response()->json(['success' => true]);
     }
 }

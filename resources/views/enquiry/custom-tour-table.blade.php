@@ -8,6 +8,8 @@
             <th>Travelers</th>
             <th>Message</th>
             <th>Status</th>
+            <th>Action</th>
+            <th>Date</th>
         </tr>
     </thead>
 
@@ -20,6 +22,7 @@
                 <td>{{ $req->preferred_dates }}</td>
                 <td>{{ $req->travelers }}</td>
                 <td>{{ $req->message }}</td>
+                <td>{{ $req->created_at->format('d M Y') }}</td>
 
                 <td>
                     <select class="form-select form-select-sm changeStatus" data-id="{{ $req->id }}">
@@ -28,6 +31,13 @@
                         <option value="completed" {{ $req->status == 'completed' ? 'selected' : '' }}>Completed</option>
                     </select>
                 </td>
+                     <td class="text-center">
+                        <button type="button" class="icon-btn text-danger delete-row" data-id="{{ $req->id }}"
+                            data-url="{{ route('admin.enquiry.customTour.delete', $req->id) }}" title="Delete">
+                            <i class="fa fa-trash fa-lg"></i>
+                        </button>
+                    </td>
+
             </tr>
         @empty
             <tr>

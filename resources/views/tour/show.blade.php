@@ -1309,7 +1309,7 @@
 
                             @php $programs = explode('|', $itinerary->program); @endphp
                             <div class="program-section">
-                                <h4>Day {{ $index + 1 }} Program</h4>
+                                <h4>Day {{ $itinerary->day ?? '-' }} Program</h4>
                                 <div class="program-box">
                                     @foreach (collect($itinerary->program_points)->take(4) as $point)
                                         <div class="program-point">{{ trim($point) }}</div>

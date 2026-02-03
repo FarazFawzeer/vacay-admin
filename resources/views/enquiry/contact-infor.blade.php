@@ -97,4 +97,54 @@
             });
         });
     </script>
+        <script>
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.delete-row');
+            if (!btn) return;
+
+            const url = btn.dataset.url;
+            const row = btn.closest('tr'); // ✅ current row
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This record will be permanently deleted!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+
+                if (!result.isConfirmed) return;
+
+                fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+
+                            // ✅ Remove row immediately
+                            if (row) row.remove();
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted!',
+                                text: 'Deleted successfully.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+
+                        } else {
+                            Swal.fire('Error', 'Failed to delete.', 'error');
+                        }
+                    })
+                    .catch(() => Swal.fire('Error', 'Something went wrong.', 'error'));
+            });
+        });
+    </script>
 @endsection

@@ -14,7 +14,9 @@
             <th>Service Type</th>
             <th>Hour Count</th>
             <th>Message</th>
+            <th>Date</th>
             <th>Status</th>
+            <th>Action</th>
         </tr>
     </thead>
 
@@ -34,6 +36,7 @@
                 <td>{{ ucfirst($req->service_type) }}</td>
                 <td>{{ $req->hour_count }}</td>
                 <td>{{ $req->message }}</td>
+                <td>{{ $req->created_at->format('d M Y') }}</td>
                 <td>
                     <select class="form-select form-select-sm changeStatus" data-id="{{ $req->id }}">
                         <option value="pending" {{ $req->status=='pending'?'selected':'' }}>Pending</option>
@@ -42,6 +45,11 @@
                         <option value="cancelled" {{ $req->status=='cancelled'?'selected':'' }}>Cancelled</option>
                     </select>
                 </td>
+                <td class="text-center">
+                    <button type="button" class="icon-btn text-danger delete-row" data-id="{{ $req->id }}"
+                        data-url="{{ route('admin.enquiry.transport.delete', $req->id) }}" title="Delete">
+                        <i class="fa fa-trash fa-lg"></i>
+                    </button>
             </tr>
         @empty
             <tr>

@@ -8,7 +8,9 @@
             <th>Start</th>
             <th>End</th>
             <th>Message</th>
+            <th>Date</th>
             <th>Status</th>
+            <th>Action</th>
         </tr>
     </thead>
 
@@ -22,13 +24,20 @@
                 <td>{{ $item->start_date?->format('Y-m-d') }}</td>
                 <td>{{ $item->end_date?->format('Y-m-d') }}</td>
                 <td>{{ $item->message }}</td>
-
+                <td>{{ $item->created_at->format('d M Y') }}</td>
                 <td>
                     <select class="form-select form-select-sm changeStatus" data-id="{{ $item->id }}">
-                        <option value="pending" {{ $item->status=='pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="viewed" {{ $item->status=='viewed' ? 'selected' : '' }}>Viewed</option>
-                        <option value="completed" {{ $item->status=='completed' ? 'selected' : '' }}>Completed</option>
+                        <option value="pending" {{ $item->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="viewed" {{ $item->status == 'viewed' ? 'selected' : '' }}>Viewed</option>
+                        <option value="completed" {{ $item->status == 'completed' ? 'selected' : '' }}>Completed
+                        </option>
                     </select>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="icon-btn text-danger delete-row" data-id="{{ $item->id }}"
+                        data-url="{{ route('admin.enquiry.rentVehicle.delete', $item->id) }}" title="Delete">
+                        <i class="fa fa-trash fa-lg"></i>
+                    </button>
                 </td>
             </tr>
         @empty
