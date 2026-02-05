@@ -12,24 +12,31 @@ class Reminder extends Model
 
     protected $table = 'reminders';
 
-    protected $fillable = [
-        'user_id',
-        'title',
-        'description',
-        'attachments', // 👈 added
-        'due_date',
-        'remind_before_minutes',
-        'status',
-        'is_notified',
-    ];
+   protected $fillable = [
+    'user_id',
+    'created_by',
+    'is_global',
+    'title',
+    'description',
+    'attachments',
+    'due_date',
+    'remind_before_minutes',
+    'status',
+    'is_notified',
+];
 
-    protected $casts = [
-        'due_date' => 'datetime',
-        'is_notified' => 'boolean',
-        'attachments' => 'array', // 👈 VERY IMPORTANT
-    ];
+protected $casts = [
+    'due_date' => 'datetime',
+    'is_notified' => 'boolean',
+    'attachments' => 'array',
+    'is_global' => 'boolean',
+];
 
 
+public function creator()
+{
+    return $this->belongsTo(User::class, 'created_by');
+}
     /* =========================
      | Relationships
      ========================= */

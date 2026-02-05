@@ -76,8 +76,9 @@
                     <div class="col-md-4 mb-3">
                         <label for="tour_ref_no" class="form-label">Reference No</label>
                         <input type="text" name="tour_ref_no" id="tour_ref_no" class="form-control"
-                            placeholder="e.g., SLT-001" required>
+                            value="{{ $nextTourRefNo }}" readonly>
                     </div>
+
                 </div>
 
                 {{-- Main & Summary Description --}}
@@ -563,7 +564,7 @@
             </div>
             <div class="col-md-3">
                 ${h.image ? `<input type="hidden" name="itineraries[${index}][highlights][${i}][images]" value="${h.image}">
-                                                                                                                             <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
+                                                                                                                                 <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">` : ''}
             </div>
             <div class="col-md-1 d-flex align-items-center">
                 <button type="button" class="btn btn-sm btn-danger" onclick="removeElement('${hid}')">X</button>

@@ -4,17 +4,23 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reminder;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ReminderController extends Controller
 {
     /**
-     * List all reminders
+     * List reminders visible to current user (Global + My reminders)
      */
     public function index(Request $request)
     {
-        $query = Reminder::query();
+        $query = Reminder::query()
+            ->where(function ($q) {
+                $q->where('is_global', 1)
+                    ->orWhere('user_id', Auth::id());
+            });
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
@@ -37,7 +43,6 @@ class ReminderController extends Controller
         return view('reminders.index', compact('reminders'));
     }
 
-
     /**
      * Show create reminder form
      */
@@ -46,13 +51,12 @@ class ReminderController extends Controller
         return view('reminders.create');
     }
 
-    /**
-     * Store reminder
-     */
 
     public function store(Request $request)
     {
         $request->validate([
+            'audience' => 'required|in:global,me',
+
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date' => 'required|date|after_or_equal:now',
@@ -60,19 +64,23 @@ class ReminderController extends Controller
         ]);
 
         $attachments = [];
-
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
                 $attachments[] = $file->store('reminders', 'public');
             }
         }
 
+        $isGlobal = $request->audience === 'global';
+
         Reminder::create([
-            'user_id' => Auth::id(),
+            'created_by' => Auth::id(),
+            'is_global'  => $isGlobal ? 1 : 0,
+            'user_id'    => $isGlobal ? null : Auth::id(), // ✅ only me
+
             'title' => $request->title,
             'description' => $request->description,
             'due_date' => $request->due_date,
-            'attachments' => $attachments, // 👈 JSON stored
+            'attachments' => $attachments,
             'status' => 'pending',
             'is_notified' => 0,
         ]);
@@ -82,13 +90,13 @@ class ReminderController extends Controller
             ->with('success', 'Reminder created successfully.');
     }
 
+
     /**
      * Show edit form
      */
     public function edit(Reminder $reminder)
     {
         $this->authorizeReminder($reminder);
-
         return view('reminders.edit', compact('reminder'));
     }
 
@@ -113,10 +121,7 @@ class ReminderController extends Controller
         // Remove selected attachments
         if ($request->filled('remove_attachments')) {
             foreach ($request->remove_attachments as $removeFile) {
-                // Delete file from storage
-                \Storage::disk('public')->delete($removeFile);
-
-                // Remove from array
+                Storage::disk('public')->delete($removeFile);
                 $attachments = array_values(array_diff($attachments, [$removeFile]));
             }
         }
@@ -144,7 +149,6 @@ class ReminderController extends Controller
             ->with('success', 'Reminder updated successfully.');
     }
 
-
     /**
      * Mark reminder as completed (quick action)
      */
@@ -158,7 +162,6 @@ class ReminderController extends Controller
 
         return back()->with('success', 'Reminder marked as completed.');
     }
-
 
     public function show(Reminder $reminder)
     {
@@ -174,6 +177,13 @@ class ReminderController extends Controller
     {
         $this->authorizeReminder($reminder);
 
+        // Optional: delete attachments from disk too
+        if (!empty($reminder->attachments)) {
+            foreach ($reminder->attachments as $file) {
+                Storage::disk('public')->delete($file);
+            }
+        }
+
         $reminder->delete();
 
         return back()->with('success', 'Reminder deleted successfully.');
@@ -181,10 +191,21 @@ class ReminderController extends Controller
 
     /**
      * Authorization check
+     * - Global reminder => only creator can edit/delete/view
+     * - User reminder => only assigned user can edit/delete/view
      */
     private function authorizeReminder(Reminder $reminder)
     {
-        if ($reminder->user_id !== Auth::id()) {
+        $uid = Auth::id();
+
+        if ($reminder->is_global) {
+            if ($reminder->created_by !== $uid) {
+                abort(403, 'Unauthorized access');
+            }
+            return;
+        }
+
+        if ($reminder->user_id !== $uid) {
             abort(403, 'Unauthorized access');
         }
     }

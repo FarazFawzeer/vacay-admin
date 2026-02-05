@@ -81,6 +81,7 @@
                         <tr>
                             <th>Title</th>
                             <th>Description</th>
+                            <th>Audience</th>
                             <th>Due Date</th>
                             <th>Attachments</th>
                             <th>Status</th>
@@ -99,6 +100,13 @@
 
                                 <td>
                                     {{ $reminder->description ?? '-' }}
+                                </td>
+                                <td>
+                                    @if ($reminder->is_global)
+                                        <span class="badge bg-info">General</span>
+                                    @else
+                                        <span class="badge bg-secondary">Only Me</span>
+                                    @endif
                                 </td>
 
                                 <td>
@@ -149,43 +157,52 @@
                                         <span class="badge bg-warning">Pending</span>
                                     @endif
                                 </td>
-
                                 <td class="text-center">
 
-                                    <a href="{{ route('admin.reminders.show', $reminder) }}" class="icon-btn text-info"
-                                        title="View">
-                                        <i class="bi bi-eye-fill fs-5"></i>
-                                    </a>
 
+                                    @php
+                                        $canManage =
+                                            ($reminder->is_global && $reminder->created_by == auth()->id()) ||
+                                            (!$reminder->is_global && $reminder->user_id == auth()->id());
+                                    @endphp
 
-                                    {{-- Edit --}}
-                                    <a href="{{ route('admin.reminders.edit', $reminder) }}" class="icon-btn text-primary"
-                                        title="Edit">
-                                        <i class="bi bi-pencil-square fs-5"></i>
-                                    </a>
+                                    @if ($canManage)
+                                        {{-- View: allow everyone to view global, and owner to view personal --}}
+                                        <a href="{{ route('admin.reminders.show', $reminder) }}" class="icon-btn text-info"
+                                            title="View">
+                                            <i class="bi bi-eye-fill fs-5"></i>
+                                        </a>
 
-                                    {{-- Complete --}}
-                                    @if ($reminder->status !== 'completed')
-                                        <form action="{{ route('admin.reminders.complete', $reminder) }}" method="POST"
-                                            class="d-inline">
+                                        {{-- Edit --}}
+                                        <a href="{{ route('admin.reminders.edit', $reminder) }}"
+                                            class="icon-btn text-primary" title="Edit">
+                                            <i class="bi bi-pencil-square fs-5"></i>
+                                        </a>
+
+                                        {{-- Complete --}}
+                                        @if ($reminder->status !== 'completed')
+                                            <form action="{{ route('admin.reminders.complete', $reminder) }}"
+                                                method="POST" class="d-inline">
+                                                @csrf
+                                                <button class="icon-btn text-success" title="Mark Complete">
+                                                    <i class="bi bi-check-circle-fill fs-5"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        {{-- Delete --}}
+                                        <form action="{{ route('admin.reminders.destroy', $reminder) }}" method="POST"
+                                            class="d-inline" onsubmit="return confirm('Delete this reminder?')">
                                             @csrf
-                                            <button class="icon-btn text-success" title="Mark Complete">
-                                                <i class="bi bi-check-circle-fill fs-5"></i>
+                                            @method('DELETE')
+                                            <button class="icon-btn text-danger" title="Delete">
+                                                <i class="bi bi-trash-fill fs-5"></i>
                                             </button>
                                         </form>
                                     @endif
 
-                                    {{-- Delete --}}
-                                    <form action="{{ route('admin.reminders.destroy', $reminder) }}" method="POST"
-                                        class="d-inline" onsubmit="return confirm('Delete this reminder?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="icon-btn text-danger" title="Delete">
-                                            <i class="bi bi-trash-fill fs-5"></i>
-                                        </button>
-                                    </form>
-
                                 </td>
+
                             </tr>
                         @empty
                             <tr>

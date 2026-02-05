@@ -13,21 +13,25 @@ class Note extends Model
 
     protected $fillable = [
         'user_id',
+        'is_global',
+        'created_by',
         'title',
         'note',
-        'attachments', // 👈 added
+        'attachments',
     ];
 
     protected $casts = [
-        'attachments' => 'array', // 👈 important
+        'attachments' => 'array',
+        'is_global' => 'boolean',
     ];
-
-    /* =========================
-     | Relationships
-     ========================= */
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

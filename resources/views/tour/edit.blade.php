@@ -64,8 +64,8 @@
 
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Reference No</label>
-                        <input type="text" name="tour_ref_no" class="form-control"
-                            value="{{ old('tour_ref_no', $package->tour_ref_no) }}" required>
+                        <input type="text" name="tour_ref_no" class="form-control" value="{{ $package->tour_ref_no }}"
+                            readonly>
                     </div>
                 </div>
 
@@ -809,9 +809,9 @@
                         </div>
                         <div class="col-md-3">
                             ${h.image ? `
-                                                                                                                            <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
-                                                                                                                            <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
-                                                                                                                        ` : ''}
+                                                                                                                                <input type="hidden" name="itineraries[${index}][highlights][${highlightCounter}][existing_image]" value="${h.image}">
+                                                                                                                                <img src="/admin/storage/${h.image}" class="img-fluid rounded" style="max-height:60px;">
+                                                                                                                            ` : ''}
                             <input type="file" 
                                 name="itineraries[${index}][highlights][${highlightCounter}][images]" 
                                 class="form-control">
