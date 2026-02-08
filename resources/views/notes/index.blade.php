@@ -67,110 +67,123 @@
             <div class="table-responsive">
                 <table class="table table-striped table-hover align-middle">
                     <thead>
-    <tr>
-        <th>Title</th>
-        <th>Note</th>
-        <th>Audience</th>
-        <th>Attachments</th>
-        <th>Created At</th>
-        <th class="text-center">Action</th>
-    </tr>
-</thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Note</th>
+                            <th>Audience</th>
+                            <th>Attachments</th>
+                            <th>Created At</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
 
-<tbody>
-@forelse($notes as $note)
-    @php
-        $canManage = ($note->is_global && $note->created_by == auth()->id())
-            || (!$note->is_global && $note->user_id == auth()->id());
-    @endphp
+                    <tbody>
+                        @forelse($notes as $note)
+                         
 
-    <tr>
-        <td>
-            <strong>{{ $note->title }}</strong>
-        </td>
+                            <tr>
+                                <td>
+                                    <strong>{{ $note->title }}</strong>
+                                </td>
 
-        <td>
-            {{ Str::limit($note->note, 50) ?? '-' }}
-        </td>
+                                <td>
+                                    {{ Str::limit($note->note, 50) ?? '-' }}
+                                </td>
 
-        {{-- Audience --}}
-        <td>
-            @if($note->is_global)
-                <span class="badge bg-info">General</span>
-            @else
-                <span class="badge bg-secondary">Only Me</span>
-            @endif
-        </td>
+                                {{-- Audience --}}
 
-        {{-- 📎 Attachments --}}
-        <td>
-            @if (!empty($note->attachments))
-                <div class="d-flex flex-wrap gap-1">
-                    @foreach ($note->attachments as $file)
-                        @php $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION)); @endphp
 
-                        <a href="{{ asset('storage/' . $file) }}" target="_blank"
-                           class="badge bg-light text-dark border" title="{{ basename($file) }}">
+                                <td>
+                                    @if ($note->is_global)
+                                        <span class="badge bg-info">General</span>
+                                    @else
+                                        @if ($note->user_id == auth()->id())
+                                            <span class="badge bg-secondary">Only Me</span>
+                                        @else
+                                            <span class="badge bg-dark">Specific User</span>
+                                            <div class="small text-muted">
+                                                {{ optional($note->user)->name }} (ID: {{ $note->user_id }})
+                                            </div>
+                                        @endif
+                                    @endif
+                                </td>
 
-                            @if (in_array($ext, ['jpg', 'jpeg', 'png']))
-                                <i class="bi bi-image"></i>
-                            @elseif ($ext === 'pdf')
-                                <i class="bi bi-file-earmark-pdf text-danger"></i>
-                            @elseif (in_array($ext, ['doc', 'docx']))
-                                <i class="bi bi-file-earmark-word text-primary"></i>
-                            @else
-                                <i class="bi bi-paperclip"></i>
-                            @endif
+                                {{-- 📎 Attachments --}}
+                                <td>
+                                    @if (!empty($note->attachments))
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach ($note->attachments as $file)
+                                                @php $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION)); @endphp
 
-                            {{ Str::limit(basename($file), 12) }}
-                        </a>
-                    @endforeach
-                </div>
-            @else
-                <span class="text-muted">—</span>
-            @endif
-        </td>
+                                                <a href="{{ asset('storage/' . $file) }}" target="_blank"
+                                                    class="badge bg-light text-dark border" title="{{ basename($file) }}">
 
-        <td>
-            {{ $note->created_at->format('d M Y') }}<br>
-            <small class="text-muted">{{ $note->created_at->format('h:i A') }}</small>
-        </td>
+                                                    @if (in_array($ext, ['jpg', 'jpeg', 'png']))
+                                                        <i class="bi bi-image"></i>
+                                                    @elseif ($ext === 'pdf')
+                                                        <i class="bi bi-file-earmark-pdf text-danger"></i>
+                                                    @elseif (in_array($ext, ['doc', 'docx']))
+                                                        <i class="bi bi-file-earmark-word text-primary"></i>
+                                                    @else
+                                                        <i class="bi bi-paperclip"></i>
+                                                    @endif
 
-        <td class="text-center">
-            {{-- View --}}
-            <a href="{{ route('admin.notes.show', $note) }}" class="icon-btn text-info" title="View">
-                <i class="bi bi-eye-fill fs-5"></i>
-            </a>
+                                                    {{ Str::limit(basename($file), 12) }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
 
-            {{-- Edit/Delete only if allowed --}}
-            @if($canManage)
+                                <td>
+                                    {{ $note->created_at->format('d M Y') }}<br>
+                                    <small class="text-muted">{{ $note->created_at->format('h:i A') }}</small>
+                                </td>
 
-                <a href="{{ route('admin.notes.edit', $note) }}" class="icon-btn text-primary" title="Edit">
-                    <i class="bi bi-pencil-square fs-5"></i>
-                </a>
+                                <td class="text-center">
+                                    {{-- View --}}
+                                    <a href="{{ route('admin.notes.show', $note) }}" class="icon-btn text-info"
+                                        title="View">
+                                        <i class="bi bi-eye-fill fs-5"></i>
+                                    </a>
+                                    @php
+                                        $isSuper = auth()->user()->type === 'Super Admin';
 
-                <form action="{{ route('admin.notes.destroy', $note) }}" method="POST"
-                      class="d-inline" onsubmit="return confirm('Delete this note?')">
-                    @csrf
-                    @method('DELETE')
-                    <button class="icon-btn text-danger" title="Delete">
-                        <i class="bi bi-trash-fill fs-5"></i>
-                    </button>
-                </form>
+                                        $canManage =
+                                            ($note->is_global && $note->created_by == auth()->id()) ||
+                                            (!$note->is_global && $note->user_id == auth()->id()) ||
+                                            ($isSuper && $note->created_by == auth()->id());
+                                    @endphp
+                                    {{-- Edit/Delete only if allowed --}}
+                                    @if ($canManage)
+                                        <a href="{{ route('admin.notes.edit', $note) }}" class="icon-btn text-primary"
+                                            title="Edit">
+                                            <i class="bi bi-pencil-square fs-5"></i>
+                                        </a>
 
-            @else
-                <span class="text-muted">—</span>
-            @endif
-        </td>
-    </tr>
-@empty
-    <tr>
-        <td colspan="6" class="text-center text-muted">
-            No notes found.
-        </td>
-    </tr>
-@endforelse
-</tbody>
+                                        <form action="{{ route('admin.notes.destroy', $note) }}" method="POST"
+                                            class="d-inline" onsubmit="return confirm('Delete this note?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="icon-btn text-danger" title="Delete">
+                                                <i class="bi bi-trash-fill fs-5"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    No notes found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
 
                 </table>
             </div>

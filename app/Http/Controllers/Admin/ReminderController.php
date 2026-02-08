@@ -16,10 +16,16 @@ class ReminderController extends Controller
      */
     public function index(Request $request)
     {
+        $isSuper = auth()->user()->type === 'Super Admin';
+
         $query = Reminder::query()
-            ->where(function ($q) {
+            ->where(function ($q) use ($isSuper) {
                 $q->where('is_global', 1)
-                    ->orWhere('user_id', Auth::id());
+                    ->orWhere('user_id', auth()->id());
+
+                if ($isSuper) {
+                    $q->orWhere('created_by', auth()->id()); // ✅ see reminders you created for others
+                }
             });
 
         if ($request->filled('search')) {
@@ -43,19 +49,33 @@ class ReminderController extends Controller
         return view('reminders.index', compact('reminders'));
     }
 
+
     /**
      * Show create reminder form
      */
     public function create()
     {
-        return view('reminders.create');
+        $users = [];
+
+        if (auth()->user()->type === 'Super Admin') {
+            $users = User::select('id', 'name')->orderBy('name')->get();
+        }
+
+        return view('reminders.create', compact('users'));
     }
 
 
     public function store(Request $request)
     {
+        $isSuper = auth()->user()->type === 'Super Admin';
+
+        // Super admin can do: global, me, user
+        // Normal admin can do: me only
+        $allowedAudiences = $isSuper ? 'global,me,user' : 'me';
+
         $request->validate([
-            'audience' => 'required|in:global,me',
+            'audience' => 'required|in:' . $allowedAudiences,
+            'user_id'  => 'nullable|required_if:audience,user|exists:users,id',
 
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -70,12 +90,16 @@ class ReminderController extends Controller
             }
         }
 
-        $isGlobal = $request->audience === 'global';
+        $audience = $request->audience;
 
         Reminder::create([
             'created_by' => Auth::id(),
-            'is_global'  => $isGlobal ? 1 : 0,
-            'user_id'    => $isGlobal ? null : Auth::id(), // ✅ only me
+            'is_global'  => $audience === 'global' ? 1 : 0,
+
+            // For "me" => user_id = me
+            // For "user" => user_id = selected user
+            // For "global" => user_id = NULL (IMPORTANT your DB column must allow null)
+            'user_id'    => $audience === 'me' ? Auth::id() : ($audience === 'user' ? $request->user_id : null),
 
             'title' => $request->title,
             'description' => $request->description,
@@ -85,10 +109,10 @@ class ReminderController extends Controller
             'is_notified' => 0,
         ]);
 
-        return redirect()
-            ->route('admin.reminders.index')
+        return redirect()->route('admin.reminders.index')
             ->with('success', 'Reminder created successfully.');
     }
+
 
 
     /**
@@ -97,8 +121,15 @@ class ReminderController extends Controller
     public function edit(Reminder $reminder)
     {
         $this->authorizeReminder($reminder);
-        return view('reminders.edit', compact('reminder'));
+
+        $users = [];
+        if (auth()->user()->type === 'Super Admin') {
+            $users = User::select('id', 'name')->orderBy('name')->get();
+        }
+
+        return view('reminders.edit', compact('reminder', 'users'));
     }
+
 
     /**
      * Update reminder
@@ -107,7 +138,15 @@ class ReminderController extends Controller
     {
         $this->authorizeReminder($reminder);
 
+        $isSuper = auth()->user()->type === 'Super Admin';
+
+        // super admin can change audience, normal cannot
+        $allowedAudiences = $isSuper ? ['global', 'me', 'user'] : ['me'];
+
         $request->validate([
+            'audience' => ['required', \Illuminate\Validation\Rule::in($allowedAudiences)],
+            'user_id'  => ['nullable', 'required_if:audience,user', 'exists:users,id'],
+
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date' => 'required|date',
@@ -133,7 +172,24 @@ class ReminderController extends Controller
             }
         }
 
+        // ✅ Audience update (ONLY for super admin, otherwise always "me")
+        $audience = $isSuper ? $request->audience : 'me';
+
+        $isGlobal = $audience === 'global';
+        $newUserId = null;
+
+        if ($audience === 'me') {
+            $newUserId = auth()->id();
+        } elseif ($audience === 'user') {
+            $newUserId = (int) $request->user_id;
+        } else {
+            $newUserId = null; // global
+        }
+
         $reminder->update([
+            'is_global' => $isGlobal ? 1 : 0,
+            'user_id'   => $newUserId,
+
             'title' => $request->title,
             'description' => $request->description,
             'due_date' => $request->due_date,
@@ -148,6 +204,7 @@ class ReminderController extends Controller
             ->route('admin.reminders.index')
             ->with('success', 'Reminder updated successfully.');
     }
+
 
     /**
      * Mark reminder as completed (quick action)
@@ -196,17 +253,20 @@ class ReminderController extends Controller
      */
     private function authorizeReminder(Reminder $reminder)
     {
-        $uid = Auth::id();
+        $uid = auth()->id();
+        $isSuper = auth()->user()->type === 'Super Admin';
 
         if ($reminder->is_global) {
-            if ($reminder->created_by !== $uid) {
-                abort(403, 'Unauthorized access');
-            }
+            if ($reminder->created_by !== $uid) abort(403);
             return;
         }
 
-        if ($reminder->user_id !== $uid) {
-            abort(403, 'Unauthorized access');
-        }
+        // ✅ assigned user can access
+        if ($reminder->user_id === $uid) return;
+
+        // ✅ super admin can access reminders they created for others
+        if ($isSuper && $reminder->created_by === $uid) return;
+
+        abort(403, 'Unauthorized access');
     }
 }

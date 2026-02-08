@@ -101,13 +101,37 @@
                                 <td>
                                     {{ $reminder->description ?? '-' }}
                                 </td>
+
+                                @php
+                                    $isSuper = auth()->user()->type === 'Super Admin';
+
+                                    $canManage =
+                                        ($reminder->is_global && $reminder->created_by == auth()->id()) ||
+                                        (!$reminder->is_global && $reminder->user_id == auth()->id()) ||
+                                        ($isSuper && !$reminder->is_global && $reminder->created_by == auth()->id()); // ✅ super admin managing assigned reminders
+                                @endphp
                                 <td>
                                     @if ($reminder->is_global)
-                                        <span class="badge bg-info">General</span>
+                                        <span class="badge bg-info">
+                                            General
+                                        </span>
+                                    @elseif ($reminder->user_id == auth()->id())
+                                        <span class="badge bg-secondary">
+                                            Only Me
+                                        </span>
                                     @else
-                                        <span class="badge bg-secondary">Only Me</span>
+                                        <span class="badge bg-dark">
+                                            Specific User
+                                        </span>
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ $reminder->user->name ?? 'Unknown User' }}
+                                            (ID: {{ $reminder->user_id }})
+                                        </small>
                                     @endif
                                 </td>
+
+
 
                                 <td>
                                     {{ $reminder->due_date->format('d M Y') }}<br>
@@ -159,15 +183,16 @@
                                 </td>
                                 <td class="text-center">
 
-
                                     @php
-                                        $canManage =
-                                            ($reminder->is_global && $reminder->created_by == auth()->id()) ||
-                                            (!$reminder->is_global && $reminder->user_id == auth()->id());
+                                        $isOwner = $reminder->user_id === auth()->id();
+                                        $isCreator = $reminder->created_by === auth()->id();
+                                        $isGlobalOwn = $reminder->is_global && $isCreator;
+
+                                        $canManage = $isOwner || $isCreator || $isGlobalOwn;
                                     @endphp
 
                                     @if ($canManage)
-                                        {{-- View: allow everyone to view global, and owner to view personal --}}
+                                        {{-- View --}}
                                         <a href="{{ route('admin.reminders.show', $reminder) }}" class="icon-btn text-info"
                                             title="View">
                                             <i class="bi bi-eye-fill fs-5"></i>
