@@ -59,6 +59,7 @@ class TourQuotationController extends Controller
         return view('bookings.tour', compact('customers', 'packages', 'agents'));
     }
     // Store Quotation
+    // Store Quotation
     public function store(Request $request)
     {
         $request->validate([
@@ -78,27 +79,56 @@ class TourQuotationController extends Controller
             'currency' => 'required|string|max:5',
             'status' => 'required',
             'advance_paid' => 'nullable|numeric|min:0',
+            'special_requirements' => 'nullable|string',
+
+            // ✅ NEW: description points validation
+            'desc_points' => 'nullable|array',
+            'desc_points.*.title' => 'nullable|string|max:255',
+            'desc_points.*.subs' => 'nullable|array',
+            'desc_points.*.subs.*' => 'nullable|string|max:255',
         ]);
+
+        // ✅ Clean & normalize desc_points (remove empty rows, reindex)
+        $descPoints = collect($request->input('desc_points', []))
+            ->map(function ($row) {
+                $title = trim((string)($row['title'] ?? ''));
+                $subs = collect($row['subs'] ?? [])
+                    ->map(fn($s) => trim((string)$s))
+                    ->filter(fn($s) => $s !== '')
+                    ->values()
+                    ->all();
+
+                return [
+                    'title' => $title,
+                    'subs'  => $subs,
+                ];
+            })
+            ->filter(function ($row) {
+                return ($row['title'] !== '') || (count($row['subs']) > 0);
+            })
+            ->values()
+            ->all();
 
         // Calculate total
         $totalPrice = ($request->package_price + ($request->additional_charges ?? 0)) - ($request->discount ?? 0);
 
-
-        // Generate invoice/quotation number
+        // Generate booking ref
         $lastBooking = TourBooking::latest()->first();
 
         if ($lastBooking && preg_match('/BT-(\d+)/', $lastBooking->booking_ref_no, $matches)) {
             $lastNumber = (int)$matches[1];
-            $nextNumber = $lastNumber + 1;
+            $nextRefNumber = $lastNumber + 1;
         } else {
-            $nextNumber = 1;
+            $nextRefNumber = 1;
         }
 
-        $bookingRefNo = 'BT-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        $bookingRefNo = 'BT-' . str_pad($nextRefNumber, 4, '0', STR_PAD_LEFT);
 
-        $nextNumber = $lastBooking ? $lastBooking->invoice_number + 1 : 1;
-        $invoiceNumber = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        // Invoice number
+        $nextInvoice = $lastBooking ? ($lastBooking->invoice_number + 1) : 1;
+        $invoiceNumber = str_pad($nextInvoice, 4, '0', STR_PAD_LEFT);
 
+        // Payment status
         $advancePaid = $request->advance_paid ?? 0;
 
         if ($advancePaid <= 0) {
@@ -108,7 +138,6 @@ class TourQuotationController extends Controller
         } else {
             $paymentStatus = 'paid';
         }
-
 
         // Create booking
         $booking = TourBooking::create([
@@ -131,6 +160,10 @@ class TourQuotationController extends Controller
             'payment_status' => $paymentStatus,
             'currency' => $request->currency,
             'special_requirements' => $request->special_requirements,
+
+            // ✅ NEW: store desc points as JSON
+            'desc_points' => $descPoints,
+
             'invoice_number' => $invoiceNumber,
             'invoice_date' => now(),
             'published_at' => $request->published_at ?? now()->toDateString(),
@@ -138,9 +171,9 @@ class TourQuotationController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-
         return redirect()->back()->with('success', ucfirst($request->status) . ' saved successfully!');
     }
+
 
     public function edit(TourBooking $booking)
     {
@@ -162,7 +195,7 @@ class TourQuotationController extends Controller
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'package_id' => 'required|exists:packages,id',
-            'agent_id' => 'nullable|exists:agents,id',     // ✅ added
+            'agent_id' => 'nullable|exists:agents,id',
             'published_at' => 'nullable|date',
             'travel_start_date' => 'required|date',
             'travel_end_date' => 'required|date|after_or_equal:travel_start_date',
@@ -177,15 +210,38 @@ class TourQuotationController extends Controller
             'status' => 'required',
             'advance_paid' => 'nullable|numeric|min:0',
             'special_requirements' => 'nullable|string|max:1000',
+
+            // ✅ NEW
+            'desc_points' => 'nullable|array',
+            'desc_points.*.title' => 'nullable|string|max:255',
+            'desc_points.*.subs' => 'nullable|array',
+            'desc_points.*.subs.*' => 'nullable|string|max:255',
         ]);
+
+        // ✅ Clean & normalize desc_points
+        $descPoints = collect($request->input('desc_points', []))
+            ->map(function ($row) {
+                $title = trim((string)($row['title'] ?? ''));
+                $subs = collect($row['subs'] ?? [])
+                    ->map(fn($s) => trim((string)$s))
+                    ->filter(fn($s) => $s !== '')
+                    ->values()
+                    ->all();
+
+                return [
+                    'title' => $title,
+                    'subs'  => $subs,
+                ];
+            })
+            ->filter(fn($row) => ($row['title'] !== '') || (count($row['subs']) > 0))
+            ->values()
+            ->all();
 
         // Recalculate total price
         $totalPrice = ($request->package_price + ($request->additional_charges ?? 0)) - ($request->discount ?? 0);
 
-        // Determine advance paid
         $advancePaid = $request->advance_paid ?? 0;
 
-        // Determine payment status based on advance
         if ($advancePaid <= 0) {
             $paymentStatus = 'pending';
         } elseif ($advancePaid < $totalPrice) {
@@ -194,11 +250,10 @@ class TourQuotationController extends Controller
             $paymentStatus = 'paid';
         }
 
-        // Update booking
         $booking->update([
             'customer_id' => $request->customer_id,
             'package_id' => $request->package_id,
-            'agent_id' => $request->agent_id, // ✅ added
+            'agent_id' => $request->agent_id,
             'travel_date' => $request->travel_start_date,
             'travel_end_date' => $request->travel_end_date,
             'adults' => $request->adults,
@@ -210,13 +265,17 @@ class TourQuotationController extends Controller
             'discount' => $request->discount ?? 0,
             'total_price' => $totalPrice,
             'advance_paid' => $advancePaid,
-            'amount_paid' => $advancePaid, // same as store logic
+            'amount_paid' => $advancePaid,
             'payment_status' => $paymentStatus,
             'currency' => $request->currency,
             'status' => $request->status,
             'special_requirements' => $request->special_requirements,
-            'published_at' => $request->published_at,
-            'updated_by' => auth()->id(), // optional
+
+            // ✅ NEW
+            'desc_points' => $descPoints,
+
+            'published_at' => $request->published_at ?? $booking->published_at,
+            'updated_by' => auth()->id(), // only if column exists
         ]);
 
         return redirect()->route('admin.tour-bookings.edit', $booking)

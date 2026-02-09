@@ -55,7 +55,7 @@
                             <option value="">-- Select Customer --</option>
                             @foreach ($customers as $customer)
                                 <option value="{{ $customer->id }}" data-email="{{ $customer->email }}"
-                                    data-phone="{{ $customer->contact ?? 'N/A' }}"
+                                    data-phone="{{ $customer->contact ?? 'N/A' }}"data-address="{{ $customer->address ?? 'N/A' }}"
                                     {{ $booking->customer_id == $customer->id ? 'selected' : '' }}>
                                     {{ $customer->name }}
                                 </option>
@@ -83,7 +83,7 @@
                                 <option value="{{ $package->id }}" data-category="{{ $package->tour_category }}"
                                     data-price="{{ $package->price }}" data-tour-ref="{{ $package->tour_ref_no }}"
                                     {{ $booking->package_id == $package->id ? 'selected' : '' }}>
-                                   {{ $package->tour_ref_no }} - {{ $package->heading }}
+                                    {{ $package->tour_ref_no }} - {{ $package->heading }}
                                 </option>
                             @endforeach
                         </select>
@@ -187,6 +187,24 @@
                     <label for="special_requirements" class="form-label">Special Requirements / Notes</label>
                     <textarea name="special_requirements" id="special_requirements" class="form-control" rows="3">{{ $booking->special_requirements }}</textarea>
                 </div>
+
+                {{-- Description Points --}}
+                <div class="mb-3">
+                    <label class="form-label">Description Points (Main + Sub points)</label>
+
+                    <div id="descPointsWrapper" class="border rounded p-3">
+                        {{-- Items appended by JS --}}
+                    </div>
+
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addMainPoint()">
+                        + Add Main Point
+                    </button>
+
+                    <small class="text-muted d-block mt-2">
+                        Example: Main point = "Hotel", Sub points = "4 Star", "Breakfast included"
+                    </small>
+                </div>
+
 
                 {{-- Price & Payment Details --}}
                 <div class="col-md-6 mb-3">
@@ -381,6 +399,133 @@
         // Initial calculation on load
         calculateTotal();
 
+        // ---------- Description Points Repeater ----------
+        let mainPointIndex = 0;
+
+        function addMainPoint(value = '') {
+            const wrapper = document.getElementById('descPointsWrapper');
+
+            const block = document.createElement('div');
+            block.className = 'border rounded p-3 mb-3';
+            block.dataset.index = mainPointIndex;
+
+            block.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="flex-grow-1 me-2">
+                <input type="text"
+                    name="desc_points[${mainPointIndex}][title]"
+                    class="form-control"
+                    placeholder="Main point (e.g. Accommodation)"
+                    value="${escapeHtml(value)}">
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeMainPoint(this)">
+                Remove
+            </button>
+        </div>
+
+        <div class="ms-3">
+            <div class="subPoints"></div>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" onclick="addSubPoint(this)">
+                + Add Sub Point
+            </button>
+        </div>
+    `;
+
+            wrapper.appendChild(block);
+
+            // add 1 empty sub point
+            addSubPoint(block.querySelector('button.btn-outline-secondary'));
+
+            mainPointIndex++;
+        }
+
+        function addSubPoint(btn, value = '') {
+            const mainBlock = btn.closest('[data-index]');
+            const idx = mainBlock.dataset.index;
+
+            const container = mainBlock.querySelector('.subPoints');
+            const subIndex = container.querySelectorAll('.subPointRow').length;
+
+            const row = document.createElement('div');
+            row.className = 'subPointRow d-flex align-items-center gap-2 mb-2';
+
+            row.innerHTML = `
+        <input type="text"
+            name="desc_points[${idx}][subs][${subIndex}]"
+            class="form-control"
+            placeholder="Sub point (e.g. Breakfast included)"
+            value="${escapeHtml(value)}">
+
+        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('.subPointRow').remove()">
+            X
+        </button>
+    `;
+
+            container.appendChild(row);
+        }
+
+        function removeMainPoint(btn) {
+            btn.closest('[data-index]').remove();
+        }
+
+        function escapeHtml(str) {
+            return (str ?? '').replace(/[&<>"']/g, function(m) {
+                return ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                })[m];
+            });
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // ✅ Get existing points from DB
+            const existingPoints = @json($booking->desc_points ?? []);
+
+            // If DB returns string (just in case), parse it
+            let points = existingPoints;
+            if (typeof points === 'string') {
+                try {
+                    points = JSON.parse(points);
+                } catch (e) {
+                    points = [];
+                }
+            }
+
+            if (Array.isArray(points) && points.length > 0) {
+
+                points.forEach(item => {
+                    // add main point title
+                    addMainPoint(item.title ?? '');
+
+                    // get the last added block
+                    const lastBlock = document.querySelector('#descPointsWrapper [data-index]:last-child');
+                    const subContainer = lastBlock.querySelector('.subPoints');
+
+                    // clear default empty subpoint
+                    subContainer.innerHTML = '';
+
+                    // add existing subs
+                    if (Array.isArray(item.subs) && item.subs.length > 0) {
+                        const addSubBtn = lastBlock.querySelector('button.btn-outline-secondary');
+                        item.subs.forEach(sub => addSubPoint(addSubBtn, sub));
+                    } else {
+                        // if no subs, keep one empty sub input
+                        const addSubBtn = lastBlock.querySelector('button.btn-outline-secondary');
+                        addSubPoint(addSubBtn, '');
+                    }
+                });
+
+            } else {
+                // If no data in DB, show one empty block
+                addMainPoint('');
+            }
+        });
+
         // Preview
         function previewQuotation() {
             const customerSelect = document.getElementById('customer_id');
@@ -401,6 +546,64 @@
             const discountVal = parseFloat(document.getElementById('discount').value) || 0;
             const advancePaidVal = parseFloat(document.getElementById('advance_paid').value) || 0;
 
+            // ---------- Description rows with separate No column ----------
+            const descBlocks = document.querySelectorAll('#descPointsWrapper [data-index]');
+            let descHtml = '';
+            let mainCounter = 1;
+
+            descBlocks.forEach((block, index) => {
+                const titleInput = block.querySelector(`input[name^="desc_points"][name$="[title]"]`);
+                const title = titleInput ? titleInput.value.trim() : '';
+
+                const subInputs = block.querySelectorAll('.subPoints input');
+                const subs = Array.from(subInputs).map(i => i.value.trim()).filter(Boolean);
+
+                if (!title && subs.length === 0) return;
+
+                descHtml += `
+        <tr>
+            <td style="padding:12px; text-align:center; border-bottom:1px solid #eee; vertical-align:top;">
+                ${mainCounter}
+            </td>
+
+            <td style="padding:12px; border-bottom:1px solid #eee;">
+                <div style="font-weight:700; margin-bottom:6px;">
+                    ${escapeHtml(title)}
+                </div>
+
+                ${
+                    subs.length > 0
+                        ? `<ul style="margin:0 0 0 18px; padding:0; font-size:12.5px; color:#555; line-height:1.6;">
+                                    ${subs.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+                                   </ul>`
+                        : ''
+                }
+            </td>
+
+            ${
+                index === 0
+                    ? `<td style="padding:12px; text-align:right; border-bottom:1px solid #eee; vertical-align:top;">
+                                ${packagePriceVal.toFixed(2)}
+                               </td>`
+                    : `<td style="padding:12px; border-bottom:1px solid #eee;"></td>`
+            }
+        </tr>
+    `;
+
+                mainCounter++;
+            });
+
+            if (!descHtml) {
+                descHtml = `
+        <tr>
+            <td colspan="3" style="padding:12px; color:#888; text-align:center;">
+                No description points added.
+            </td>
+        </tr>
+    `;
+            }
+
+
             const totalPriceVal = Math.max(0, (packagePriceVal + addChargesVal) - discountVal);
             const balanceVal = Math.max(0, totalPriceVal - advancePaidVal);
 
@@ -410,6 +613,8 @@
             const customerName = customerOption.text;
             const customerEmail = customerOption.dataset.email;
             const customerPhone = customerOption.dataset.phone;
+            const customerAddress = customerOption.dataset.address || '-';
+
 
             const packageOption = packageSelect.options[packageSelect.selectedIndex];
             const packageName = packageOption.text;
@@ -453,29 +658,30 @@
             const html = `
 <div style="max-width:800px; margin:0 auto; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color:#333; background:#fff; padding:20px;">
     <table style="width:100%; border-bottom:2px solid #333; padding-bottom:20px; margin-bottom:30px;">
-        <tr>
+           <tr>
             <td style="vertical-align: top;">
                 <img src="{{ asset('images/vacayguider.png') }}" alt="Logo" style="height:80px;">
-                <div style="margin-top:15px; font-size:12px; line-height:1.4; color:#666;">
-                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
-                    22/14 C Asarappa Rd, Negombo 11400<br>
-                    +94 114 272 372 | info@vacayguider.com
+                <div style="margin-top:10px; font-size:12px; line-height:1.4; color:#666;">
+                    <strong>VACAYGUIDER PRIVATE LIMITED</strong><br>
+                   22/14 C, Asarappa Road, Negombo.<br>
+                    +94114272372 / +94711 999 444 / +94 777 035 325 <br>
+                    info@vacayguider.com
                 </div>
             </td>
-            <td style="text-align:right; vertical-align: top;">
-                <h1 style="margin:0; font-size:24px; font-weight:300; letter-spacing:2px; text-transform:uppercase; color:${badgeColor};">${badgeText}</h1>
+            <td style="text-align:right; vertical-align: bottom;">
+                <h1 style="margin:0; font-size:24px; font-weight:300; letter-spacing:2px; text-transform:uppercase;">${badgeText}</h1>
                 <table style="margin-left:auto; margin-top:10px; font-size:13px; border-collapse:collapse;">
                     <tr>
-                        <td style="padding:2px 10px; text-align:left; color:#888;">Reference:</td>
-                        <td style="padding:2px 10px; font-weight:bold;">${packageRef || '-'}</td>
+                        <td style="padding:2px 10px; text-align:left; color:#888;">Invoice No:</td>
+                        <td style="padding:2px 10px; font-weight:bold;">-</td>
                     </tr>
                     <tr>
                         <td style="padding:2px 10px; text-align:left; color:#888;">Date:</td>
                         <td style="padding:2px 10px;">${currentDate}</td>
                     </tr>
                     <tr>
-                        <td style="padding:2px 10px; text-align:left; color:#888;">Currency:</td>
-                        <td style="padding:2px 10px;">${currency}</td>
+                        <td style="padding:2px 10px; text-align:left; color:#888;">Commercial License No:</td>
+                        <td style="padding:2px 10px;">PV 00285826</td>
                     </tr>
                 </table>
             </td>
@@ -501,34 +707,29 @@
     </table>
 
     <table style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:14px;">
-        <thead>
-            <tr style="background:#f9f9f9; border-top:1px solid #333; border-bottom:1px solid #333;">
-                <th style="padding:12px; text-align:left; text-transform:uppercase; font-size:11px;">Description</th>
-                <th style="padding:12px; text-align:right; text-transform:uppercase; font-size:11px;">Total (${currency})</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td style="padding:15px 12px; border-bottom:1px solid #eee;">
-                    <strong>Travel Package Arrangement</strong><br>
+    <thead>
+        <tr style="background:#f9f9f9; border-top:1px solid #333; border-bottom:1px solid #333;">
+            <th style="padding:12px; width:50px; text-align:center; text-transform:uppercase; font-size:11px;">No</th>
+            <th style="padding:12px; text-align:left; text-transform:uppercase; font-size:11px;">Description</th>
+            <th style="padding:12px; text-align:right; text-transform:uppercase; font-size:11px;">Total (${currency})</th>
+        </tr>
+    </thead>
+    <tbody>
+        ${descHtml}
 
-                </td>
-                <td style="padding:15px 12px; text-align:right; border-bottom:1px solid #eee; vertical-align:top;">
-                    ${packagePriceVal.toFixed(2)}
-                </td>
-            </tr>
-            ${addChargesVal > 0 ? `
-                                        <tr>
-                                            <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
-                                            <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
-                                        </tr>` : ''}
-            ${discountVal > 0 ? `
-                                        <tr>
-                                            <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
-                                            <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
-                                        </tr>` : ''}
-        </tbody>
-    </table>
+        ${addChargesVal > 0 ? `
+                    <tr>
+                        <td colspan="2" style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
+                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addChargesVal.toFixed(2)}</td>
+                    </tr>` : ''}
+
+        ${discountVal > 0 ? `
+                    <tr>
+                        <td colspan="2" style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
+                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discountVal.toFixed(2)})</td>
+                    </tr>` : ''}
+    </tbody>
+</table>
 
     <div style="width:40%; margin-left:auto;">
         <table style="width:100%; font-size:14px; border-collapse:collapse;">
@@ -548,14 +749,14 @@
     </div>
 
     ${specialReq ? `
-                                <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
-                                    <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
-                                    <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
-                                </div>` : ''}
+                                        <div style="margin-top:50px; border-top:1px solid #eee; padding-top:20px;">
+                                            <h4 style="font-size:11px; text-transform:uppercase; color:#888; margin-bottom:10px;">Terms & Notes</h4>
+                                            <div style="font-size:12px; color:#666; line-height:1.6; white-space: pre-wrap;">${specialReq}</div>
+                                        </div>` : ''}
 
     <div style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
-        <p style="margin-bottom:5px;">This is a computer-generated document. No signature is required.</p>
-        <p><strong>Vacay Guider</strong> | www.vacayguider.com | Thank you for your business.</p>
+
+        <p>www.vacayguider.com | Thank you for your business.</p>
     </div>
 </div>`;
 

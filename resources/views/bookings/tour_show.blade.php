@@ -16,34 +16,23 @@
                     <tr>
                         <td style="vertical-align: top;">
                             <img src="{{ asset('images/vacayguider.png') }}" alt="Logo" style="height:80px;">
-                            <div style="margin-top:15px; font-size:12px; line-height:1.4; color:#666;">
-                                <strong>Vacay Guider (Pvt) Ltd.</strong><br>
-                                22/14 C Asarappa Rd, Negombo 11400<br>
-                                +94 114 272 372 | +94 711 999 444 |  +94 777 035 325 <br>
-                                    info@vacayguider.com
+                            <div style="margin-top:10px; font-size:12px; line-height:1.4; color:#666;">
+                                <strong>VACAYGUIDER PRIVATE LIMITED</strong><br>
+                                22/14 C, Asarappa Road, Negombo.<br>
+                                +94114272372 / +94711 999 444 / +94 777 035 325 <br>
+                                info@vacayguider.com
                             </div>
                         </td>
-                        <td style="text-align:right; vertical-align: top;">
-                            @php
-                                $statusColors = [
-                                    'quotation' => 'secondary',
-                                    'accepted' => 'primary',
-                                    'invoiced' => 'info',
-                                    'partially_paid' => 'warning',
-                                    'paid' => 'success',
-                                    'cancelled' => 'danger',
-                                ];
-                                $badgeClass = $statusColors[$booking->status] ?? 'secondary';
-                            @endphp
+
+                        <td style="text-align:right; vertical-align: bottom;">
                             <h1
                                 style="margin:0; font-size:24px; font-weight:300; letter-spacing:2px; text-transform:uppercase;">
                                 {{ strtoupper($booking->status) }}
                             </h1>
                             <table style="margin-left:auto; margin-top:10px; font-size:13px; border-collapse:collapse;">
                                 <tr>
-                                    <td style="padding:2px 10px; text-align:left; color:#888;">Ref:</td>
-                                    <td style="padding:2px 10px; font-weight:bold;">
-                                        {{ $booking->booking_ref_no }}
+                                    <td style="padding:2px 10px; text-align:left; color:#888;">Invoice No:</td>
+                                    <td style="padding:2px 10px; font-weight:bold;">{{ $booking->invoice_number ?? '-' }}
                                     </td>
                                 </tr>
                                 <tr>
@@ -53,8 +42,8 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="padding:2px 10px; text-align:left; color:#888;">Currency:</td>
-                                    <td style="padding:2px 10px;">{{ $booking->currency }}</td>
+                                    <td style="padding:2px 10px; text-align:left; color:#888;">Commercial License No:</td>
+                                    <td style="padding:2px 10px;">PV 00285826</td>
                                 </tr>
                             </table>
                         </td>
@@ -72,6 +61,7 @@
                             <div style="font-size:15px; font-weight:bold; margin-bottom:5px;">
                                 {{ $booking->customer->name ?? 'N/A' }}
                             </div>
+                            <div style="color:#555;">{{ $booking->customer->address ?? 'N/A' }}</div>
                             <div style="color:#555;">{{ $booking->customer->email ?? 'N/A' }}</div>
                             <div style="color:#555;">{{ $booking->customer->contact ?? 'N/A' }}</div>
                         </td>
@@ -100,6 +90,9 @@
                 <table style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:14px;">
                     <thead>
                         <tr style="background:#f9f9f9; border-top:1px solid #333; border-bottom:1px solid #333;">
+                            <th
+                                style="padding:12px; width:50px; text-align:center; text-transform:uppercase; font-size:11px;">
+                                No</th>
                             <th style="padding:12px; text-align:left; text-transform:uppercase; font-size:11px;">Description
                             </th>
                             <th style="padding:12px; text-align:right; text-transform:uppercase; font-size:11px;">Total
@@ -107,33 +100,89 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td style="padding:15px 12px; border-bottom:1px solid #eee;">
-                                <strong>Travel Package Arrangement</strong><br>
-                                <small style="color:#888;">Comprehensive tour package including accommodation and
-                                    transport.</small>
-                            </td>
-                            <td style="padding:15px 12px; text-align:right; border-bottom:1px solid #eee;">
-                                {{ number_format($booking->package_price, 2) }}
-                            </td>
-                        </tr>
-                        @if ($booking->tax > 0)
+                        @php
+                            $points = $booking->desc_points ?? [];
+                            $mainCounter = 1;
+                        @endphp
+
+                        @if (!empty($points))
+                            @foreach ($points as $index => $p)
+                                @php
+                                    $title = $p['title'] ?? '';
+                                    $subs = $p['subs'] ?? [];
+                                @endphp
+
+                                @if ($title || !empty($subs))
+                                    <tr>
+                                        <td
+                                            style="padding:12px; text-align:center; border-bottom:1px solid #eee; vertical-align:top;">
+                                            {{ $mainCounter }}
+                                        </td>
+
+                                        <td style="padding:12px; border-bottom:1px solid #eee;">
+                                            @if ($title)
+                                                <div style="font-weight:700; margin-bottom:6px;">
+                                                    {{ $title }}
+                                                </div>
+                                            @endif
+
+                                            @if (!empty($subs))
+                                                <ul
+                                                    style="margin:0 0 0 18px; padding:0; font-size:12.5px; color:#555; line-height:1.6;">
+                                                    @foreach ($subs as $s)
+                                                        @if ($s)
+                                                            <li>{{ $s }}</li>
+                                                        @endif
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </td>
+
+                                        @if ($mainCounter === 1)
+                                            <td
+                                                style="padding:12px; text-align:right; border-bottom:1px solid #eee; vertical-align:top;">
+                                                {{ number_format($booking->package_price, 2) }}
+                                            </td>
+                                        @else
+                                            <td style="padding:12px; border-bottom:1px solid #eee;"></td>
+                                        @endif
+                                    </tr>
+
+                                    @php $mainCounter++; @endphp
+                                @endif
+                            @endforeach
+                        @else
                             <tr>
-                                <td style="padding:12px; border-bottom:1px solid #eee;">Additional Services / Charges</td>
-                                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">
-                                    {{ number_format($booking->tax, 2) }}</td>
+                                <td colspan="3" style="padding:12px; color:#888; text-align:center;">
+                                    No description points added.
+                                </td>
                             </tr>
                         @endif
+
+                        @if ($booking->tax > 0)
+                            <tr>
+                                <td colspan="2" style="padding:12px; border-bottom:1px solid #eee;">Additional Services /
+                                    Charges</td>
+                                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">
+                                    {{ number_format($booking->tax, 2) }}
+                                </td>
+                            </tr>
+                        @endif
+
                         @if ($booking->discount > 0)
                             <tr>
-                                <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">
-                                    Discount Applied</td>
+                                <td colspan="2"
+                                    style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">
+                                    Discount Applied
+                                </td>
                                 <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">
-                                    ({{ number_format($booking->discount, 2) }})</td>
+                                    ({{ number_format($booking->discount, 2) }})
+                                </td>
                             </tr>
                         @endif
                     </tbody>
                 </table>
+
 
                 {{-- TOTAL / ADVANCE / BALANCE --}}
                 @php
@@ -148,7 +197,8 @@
                         </tr>
                         <tr>
                             <td style="padding:8px 0; color:#888;">Advance Paid:</td>
-                            <td style="padding:8px 0; text-align:right; color:#1a7f37;">{{ number_format($advancePaid, 2) }}
+                            <td style="padding:8px 0; text-align:right; color:#1a7f37;">
+                                {{ number_format($advancePaid, 2) }}
                             </td>
                         </tr>
                         <tr style="border-top:1px solid #333;">
@@ -174,8 +224,8 @@
                 {{-- FOOTER --}}
                 <div
                     style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
-                    <p style="margin-bottom:5px;">This is a computer-generated document. No signature is required.</p>
-                    <p><strong>Vacay Guider</strong> | www.vacayguider.com | Thank you for your business.</p>
+
+                    <p>www.vacayguider.com | Thank you for your business.</p>
                 </div>
             </div>
 

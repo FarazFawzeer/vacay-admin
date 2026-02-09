@@ -26,6 +26,7 @@ class TourBooking extends Model
         'total_price',
         'currency',
         'special_requirements',
+        'desc_points',
         'invoice_number',
         'invoice_date',
         'amount_paid',
@@ -45,6 +46,7 @@ class TourBooking extends Model
         'published_at'     => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'desc_points' => 'array',
     ];
 
     public function package()
