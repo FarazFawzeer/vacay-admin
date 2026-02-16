@@ -29,6 +29,7 @@ class RentVehicleBooking extends Model
         'start_datetime',
         'end_datetime',
         'notes',
+          'desc_points',  
         'published_at',   // ✅ added
         'created_by',
     ];
@@ -37,6 +38,7 @@ class RentVehicleBooking extends Model
         'start_datetime'   => 'datetime',
         'end_datetime'     => 'datetime',
         'published_at'     => 'date',
+        'desc_points'  => 'array',
         'price'            => 'decimal:2',
         'additional_price' => 'decimal:2',
         'discount'         => 'decimal:2',

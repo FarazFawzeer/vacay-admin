@@ -9,10 +9,8 @@ class VehicleInvBooking extends Model
 {
     use HasFactory;
 
-    // Table name
     protected $table = 'vehicle_inv_bookings';
 
-    // Mass-assignable fields
     protected $fillable = [
         'inv_no',
         'customer_id',
@@ -30,24 +28,25 @@ class VehicleInvBooking extends Model
         'advance_paid',
         'auth_id',
         'note',
+        'desc_points',        // ✅ NEW
         'status',
         'payment_status',
         'payment_method',
         'currency',
-        'published_at', 
+        'published_at',
     ];
 
     protected $casts = [
-        'pickup_datetime' => 'datetime',
-        'dropoff_datetime' => 'datetime',
-        'price' => 'decimal:2',
-        'additional_charges' => 'decimal:2',
-         'published_at'     => 'date',
-        'discount' => 'decimal:2',
-        'total_price' => 'decimal:2',
+        'pickup_datetime'      => 'datetime',
+        'dropoff_datetime'     => 'datetime',
+        'price'                => 'decimal:2',
+        'additional_charges'   => 'decimal:2',
+        'discount'             => 'decimal:2',
+        'total_price'          => 'decimal:2',
+        'published_at'         => 'date',
+        'desc_points'          => 'array',   // ✅ NEW (auto json encode/decode)
     ];
 
-    // Relationships
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');

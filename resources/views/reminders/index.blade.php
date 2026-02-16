@@ -172,15 +172,40 @@
                                 </td>
 
 
-                                <td>
-                                    @if ($reminder->status === 'completed')
-                                        <span class="badge bg-success">Completed</span>
-                                    @elseif($reminder->due_date < now())
-                                        <span class="badge bg-danger">Overdue</span>
-                                    @else
-                                        <span class="badge bg-warning">Pending</span>
-                                    @endif
-                                </td>
+                              <td>
+    @php
+        $isOverdue = $reminder->due_date < now() && $reminder->status === 'pending';
+        $statusClass = $reminder->status === 'completed' ? 'success' : ($isOverdue ? 'danger' : 'warning');
+    @endphp
+
+    @if ($canManage)
+        <form action="{{ route('admin.reminders.updateStatus', $reminder) }}" method="POST">
+            @csrf
+            @method('PATCH')
+
+            <select name="status"
+                class="form-select form-select-sm border-{{ $statusClass }}"
+                onchange="this.form.submit()">
+                <option value="pending" @selected($reminder->status === 'pending')>
+                    Pending{{ $isOverdue ? ' (Overdue)' : '' }}
+                </option>
+                <option value="completed" @selected($reminder->status === 'completed')>
+                    Completed
+                </option>
+            </select>
+        </form>
+    @else
+        {{-- If user cannot manage, show badge only --}}
+        @if ($reminder->status === 'completed')
+            <span class="badge bg-success">Completed</span>
+        @elseif($reminder->due_date < now())
+            <span class="badge bg-danger">Overdue</span>
+        @else
+            <span class="badge bg-warning">Pending</span>
+        @endif
+    @endif
+</td>
+
                                 <td class="text-center">
 
                                     @php

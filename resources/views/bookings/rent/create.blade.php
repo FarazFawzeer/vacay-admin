@@ -28,7 +28,8 @@
                             <option value="">Select Customer</option>
                             @foreach ($customers as $customer)
                                 <option value="{{ $customer->id }}" data-email="{{ $customer->email ?? 'N/A' }}"
-                                    data-phone="{{ $customer->contact ?? 'N/A' }}">
+                                    data-phone="{{ $customer->contact ?? 'N/A' }}"
+                                    data-address="{{ $customer->address ?? 'N/A' }}">
                                     {{ $customer->name }} ({{ $customer->customer_code ?? 'N/A' }})
                                 </option>
                             @endforeach
@@ -50,7 +51,7 @@
                                 @endphp
                                 <option value="{{ $vehicle->id }}" data-images='@json($images)'>
                                     {{ $vehicle->vehicle_name ?? $vehicle->name }} -
-                                    {{ $vehicle->vehicle_number ?? $vehicle->vehicle_number  }}
+                                    {{ $vehicle->vehicle_number ?? $vehicle->vehicle_number }}
                                 </option>
                             @endforeach
                         </select>
@@ -75,7 +76,7 @@
                         <select name="status" id="status" class="form-select" required>
                             <option value="Quotation">Quotation</option>
                             <option value="Accepted">Accepted</option>
-                            <option value="Ivoiced">Invoiced</option>
+                            <option value="Invoiced">Invoiced</option>
                             <option value="Partially Paid">Partially Paid</option>
                             <option value="Paid">Paid</option>
                             <option value="Cancelled">Cancelled</option>
@@ -90,17 +91,39 @@
                         </select>
                     </div>
 
-                     <div class="col-md-3">
-                            <label for="published_at" class="form-label">Published Date</label>
-                            <input type="date" name="published_at" id="published_at" class="form-control"
-                                value="{{ old('published_at', now()->toDateString()) }}">
-                        </div>
+                    <div class="col-md-3">
+                        <label for="published_at" class="form-label">Published Date</label>
+                        <input type="date" name="published_at" id="published_at" class="form-control"
+                            value="{{ old('published_at', now()->toDateString()) }}">
+                    </div>
 
                     <!-- Notes -->
                     <div class="col-md-12 mb-3">
                         <label class="form-label">Notes</label>
                         <textarea name="notes" id="notes" rows="4" class="form-control"></textarea>
                     </div>
+
+                    {{-- Description Points (like Tour) --}}
+                    <div class="col-md-12 mb-3">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <strong>Description Points</strong>
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="addDescBlockBtn">
+                                    + Add Point
+                                </button>
+                            </div>
+
+                            <div class="card-body" id="descPointsWrapper">
+                                {{-- Start with one row (optional) --}}
+                            </div>
+
+                            <div class="px-3 pb-3 text-muted" style="font-size:12px;">
+                                Add main description titles and optional sub points (bullets). This will show in
+                                preview/PDF.
+                            </div>
+                        </div>
+                    </div>
+
 
                     {{-- Price & Payment Details --}}
                     <div class="col-md-6 mb-3">
@@ -126,8 +149,8 @@
                                 <div class="mb-2 row">
                                     <label class="col-sm-2 col-form-label">Base Price</label>
                                     <div class="col-sm-10">
-                                        <input type="number" step="0.01" value="0" name="price" id="price"
-                                            class="form-control calc" required>
+                                        <input type="number" step="0.01" value="0" name="price"
+                                            id="price" class="form-control calc" required>
                                     </div>
                                 </div>
 
@@ -215,9 +238,87 @@
     </div>
 @endsection
 
+<script>
+    // ---------- Description UI helpers (must be global for onclick) ----------
+    let descIndex = 0;
+
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function addDescBlock() {
+        const wrapper = document.getElementById('descPointsWrapper');
+        if (!wrapper) return;
+
+        const idx = descIndex++;
+
+        const block = document.createElement('div');
+        block.className = 'border rounded p-3 mb-3';
+        block.setAttribute('data-index', idx);
+
+        block.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-bold">Main Point</div>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDescBlock(${idx})">
+                    Remove
+                </button>
+            </div>
+
+            <div class="mb-2">
+                <input type="text" class="form-control"
+                    name="desc_points[${idx}][title]"
+                    placeholder="Title (e.g., Inclusions / Vehicle & Driver)">
+            </div>
+
+            <div class="subPoints"></div>
+
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2"
+                onclick="addSubPoint(${idx})">
+                + Add Sub Point
+            </button>
+        `;
+
+        wrapper.appendChild(block);
+        addSubPoint(idx);
+    }
+
+    function removeDescBlock(idx) {
+        const block = document.querySelector(`#descPointsWrapper [data-index="${idx}"]`);
+        if (block) block.remove();
+    }
+
+    function addSubPoint(idx) {
+        const block = document.querySelector(`#descPointsWrapper [data-index="${idx}"]`);
+        if (!block) return;
+
+        const subWrap = block.querySelector('.subPoints');
+
+        const row = document.createElement('div');
+        row.className = 'd-flex gap-2 mb-2';
+
+        row.innerHTML = `
+            <input type="text" class="form-control"
+                name="desc_points[${idx}][subs][]"
+                placeholder="Sub point (e.g., Fuel included)">
+            <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">✕</button>
+        `;
+
+        subWrap.appendChild(row);
+    }
+</script>
+
+
 @section('scripts')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            const addBtn = document.getElementById('addDescBlockBtn');
+            if (addBtn) addBtn.addEventListener('click', addDescBlock);
+            addDescBlock();
 
             const priceInput = document.getElementById("price");
             const additionalInput = document.getElementById("additional_price");
@@ -258,6 +359,8 @@
         }
 
         function previewBooking() {
+
+
             const customerSelect = document.getElementById('customer_id');
             const vehicleSelect = document.getElementById('vehicle_id');
 
@@ -267,6 +370,7 @@
             const customerName = customerOption.text;
             const customerEmail = customerOption.dataset.email;
             const customerPhone = customerOption.dataset.phone;
+            const customerAddress = customerOption.dataset.address || '-';
 
             const vehicleName = vehicleOption.text;
 
@@ -298,6 +402,56 @@
             const discount = parseFloat(document.getElementById('discount').value) || 0;
             const advancePaid = parseFloat(document.getElementById('advance_paid').value) || 0;
 
+            const descBlocks = document.querySelectorAll('#descPointsWrapper [data-index]');
+            let descHtml = '';
+            let counter = 1;
+
+            descBlocks.forEach((block, index) => {
+                const titleInput = block.querySelector(`input[name^="desc_points"][name$="[title]"]`);
+                const title = titleInput ? titleInput.value.trim() : '';
+
+                const subInputs = block.querySelectorAll('.subPoints input');
+                const subs = Array.from(subInputs).map(i => i.value.trim()).filter(Boolean);
+
+                if (!title && subs.length === 0) return;
+
+                descHtml += `
+        <tr>
+            <td style="padding:12px; text-align:center; border-bottom:1px solid #eee; vertical-align:top;">
+                ${counter}
+            </td>
+            <td style="padding:12px; border-bottom:1px solid #eee;">
+                <div style="font-weight:700; margin-bottom:6px;">
+                    ${escapeHtml(title)}
+                </div>
+                ${subs.length > 0 ? `
+                            <ul style="margin:0 0 0 18px; padding:0; font-size:12.5px; color:#555; line-height:1.6;">
+                                ${subs.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+                            </ul>
+                        ` : ''}
+            </td>
+            ${
+                index === 0
+                    ? `<td style="padding:12px; text-align:right; border-bottom:1px solid #eee; vertical-align:top;">
+                                ${price.toFixed(2)}
+                               </td>`
+                    : `<td style="padding:12px; border-bottom:1px solid #eee;"></td>`
+            }
+        </tr>
+    `;
+                counter++;
+            });
+
+            if (!descHtml) {
+                descHtml = `
+        <tr>
+            <td colspan="3" style="padding:12px; color:#888; text-align:left;">
+                No description points added.
+            </td>
+        </tr>
+    `;
+            }
+
             const total = Math.max(0, (price + addCharges) - discount);
             const balance = Math.max(0, total - advancePaid);
 
@@ -310,142 +464,169 @@
             const invoiceDate = new Date().toLocaleDateString('en-GB');
 
             const html = `
-<div style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
+<div style="max-width:800px; margin:0 auto; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color:#333; background:#fff; padding:20px;">
 
-    <!-- Header -->
-    <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
+    <!-- Header (Tour style) -->
+    <table style="width:100%; border-bottom:2px solid #333; padding-bottom:20px; margin-bottom:30px;">
         <tr>
-            <td>
-                <img src="{{ asset('images/vacayguider.png') }}" style="height:80px;">
-                <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
-                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
-                    Negombo, Sri Lanka<br>
-                    +94 114 272 372 | info@vacayguider.com
+            <td style="vertical-align: top;">
+                <img src="{{ asset('images/vacayguider.png') }}" alt="Logo" style="height:80px;">
+                <div style="margin-top:10px; font-size:12px; line-height:1.4; color:#666;">
+                    <strong>VACAYGUIDER PRIVATE LIMITED</strong><br>
+                    22/14 C, Asarappa Road, Negombo.<br>
+                    +94114272372 / +94711 999 444 / +94 777 035 325 <br>
+                    info@vacayguider.com
                 </div>
             </td>
-            <td style="text-align:right;">
-                <h1 style="margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">${status}</h1>
-                <table style="margin-left:auto;margin-top:10px;font-size:13px;">
+
+            <td style="text-align:right; vertical-align: bottom;">
+                <h1 style="margin:0; font-size:24px; font-weight:300; letter-spacing:2px; text-transform:uppercase;">
+                    ${escapeHtml(status)}
+                </h1>
+
+                <table style="margin-left:auto; margin-top:10px; font-size:13px; border-collapse:collapse;">
                     <tr>
-                        <td style="color:#888;padding:2px 10px;">Invoice No</td>
-                        <td>${invoiceNo}</td>
+                        <td style="padding:2px 10px; text-align:left; color:#888;">Invoice No:</td>
+                        <td style="padding:2px 10px; font-weight:bold;">${escapeHtml(invoiceNo)}</td>
                     </tr>
                     <tr>
-                        <td style="color:#888;padding:2px 10px;">Date</td>
-                        <td>${invoiceDate}</td>
+                        <td style="padding:2px 10px; text-align:left; color:#888;">Date:</td>
+                        <td style="padding:2px 10px;">${invoiceDate}</td>
                     </tr>
-                   
+                    <tr>
+                        <td style="padding:2px 10px; text-align:left; color:#888;">Payment:</td>
+                        <td style="padding:2px 10px;">${escapeHtml(paymentStatus)}</td>
+                    </tr>
                 </table>
             </td>
         </tr>
     </table>
 
-    <!-- Customer & Booking Info -->
-    <table style="width:100%;margin-bottom:35px;font-size:13px;">
+    <!-- Client & Booking Info (Tour style) -->
+    <table style="width:100%; margin-bottom:40px; font-size:13px;">
         <tr>
-            <td style="width:50%;vertical-align:top;">
-                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Client Information</h4>
-                <div style="font-size:15px;font-weight:bold;">${customerName}</div>
-                <div>${customerEmail}</div>
-                <div>${customerPhone}</div>
+            <td style="width:50%; vertical-align:top;">
+                <h4 style="text-transform:uppercase; font-size:11px; color:#888; margin-bottom:10px; letter-spacing:1px;">
+                    Client Information
+                </h4>
+                <div style="font-size:15px; font-weight:bold; margin-bottom:5px;">
+                    ${escapeHtml(customerName)}
+                </div>
+                <div style="color:#555;">${escapeHtml(customerAddress)}</div>
+                <div style="color:#555;">${escapeHtml(customerEmail || '-')}</div>
+                <div style="color:#555;">${escapeHtml(customerPhone || '-')}</div>
             </td>
-            <td style="width:50%;vertical-align:top;border-left:1px solid #eee;padding-left:25px;">
-                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Booking Details</h4>
-                <div><strong>Vehicle:</strong> ${vehicleName}</div>
-                <div><strong>Pickup:</strong> ${startDatetime}</div>
-                <div><strong>Drop-off:</strong> ${endDatetime}</div>
-                <div><strong>Status:</strong> ${status}</div>
-                <div><strong>Payment:</strong> ${paymentStatus}</div>
+
+            <td style="width:50%; vertical-align:top; border-left:1px solid #eee; padding-left:30px;">
+                <h4 style="text-transform:uppercase; font-size:11px; color:#888; margin-bottom:10px; letter-spacing:1px;">
+                    Booking Information
+                </h4>
+                <div style="margin-bottom:3px;"><strong>Vehicle:</strong> ${escapeHtml(vehicleName)}</div>
+                <div style="margin-bottom:3px;"><strong>Start:</strong> ${escapeHtml(startDatetime)}</div>
+                <div style="margin-bottom:3px;"><strong>End:</strong> ${escapeHtml(endDatetime)}</div>
             </td>
         </tr>
     </table>
 
-    <!-- Vehicle Preview -->
-   <table style="width:100%;margin-bottom:30px; border-collapse:collapse;">
-    <tr>
-          <!-- Vehicle Info -->
-        <td style="vertical-align:top; padding-right:15px;">
-            <h3 style="margin-top:0;">${vehicleName}</h3>
-            <p style="color:#666;font-size:13px;">${note || ''}</p>
-        </td>
+    
+    <!-- Vehicle Images (keep your section) -->
+    <table style="width:100%;margin-bottom:30px; border-collapse:collapse;">
+        <tr>
+            <td style="vertical-align:top; padding-right:15px;">
+                <h3 style="margin-top:0;">${escapeHtml(vehicleName)}</h3>
+                ${note ? `<p style="color:#666;font-size:13px; white-space:pre-wrap;">${escapeHtml(note)}</p>` : ''}
+            </td>
 
-        <!-- Main Image -->
-        <td style="width:300px; vertical-align:top;">
-            <img src="${mainImage}" style="width:300px;height:200px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
-        </td>
+            <td style="width:300px; vertical-align:top;">
+                <img src="${mainImage}" style="width:300px;height:200px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+            </td>
 
-        <!-- Sub Images -->
-        <td style="width:260px; vertical-align:top; padding-left:10px;">
-          ${images.length > 1 ? (function() {
-    let html = '<table style="width:100%; border-collapse:collapse;">';
-    const subImages = images.slice(1,5); // max 4 sub-images
-    for (let i = 0; i < subImages.length; i++) {
-        if (i % 2 === 0) html += '<tr>';
-        html += `<td style="padding:2px;">
-                            <img src="${getImageUrl(subImages[i])}" style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
-                         </td>`;
-        if (i % 2 === 1) html += '</tr>';
-    }
-    if (subImages.length % 2 !== 0) html += '<td></td></tr>'; // close last row if odd
-    html += '</table>';
-    return html;
-})() : ''}
-        </td>
-
-      
-    </tr>
-</table>
-
-
-    <!-- Charges -->
-    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:30px;">
+            <td style="width:260px; vertical-align:top; padding-left:10px;">
+                ${images.length > 1 ? (function() {
+                    let html = '<table style="width:100%; border-collapse:collapse;">';
+                    const subImages = images.slice(1,5);
+                    for (let i = 0; i < subImages.length; i++) {
+                        if (i % 2 === 0) html += '<tr>';
+                        html += `<td style="padding:2px;">
+                                    <img src="${getImageUrl(subImages[i])}" style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+                                </td>`;
+                        if (i % 2 === 1) html += '</tr>';
+                    }
+                    if (subImages.length % 2 !== 0) html += '<td></td></tr>';
+                    html += '</table>';
+                    return html;
+                })() : ''}
+            </td>
+        </tr>
+    </table>
+    <!-- Description Table (Tour style with No column) -->
+    <table style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:14px;">
         <thead>
-            <tr style="background:#f9f9f9;border-top:1px solid #333;border-bottom:1px solid #333;">
-                <th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;">Description</th>
-                <th style="padding:12px;text-align:right;font-size:11px;text-transform:uppercase;">Amount (${currency})</th>
+            <tr style="background:#f9f9f9; border-top:1px solid #333; border-bottom:1px solid #333;">
+                <th style="padding:12px; width:50px; text-align:center; text-transform:uppercase; font-size:11px;">No</th>
+                <th style="padding:12px; text-align:left; text-transform:uppercase; font-size:11px;">Description</th>
+                <th style="padding:12px; text-align:right; text-transform:uppercase; font-size:11px;">
+                    Total (${currency})
+                </th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td style="padding:14px;border-bottom:1px solid #eee;">Base Rental Charge</td>
-                <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${price.toFixed(2)}</td>
-            </tr>
+            ${descHtml}
+
             ${addCharges > 0 ? `
                         <tr>
-                            <td style="padding:14px;border-bottom:1px solid #eee;">Additional Charges</td>
-                            <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">${addCharges.toFixed(2)}</td>
+                            <td style="padding:12px; text-align:center; border-bottom:1px solid #eee;">-</td>
+                            <td style="padding:12px; border-bottom:1px solid #eee;">Additional Charges</td>
+                            <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">${addCharges.toFixed(2)}</td>
                         </tr>` : ''}
+
             ${discount > 0 ? `
                         <tr>
-                            <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
-                            <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">(${discount.toFixed(2)})</td>
+                            <td style="padding:12px; text-align:center; border-bottom:1px solid #eee;">-</td>
+                            <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">Discount Applied</td>
+                            <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">(${discount.toFixed(2)})</td>
                         </tr>` : ''}
         </tbody>
     </table>
 
-    <!-- Totals -->
-    <div style="width:40%;margin-left:auto;">
-        <table style="width:100%;font-size:14px;">
+
+    <!-- Totals (Tour style) -->
+    <div style="width:40%; margin-left:auto;">
+        <table style="width:100%; font-size:14px; border-collapse:collapse;">
             <tr>
-                <td style="padding:8px 0;color:#888;">Subtotal</td>
-                <td style="padding:8px 0;text-align:right;">${total.toFixed(2)}</td>
+                <td style="padding:8px 0; color:#888;">Subtotal:</td>
+                <td style="padding:8px 0; text-align:right;">${total.toFixed(2)}</td>
             </tr>
             <tr>
-                <td style="padding:8px 0;color:#888;">Advance Paid</td>
-                <td style="padding:8px 0;text-align:right;color:#198754;">${advancePaid.toFixed(2)}</td>
+                <td style="padding:8px 0; color:#888;">Advance Paid:</td>
+                <td style="padding:8px 0; text-align:right; color:#1a7f37;">${advancePaid.toFixed(2)}</td>
             </tr>
             <tr style="border-top:1px solid #333;">
-                <td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance Due</td>
-                <td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">
+                <td style="padding:12px 0; font-weight:bold; font-size:16px;">Balance Due:</td>
+                <td style="padding:12px 0; text-align:right; font-weight:bold; font-size:18px; color:#000;">
                     ${currency} ${balance.toFixed(2)}
                 </td>
             </tr>
         </table>
     </div>
 
-    <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
-        This is a system generated invoice. No signature required.<br>
-        <strong>Vacay Guider</strong> | www.vacayguider.com
+    <table style="width:100%; margin-bottom:20px; border-collapse:collapse;">
+    <tr>
+        <td style="padding:0;">
+
+
+            ${note && note.trim() !== ''
+                ? `<div style="color:#666; font-size:13px; line-height:1.6; white-space:pre-wrap;">
+                            ${escapeHtml(note)}
+                       </div>`
+                : `<div style="color:#999; font-size:12px;">No notes provided.</div>`
+            }
+        </td>
+    </tr>
+</table>
+    <!-- Footer (Tour-like) -->
+    <div style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
+        <p>www.vacayguider.com | Thank you for your business.</p>
     </div>
 
 </div>`;

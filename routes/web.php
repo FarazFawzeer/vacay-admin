@@ -26,6 +26,7 @@ use App\Http\Controllers\AirlineInvBookingController;
 use App\Http\Controllers\MessageController;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ReminderController;
 
 require __DIR__ . '/auth.php';
 
@@ -253,6 +254,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 
 
     Route::resource('reminders', \App\Http\Controllers\Admin\ReminderController::class);
+    Route::patch('/reminders/{reminder}/status', [ReminderController::class, 'updateStatus'])
+    ->name('reminders.updateStatus');
 
     Route::post(
         'reminders/{reminder}/complete',

@@ -7,14 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('tour_bookings', function (Blueprint $table) {
-            $table->json('desc_points')->nullable()->after('special_requirements');
+        Schema::table('airline_inv_bookings', function (Blueprint $table) {
+            // If your DB supports JSON, use json. Otherwise use longText.
+            $table->json('desc_points')->nullable()->after('note');
         });
     }
 
     public function down(): void
     {
-        Schema::table('tour_bookings', function (Blueprint $table) {
+        Schema::table('airline_inv_bookings', function (Blueprint $table) {
             $table->dropColumn('desc_points');
         });
     }

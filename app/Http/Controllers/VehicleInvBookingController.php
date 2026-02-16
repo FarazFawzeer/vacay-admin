@@ -70,6 +70,9 @@ class VehicleInvBookingController extends Controller
     /**
      * Store new booking
      */
+    /**
+     * Store new booking
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -79,55 +82,97 @@ class VehicleInvBookingController extends Controller
             'pickup_datetime'    => 'required|date',
             'dropoff_location'   => 'required|string',
             'dropoff_datetime'   => 'required|date|after_or_equal:pickup_datetime',
+
             'price'              => 'required|numeric|min:0',
             'additional_charges' => 'nullable|numeric|min:0',
             'discount'           => 'nullable|numeric|min:0',
-            'advance_paid'       => 'nullable|numeric|min:0', // <-- added validation
+            'advance_paid'       => 'nullable|numeric|min:0',
             'currency'           => 'required|string|max:5',
+
             'status'             => 'required',
+            'payment_status'     => 'required|in:pending,partial,paid',
+            'payment_method'     => 'nullable|string|max:50',
+
             'mileage'            => 'required|in:unlimited,limited',
             'total_km'           => 'required_if:mileage,limited|nullable|numeric|min:1',
-            'note'               => 'nullable|string|max:1000', // optional note
-            'published_at' => 'nullable|date',
+
+            'note'               => 'nullable|string|max:5000',
+            'published_at'       => 'nullable|date',
+
+            'desc_points'              => 'nullable|array',
+            'desc_points.*.title'      => 'nullable|string|max:255',
+            'desc_points.*.subs'       => 'nullable|array',
+            'desc_points.*.subs.*'     => 'nullable|string|max:255',
         ]);
 
-        // Calculate total
-        $total = ($request->price + ($request->additional_charges ?? 0)) - ($request->discount ?? 0);
+        // ✅ clean desc_points
+        $descPoints = collect($request->input('desc_points', []))
+            ->map(function ($row) {
+                $title = trim((string)($row['title'] ?? ''));
 
-        // Generate Invoice Number
-        $last = VehicleInvBooking::latest()->first();
+                $subs = collect($row['subs'] ?? [])
+                    ->map(fn($s) => trim((string)$s))
+                    ->filter(fn($s) => $s !== '')
+                    ->values()
+                    ->all();
+
+                return ['title' => $title, 'subs' => $subs];
+            })
+            ->filter(fn($row) => $row['title'] !== '' || count($row['subs']) > 0)
+            ->values()
+            ->all();
+
+        // totals
+        $price    = (float) $request->price;
+        $add      = (float) ($request->additional_charges ?? 0);
+        $discount = (float) ($request->discount ?? 0);
+        $advance  = (float) ($request->advance_paid ?? 0);
+        $total    = max(0, ($price + $add) - $discount);
+
+        // invoice
+        $last = VehicleInvBooking::orderByDesc('id')->first();
         $next = 1;
-        if ($last && preg_match('/VB-(\d+)/', $last->inv_no, $m)) {
-            $next = intval($m[1]) + 1;
+        if ($last && preg_match('/VB-(\d+)/', (string)$last->inv_no, $m)) {
+            $next = ((int)$m[1]) + 1;
         }
         $invNo = 'VB-' . str_pad($next, 4, '0', STR_PAD_LEFT);
 
-        // Store Booking
         VehicleInvBooking::create([
             'inv_no'             => $invNo,
             'customer_id'        => $request->customer_id,
             'vehicle_id'         => $request->vehicle_id,
+
             'pickup_location'    => $request->pickup_location,
             'pickup_datetime'    => $request->pickup_datetime,
             'dropoff_location'   => $request->dropoff_location,
             'dropoff_datetime'   => $request->dropoff_datetime,
+
             'mileage'            => $request->mileage,
-            'total_km'           => $request->total_km,
-            'price'              => $request->price,
-            'additional_charges' => $request->additional_charges ?? 0,
-            'discount'           => $request->discount ?? 0,
-            'advance_paid'       => $request->advance_paid ?? 0, // <-- store advance paid
+            'total_km'           => $request->mileage === 'limited' ? $request->total_km : null,
+
+            'price'              => $price,
+            'additional_charges' => $add,
+            'discount'           => $discount,
+            'advance_paid'       => $advance,
             'total_price'        => $total,
-            'note'               => $request->note ?? '',       // <-- store note
+
+            // ✅ SAVE INTO THE CORRECT COLUMN
+            'desc_points'        => empty($descPoints) ? null : $descPoints,
+
+            'note'               => $request->note ?? '',
             'currency'           => $request->currency,
             'status'             => $request->status,
-            'payment_status'     => 'unpaid',
+            'payment_status'     => $request->payment_status,
             'payment_method'     => $request->payment_method,
-            'published_at' => $request->published_at,
+            'published_at'       => $request->published_at,
+
+            'auth_id'            => auth()->id(),
         ]);
 
         return redirect()->back()->with('success', 'Vehicle Booking saved successfully!');
     }
+
+
 
 
 
@@ -147,7 +192,6 @@ class VehicleInvBookingController extends Controller
      */
     public function update(Request $request, VehicleInvBooking $booking)
     {
-        // Validate request
         $request->validate([
             'customer_id'        => 'required|exists:customers,id',
             'vehicle_id'         => 'required|exists:vehicle_details,id',
@@ -155,22 +199,52 @@ class VehicleInvBookingController extends Controller
             'pickup_datetime'    => 'required|date',
             'dropoff_location'   => 'required|string',
             'dropoff_datetime'   => 'required|date|after_or_equal:pickup_datetime',
+
             'price'              => 'required|numeric|min:0',
             'additional_charges' => 'nullable|numeric|min:0',
             'discount'           => 'nullable|numeric|min:0',
-            'advance_paid'       => 'nullable|numeric|min:0', // <-- added validation
+            'advance_paid'       => 'nullable|numeric|min:0',
             'currency'           => 'required|string|max:5',
+
             'status'             => 'required',
+            'payment_status'     => 'required|in:pending,partial,paid',
+            'payment_method'     => 'nullable|string|max:50',
+
             'mileage'            => 'required|in:unlimited,limited',
             'total_km'           => 'required_if:mileage,limited|nullable|numeric|min:1',
-            'note'               => 'nullable|string|max:1000', // optional note
-            'published_at' => 'nullable|date',
+
+            'note'               => 'nullable|string|max:5000',
+            'published_at'       => 'nullable|date',
+
+            'desc_points'              => 'nullable|array',
+            'desc_points.*.title'      => 'nullable|string|max:255',
+            'desc_points.*.subs'       => 'nullable|array',
+            'desc_points.*.subs.*'     => 'nullable|string|max:255',
         ]);
 
-        // Recalculate total
-        $total = ($request->price + ($request->additional_charges ?? 0)) - ($request->discount ?? 0);
+        $descPoints = collect($request->input('desc_points', []))
+            ->map(function ($row) {
+                $title = trim((string)($row['title'] ?? ''));
 
-        // Update booking
+                $subs = collect($row['subs'] ?? [])
+                    ->map(fn($s) => trim((string)$s))
+                    ->filter(fn($s) => $s !== '')
+                    ->values()
+                    ->all();
+
+                return ['title' => $title, 'subs' => $subs];
+            })
+            ->filter(fn($row) => $row['title'] !== '' || count($row['subs']) > 0)
+            ->values()
+            ->all();
+
+        $price    = (float) $request->price;
+        $add      = (float) ($request->additional_charges ?? 0);
+        $discount = (float) ($request->discount ?? 0);
+        $advance  = (float) ($request->advance_paid ?? 0);
+
+        $total = max(0, ($price + $add) - $discount);
+
         $booking->update([
             'customer_id'        => $request->customer_id,
             'vehicle_id'         => $request->vehicle_id,
@@ -178,21 +252,32 @@ class VehicleInvBookingController extends Controller
             'pickup_datetime'    => $request->pickup_datetime,
             'dropoff_location'   => $request->dropoff_location,
             'dropoff_datetime'   => $request->dropoff_datetime,
+
             'mileage'            => $request->mileage,
-            'total_km'           => $request->total_km,
-            'price'              => $request->price,
-            'additional_charges' => $request->additional_charges ?? 0,
-            'discount'           => $request->discount ?? 0,
+            'total_km'           => $request->mileage === 'limited' ? $request->total_km : null,
+
+            'price'              => $price,
+            'additional_charges' => $add,
+            'discount'           => $discount,
+            'advance_paid'       => $advance,
             'total_price'        => $total,
+
+            // ✅ FIXED: correct column
+            'desc_points'        => empty($descPoints) ? null : $descPoints,
+
             'note'               => $request->note,
             'currency'           => $request->currency,
             'status'             => $request->status,
             'payment_status'     => $request->payment_status,
             'payment_method'     => $request->payment_method,
-            'published_at' => $request->published_at,
+            'published_at'       => $request->published_at,
+
+            'auth_id'            => auth()->id(),
+            'updated_by'         => auth()->id(),
         ]);
 
-        return redirect()->route('admin.vehicle-bookings.edit', $booking->id)
+        return redirect()
+            ->route('admin.vehicle-bookings.edit', $booking->id)
             ->with('success', 'Vehicle Booking updated successfully!');
     }
 

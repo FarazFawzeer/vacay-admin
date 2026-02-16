@@ -20,103 +20,136 @@
             @php
                 // ---------- Images ----------
                 $images = [];
-                if ($booking->vehicle->vehicle_image) {
+                if (!empty($booking->vehicle?->vehicle_image)) {
                     $images[] = $booking->vehicle->vehicle_image;
                 }
-                if (!empty($booking->vehicle->sub_image) && is_array($booking->vehicle->sub_image)) {
+                if (!empty($booking->vehicle?->sub_image) && is_array($booking->vehicle->sub_image)) {
                     $images = array_merge($images, $booking->vehicle->sub_image);
                 }
 
                 $mainImage = count($images)
                     ? asset('storage/' . ltrim($images[0], '/'))
-                    : 'https://via.placeholder.com/280x180?text=No+Image';
+                    : 'https://via.placeholder.com/300x200?text=No+Image';
 
                 $subImages = array_slice($images, 1, 4); // max 4
 
                 // ---------- Calculations ----------
-                $subtotal = $booking->price + ($booking->additional_price ?? 0) - ($booking->discount ?? 0);
-                $advance  = $booking->advance_paid ?? 0;
-                $balance  = max(0, $subtotal - $advance);
+                $price      = (float) ($booking->price ?? 0);
+                $addCharges = (float) ($booking->additional_price ?? 0);
+                $discount   = (float) ($booking->discount ?? 0);
+
+                $total   = max(0, ($price + $addCharges) - $discount);
+                $advance = (float) ($booking->advance_paid ?? 0);
+                $balance = max(0, $total - $advance);
+
+                // ---------- Desc Points ----------
+                $descPoints = $booking->desc_points ?? [];
+                if (is_string($descPoints)) {
+                    $decoded = json_decode($descPoints, true);
+                    $descPoints = is_array($decoded) ? $decoded : [];
+                }
+
+                $currency = $booking->currency ?? 'LKR';
+
+                $note = $booking->notes ?? '';
+
+                $vehicleName = $booking->vehicle?->vehicle_name ?? $booking->vehicle?->name ?? '-';
+                $vehicleNumber = $booking->vehicle?->vehicle_number ?? '-';
+                $vehicleLabel = trim($vehicleName . ' - ' . $vehicleNumber, ' -');
+
+                $invoiceDate = $booking->published_at
+                    ? \Carbon\Carbon::parse($booking->published_at)->format('d/m/Y')
+                    : ($booking->created_at?->format('d/m/Y') ?? now()->format('d/m/Y'));
             @endphp
 
-            <div style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
+            <div style="max-width:800px; margin:0 auto; font-family:'Helvetica Neue', Helvetica, Arial, sans-serif; color:#333; background:#fff; padding:20px;">
 
-                <!-- Header -->
-                <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
+                <!-- Header (Tour style) -->
+                <table style="width:100%; border-bottom:2px solid #333; padding-bottom:20px; margin-bottom:30px;">
                     <tr>
-                        <td>
-                            <img src="{{ asset('images/vacayguider.png') }}" style="height:80px;">
-                            <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
-                                <strong>Vacay Guider (Pvt) Ltd.</strong><br>
-                                Negombo, Sri Lanka<br>
-                              +94 114 272 372 | +94 711 999 444 |  +94 777 035 325 <br>
-                                    info@vacayguider.com
+                        <td style="vertical-align: top;">
+                            <img src="{{ asset('images/vacayguider.png') }}" alt="Logo" style="height:80px;">
+                            <div style="margin-top:10px; font-size:12px; line-height:1.4; color:#666;">
+                                <strong>VACAYGUIDER PRIVATE LIMITED</strong><br>
+                                22/14 C, Asarappa Road, Negombo.<br>
+                                +94114272372 / +94711 999 444 / +94 777 035 325 <br>
+                                info@vacayguider.com
                             </div>
                         </td>
-                        <td style="text-align:right;">
-                            <h1 style="margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">
-                                {{ strtoupper($booking->status) }}
+
+                        <td style="text-align:right; vertical-align: bottom;">
+                            <h1 style="margin:0; font-size:24px; font-weight:300; letter-spacing:2px; text-transform:uppercase;">
+                                {{ $booking->status }}
                             </h1>
-                            <table style="margin-left:auto;margin-top:10px;font-size:13px;">
+
+                            <table style="margin-left:auto; margin-top:10px; font-size:13px; border-collapse:collapse;">
                                 <tr>
-                                    <td style="color:#888;padding:2px 10px;">Invoice No</td>
-                                    <td>{{ $booking->inv_no }}</td>
+                                    <td style="padding:2px 10px; text-align:left; color:#888;">Invoice No:</td>
+                                    <td style="padding:2px 10px; font-weight:bold;">{{ $booking->inv_no ?? '-' }}</td>
                                 </tr>
                                 <tr>
-                                    <td style="color:#888;padding:2px 10px;">Date</td>
-                                    <td>{{ $booking->created_at->format('d/m/Y') }}</td>
+                                    <td style="padding:2px 10px; text-align:left; color:#888;">Date:</td>
+                                    <td style="padding:2px 10px;">{{ $invoiceDate }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:2px 10px; text-align:left; color:#888;">Payment:</td>
+                                    <td style="padding:2px 10px;">{{ $booking->payment_status ?? '-' }}</td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                 </table>
 
-                <!-- Customer & Booking Info -->
-                <table style="width:100%;margin-bottom:35px;font-size:13px;">
+                <!-- Client & Booking Info (Tour style) -->
+                <table style="width:100%; margin-bottom:40px; font-size:13px;">
                     <tr>
-                        <td style="width:50%;vertical-align:top;">
-                            <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Client Information</h4>
-                            <div style="font-size:15px;font-weight:bold;">{{ $booking->customer->name }}</div>
-                            <div>{{ $booking->customer->email ?? '-' }}</div>
-                            <div>{{ $booking->customer->contact ?? '-' }}</div>
+                        <td style="width:50%; vertical-align:top;">
+                            <h4 style="text-transform:uppercase; font-size:11px; color:#888; margin-bottom:10px; letter-spacing:1px;">
+                                Client Information
+                            </h4>
+                            <div style="font-size:15px; font-weight:bold; margin-bottom:5px;">
+                                {{ $booking->customer?->name ?? '-' }}
+                            </div>
+                            <div style="color:#555;">{{ $booking->customer?->address ?? '-' }}</div>
+                            <div style="color:#555;">{{ $booking->customer?->email ?? '-' }}</div>
+                            <div style="color:#555;">{{ $booking->customer?->contact ?? '-' }}</div>
                         </td>
-                        <td style="width:50%;vertical-align:top;border-left:1px solid #eee;padding-left:25px;">
-                            <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">Booking Details</h4>
-                            <div><strong>Vehicle:</strong> {{ $booking->vehicle->name }}</div>
-                            <div><strong>Pickup:</strong> {{ $booking->start_datetime }}</div>
-                            <div><strong>Drop-off:</strong> {{ $booking->end_datetime }}</div>
-                            <div><strong>Status:</strong> {{ ucfirst($booking->status) }}</div>
-                            <div><strong>Payment:</strong> {{ ucfirst($booking->payment_status) }}</div>
+
+                        <td style="width:50%; vertical-align:top; border-left:1px solid #eee; padding-left:30px;">
+                            <h4 style="text-transform:uppercase; font-size:11px; color:#888; margin-bottom:10px; letter-spacing:1px;">
+                                Booking Information
+                            </h4>
+                            <div style="margin-bottom:3px;"><strong>Vehicle:</strong> {{ $vehicleLabel }}</div>
+                            <div style="margin-bottom:3px;"><strong>Start:</strong> {{ $booking->start_datetime ?? '-' }}</div>
+                            <div style="margin-bottom:3px;"><strong>End:</strong> {{ $booking->end_datetime ?? '-' }}</div>
                         </td>
                     </tr>
                 </table>
 
-                <!-- Vehicle Preview -->
-                <table style="width:100%;margin-bottom:30px;border-collapse:collapse;">
+                <!-- Vehicle Images -->
+                <table style="width:100%; margin-bottom:30px; border-collapse:collapse;">
                     <tr>
-                        <!-- Info -->
-                        <td style="vertical-align:top;padding-right:15px;">
-                            <h3 style="margin-top:0;">{{ $booking->vehicle->name }}</h3>
-                            <p style="color:#666;font-size:13px;">{{ $booking->notes }}</p>
+                        <td style="vertical-align:top; padding-right:15px;">
+                            <h3 style="margin-top:0;">{{ $vehicleLabel }}</h3>
+                            @if(!empty(trim($note)))
+                                <p style="color:#666; font-size:13px; white-space:pre-wrap;">{{ $note }}</p>
+                            @endif
                         </td>
 
-                        <!-- Main Image -->
-                        <td style="width:300px;vertical-align:top;">
-                            <img src="{{ $mainImage }}"
-                                 style="width:300px;height:200px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+                        <td style="width:300px; vertical-align:top;">
+                            <img src="{{ $mainImage }}" style="width:300px; height:200px; object-fit:cover; border:1px solid #ddd; border-radius:4px;">
                         </td>
 
-                        <!-- Sub Images 2x2 -->
-                        <td style="width:260px;vertical-align:top;padding-left:10px;">
+                        <td style="width:260px; vertical-align:top; padding-left:10px;">
                             @if(count($subImages))
-                                <table style="width:100%;border-collapse:collapse;">
+                                <table style="width:100%; border-collapse:collapse;">
                                     @foreach($subImages as $i => $img)
                                         @if($i % 2 === 0)
                                             <tr>
                                         @endif
                                         <td style="padding:2px;">
                                             <img src="{{ asset('storage/' . ltrim($img,'/')) }}"
-                                                 style="width:120px;height:95px;object-fit:cover;border:1px solid #ddd;border-radius:4px;">
+                                                 style="width:120px; height:95px; object-fit:cover; border:1px solid #ddd; border-radius:4px;">
                                         </td>
                                         @if($i % 2 === 1)
                                             </tr>
@@ -131,71 +164,131 @@
                     </tr>
                 </table>
 
-                <!-- Charges -->
-                <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:30px;">
+                <!-- Description Table (Tour style with No column) -->
+                <table style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:14px;">
                     <thead>
-                        <tr style="background:#f9f9f9;border-top:1px solid #333;border-bottom:1px solid #333;">
-                            <th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;">Description</th>
-                            <th style="padding:12px;text-align:right;font-size:11px;text-transform:uppercase;">
-                                Amount ({{ $booking->currency }})
+                        <tr style="background:#f9f9f9; border-top:1px solid #333; border-bottom:1px solid #333;">
+                            <th style="padding:12px; width:50px; text-align:center; text-transform:uppercase; font-size:11px;">No</th>
+                            <th style="padding:12px; text-align:left; text-transform:uppercase; font-size:11px;">Description</th>
+                            <th style="padding:12px; text-align:right; text-transform:uppercase; font-size:11px;">
+                                Total ({{ $currency }})
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td style="padding:14px;border-bottom:1px solid #eee;">Base Rental Charge</td>
-                            <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">
-                                {{ number_format($booking->price,2) }}
-                            </td>
-                        </tr>
+                        @php $counter = 1; @endphp
 
-                        @if($booking->additional_price > 0)
-                        <tr>
-                            <td style="padding:14px;border-bottom:1px solid #eee;">Additional Charges</td>
-                            <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">
-                                {{ number_format($booking->additional_price,2) }}
-                            </td>
-                        </tr>
+                        @if(is_array($descPoints) && count($descPoints))
+                            @foreach($descPoints as $index => $row)
+                                @php
+                                    $title = trim((string)($row['title'] ?? ''));
+                                    $subs  = $row['subs'] ?? [];
+                                    $subs  = is_array($subs) ? array_values(array_filter(array_map('trim', $subs))) : [];
+                                    $hasAny = ($title !== '') || count($subs);
+                                    if(!$hasAny) continue;
+                                @endphp
+
+                                <tr>
+                                    <td style="padding:12px; text-align:center; border-bottom:1px solid #eee; vertical-align:top;">
+                                        {{ $counter }}
+                                    </td>
+                                    <td style="padding:12px; border-bottom:1px solid #eee;">
+                                        <div style="font-weight:700; margin-bottom:6px;">
+                                            {{ $title }}
+                                        </div>
+
+                                        @if(count($subs))
+                                            <ul style="margin:0 0 0 18px; padding:0; font-size:12.5px; color:#555; line-height:1.6;">
+                                                @foreach($subs as $s)
+                                                    <li>{{ $s }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    </td>
+
+                                    @if($counter === 1)
+                                        <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; vertical-align:top;">
+                                            {{ number_format($price, 2) }}
+                                        </td>
+                                    @else
+                                        <td style="padding:12px; border-bottom:1px solid #eee;"></td>
+                                    @endif
+                                </tr>
+
+                                @php $counter++; @endphp
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="3" style="padding:12px; color:#888; text-align:left;">
+                                    No description points added.
+                                </td>
+                            </tr>
                         @endif
 
-                        @if($booking->discount > 0)
-                        <tr>
-                            <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
-                            <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">
-                                ({{ number_format($booking->discount,2) }})
-                            </td>
-                        </tr>
+                        @if($addCharges > 0)
+                            <tr>
+                                <td style="padding:12px; text-align:center; border-bottom:1px solid #eee;">-</td>
+                                <td style="padding:12px; border-bottom:1px solid #eee;">Additional Charges</td>
+                                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">
+                                    {{ number_format($addCharges,2) }}
+                                </td>
+                            </tr>
+                        @endif
+
+                        @if($discount > 0)
+                            <tr>
+                                <td style="padding:12px; text-align:center; border-bottom:1px solid #eee;">-</td>
+                                <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">
+                                    Discount Applied
+                                </td>
+                                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">
+                                    ({{ number_format($discount,2) }})
+                                </td>
+                            </tr>
                         @endif
                     </tbody>
                 </table>
 
-                <!-- Totals -->
-                <div style="width:40%;margin-left:auto;">
-                    <table style="width:100%;font-size:14px;">
+                <!-- Totals (Tour style) -->
+                <div style="width:40%; margin-left:auto;">
+                    <table style="width:100%; font-size:14px; border-collapse:collapse;">
                         <tr>
-                            <td style="padding:8px 0;color:#888;">Subtotal</td>
-                            <td style="padding:8px 0;text-align:right;">
-                                {{ number_format($subtotal,2) }}
-                            </td>
+                            <td style="padding:8px 0; color:#888;">Subtotal:</td>
+                            <td style="padding:8px 0; text-align:right;">{{ number_format($total,2) }}</td>
                         </tr>
                         <tr>
-                            <td style="padding:8px 0;color:#888;">Advance Paid</td>
-                            <td style="padding:8px 0;text-align:right;color:#198754;">
+                            <td style="padding:8px 0; color:#888;">Advance Paid:</td>
+                            <td style="padding:8px 0; text-align:right; color:#1a7f37;">
                                 {{ number_format($advance,2) }}
                             </td>
                         </tr>
                         <tr style="border-top:1px solid #333;">
-                            <td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance Due</td>
-                            <td style="padding:12px 0;text-align:right;font-weight:bold;font-size:18px;">
-                                {{ $booking->currency }} {{ number_format($balance,2) }}
+                            <td style="padding:12px 0; font-weight:bold; font-size:16px;">Balance Due:</td>
+                            <td style="padding:12px 0; text-align:right; font-weight:bold; font-size:18px; color:#000;">
+                                {{ $currency }} {{ number_format($balance,2) }}
                             </td>
                         </tr>
                     </table>
                 </div>
 
-                <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
-                    This is a system generated invoice. No signature required.<br>
-                    <strong>Vacay Guider</strong> | www.vacayguider.com
+                <!-- Notes (bottom like preview) -->
+                <table style="width:100%; margin-bottom:20px; border-collapse:collapse;">
+                    <tr>
+                        <td style="padding:0;">
+                            @if(!empty(trim($note)))
+                                <div style="color:#666; font-size:13px; line-height:1.6; white-space:pre-wrap;">
+                                    {{ $note }}
+                                </div>
+                            @else
+                                <div style="color:#999; font-size:12px;">No notes provided.</div>
+                            @endif
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Footer -->
+                <div style="margin-top:60px; text-align:center; border-top:1px solid #eee; padding-top:20px; font-size:11px; color:#aaa;">
+                    <p>www.vacayguider.com | Thank you for your business.</p>
                 </div>
 
             </div>
@@ -221,6 +314,11 @@ function generatePdf() {
         link.href = URL.createObjectURL(blob);
         link.download = 'Vehicle_Booking_Invoice.pdf';
         link.click();
+        URL.revokeObjectURL(link.href);
+    })
+    .catch(err => {
+        console.error(err);
+        alert("PDF generation failed");
     });
 }
 </script>

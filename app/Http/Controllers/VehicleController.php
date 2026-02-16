@@ -27,7 +27,12 @@ class VehicleController extends Controller
 
         $vehicles = VehicleDetail::paginate(10);
         $agents = Agent::orderBy('name')->get();
-        return view('details.vehicle', compact('vehicles', 'agents'));
+
+        $protectedVehicleIds = VehicleDetail::orderBy('id', 'asc')->limit(20)->pluck('id')->toArray();
+        $isSuper = auth()->user()->type === 'Super Admin';
+
+
+        return view('details.vehicle', compact('vehicles', 'agents', 'protectedVehicleIds', 'isSuper'));
     }
 
 
@@ -105,6 +110,8 @@ class VehicleController extends Controller
     public function update(Request $request, $id)
     {
         $vehicle = VehicleDetail::findOrFail($id);
+
+        $this->blockIfProtected($vehicle); // ✅ lock check
 
         $request->validate([
             'make'             => 'required|string|max:255',
@@ -184,6 +191,7 @@ class VehicleController extends Controller
     public function destroy($id)
     {
         $vehicle = VehicleDetail::findOrFail($id);
+        $this->blockIfProtected($vehicle); // ✅ lock check
         $vehicle->delete();
 
         return response()->json([
@@ -194,6 +202,8 @@ class VehicleController extends Controller
 
     public function toggleStatus(VehicleDetail $vehicle)
     {
+
+        $this->blockIfProtected($vehicle); // ✅ lock check
         $vehicle->status = !$vehicle->status;
         $vehicle->save();
 
@@ -202,5 +212,23 @@ class VehicleController extends Controller
             'message' => 'Vehicle status updated successfully!',
             'new_status' => $vehicle->status
         ]);
+    }
+
+    private function protectedVehicleIds()
+    {
+        // first 20 records by ID (oldest 20)
+        return \App\Models\VehicleDetail::orderBy('id', 'asc')->limit(20)->pluck('id')->toArray();
+    }
+
+    private function isSuperAdmin(): bool
+    {
+        return auth()->user()->type === 'Super Admin';
+    }
+
+    private function blockIfProtected(\App\Models\VehicleDetail $vehicle)
+    {
+        if (!$this->isSuperAdmin() && in_array($vehicle->id, $this->protectedVehicleIds())) {
+            abort(403, 'This vehicle is locked. Only Super Admin can modify it.');
+        }
     }
 }

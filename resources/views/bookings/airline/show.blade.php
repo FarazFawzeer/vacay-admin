@@ -10,7 +10,7 @@
                 <a href="{{ route('admin.airline-bookings.index') }}" class="btn btn-light me-2" style="width: 130px;">Back</a>
                 <a href="{{ route('admin.airline-bookings.edit', $airline_booking->id) }}" class="btn btn-warning me-2"
                     style="width: 130px;">Edit</a>
-                <a class="btn btn-primary" onclick="generatePdf()" style="width: 130px;">Generate PDF</a>
+                <a class="btn btn-primary" onclick="generatePdf(event)" style="width: 130px;">Generate PDF</a>
             </div>
         </div>
 
@@ -19,15 +19,15 @@
             {{-- Invoice content --}}
             <div id="invoiceContent">
                 <div
-                    style="max-width:800px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
+                    style="max-width:900px;margin:0 auto;font-family:'Helvetica Neue',Arial,sans-serif;color:#333;background:#fff;padding:25px;">
 
                     {{-- HEADER --}}
                     <table style="width:100%;border-bottom:2px solid #333;margin-bottom:30px;">
                         <tr>
-                            <td style="width:50%;">
+                            <td style="width:50%;vertical-align:top;">
                                 <img src="{{ asset('images/vacayguider.png') }}" style="height:80px;">
                                 <div style="font-size:12px;color:#666;margin-top:10px;line-height:1.4;">
-                                    <strong>Vacay Guider (Pvt) Ltd.</strong><br>
+                                    <strong>VACAYGUIDER PRIVATE LIMITED</strong><br>
                                     Negombo, Sri Lanka<br>
                                     +94 114 272 372 | +94 711 999 444 | +94 777 035 325 <br>
                                     info@vacayguider.com
@@ -37,19 +37,28 @@
                                 <h1 style="margin:0;font-size:24px;font-weight:300;letter-spacing:2px;">
                                     {{ strtoupper(str_replace('_', ' ', $airline_booking->status)) }}
                                 </h1>
+
                                 <table style="margin-left:auto;margin-top:10px;font-size:13px;">
                                     <tr>
                                         <td style="color:#888;padding:2px 10px;text-align:left;">Invoice No:</td>
                                         <td style="text-align:left;">{{ $airline_booking->invoice_id }}</td>
                                     </tr>
+
                                     <tr>
                                         <td style="color:#888;padding:2px 10px;text-align:left;">Booking Date:</td>
-                                        <td style="text-align:left;">{{ $airline_booking->created_at->format('d/m/Y') }}
+                                        <td style="text-align:left;">
+                                            {{ optional($airline_booking->published_at)->format('d/m/Y') ?? $airline_booking->created_at->format('d/m/Y') }}
                                         </td>
                                     </tr>
+
                                     <tr>
                                         <td style="color:#888;padding:2px 10px;text-align:left;">Payment Status:</td>
                                         <td style="text-align:left;">{{ ucfirst($airline_booking->payment_status) }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="color:#888;padding:2px 10px;text-align:left;">Currency:</td>
+                                        <td style="text-align:left;">{{ $airline_booking->currency }}</td>
                                     </tr>
                                 </table>
                             </td>
@@ -60,34 +69,49 @@
                     <table style="width:100%;margin-bottom:35px;font-size:13px;">
                         <tr>
                             <td style="width:50%;vertical-align:top;">
-                                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
+                                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;letter-spacing:1px;">
                                     Business Information
                                 </h4>
-                                <div style="font-size:14px;">
-                                    <strong>Type:</strong> {{ ucfirst($airline_booking->business_type) }}<br>
+
+                                <div style="font-size:14px;line-height:1.6;">
+                                    <div><strong>Type:</strong> {{ ucfirst($airline_booking->business_type) }}</div>
+
                                     @if ($airline_booking->business_type == 'corporate' && $airline_booking->company_name)
-                                        <strong>Company:</strong> {{ $airline_booking->company_name }}<br>
+                                        <div><strong>Company:</strong> {{ $airline_booking->company_name }}</div>
                                     @endif
-                                    <strong>Ticket Type:</strong>
-                                    {{ ucfirst(str_replace('_', ' ', $airline_booking->ticket_type)) }}
-                                    @if ($airline_booking->ticket_type == 'return' && $airline_booking->return_type)
-                                        ({{ ucfirst(str_replace('_', ' ', $airline_booking->return_type)) }})
-                                    @endif
+
+                                    <div>
+                                        <strong>Ticket Type:</strong>
+                                        {{ ucfirst(str_replace('_', ' ', $airline_booking->ticket_type)) }}
+                                        @if ($airline_booking->ticket_type == 'return' && $airline_booking->return_type)
+                                            ({{ ucfirst(str_replace('_', ' ', $airline_booking->return_type)) }})
+                                        @endif
+                                    </div>
+
+                                    <div><strong>Status:</strong> {{ $airline_booking->status }}</div>
                                 </div>
                             </td>
 
                             <td style="width:50%;vertical-align:top;border-left:1px solid #eee;padding-left:25px;">
-                                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
+                                <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;letter-spacing:1px;">
                                     Passenger(s)
                                 </h4>
-                                <div style="font-size:15px;font-weight:bold;">
-                                    @php
-                                        $uniquePassengers = $airline_booking->trips->unique('passport_id');
-                                    @endphp
+
+                                @php
+                                    $uniquePassengers = $airline_booking->trips->unique('passport_id');
+                                @endphp
+
+                                <div style="font-size:15px;font-weight:bold;line-height:1.6;">
                                     @if ($uniquePassengers->count() > 0)
                                         @foreach ($uniquePassengers as $trip)
                                             @if ($trip->passport)
-                                                {{ $trip->passport->first_name }} {{ $trip->passport->second_name }}<br>
+                                                {{ $trip->passport->first_name }} {{ $trip->passport->second_name }}
+                                                <span style="font-size:12px;font-weight:normal;color:#666;">
+                                                    ({{ $trip->passport_no ?? '-' }})
+                                                </span>
+                                                <br>
+                                            @else
+                                                -
                                             @endif
                                         @endforeach
                                     @else
@@ -98,103 +122,64 @@
                         </tr>
                     </table>
 
-                    {{-- TRIP DETAILS SECTION --}}
+                    {{-- FLIGHT DETAILS --}}
                     <div style="margin-bottom:35px;">
-                        <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
+                        <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;letter-spacing:1px;">
                             Flight Details
                         </h4>
 
                         @if ($airline_booking->trips->count() > 0)
-                            @php
-                                $tripChunks = $airline_booking->trips->chunk(2);
-                            @endphp
+                            @php $tripChunks = $airline_booking->trips->chunk(2); @endphp
 
                             @foreach ($tripChunks as $chunk)
                                 <table style="width:100%;margin-bottom:15px;">
                                     <tr>
                                         @foreach ($chunk as $trip)
-                                            <td
-                                                style="width:{{ $chunk->count() == 1 ? '100' : '50' }}%;vertical-align:top;{{ $loop->first ? '' : 'padding-left:15px;border-left:1px solid #eee;' }}">
-                                                <div
-                                                    style="margin-bottom:12px; padding-bottom:8px; border-bottom:1px dashed #eee;">
+                                            <td style="width:{{ $chunk->count() == 1 ? '100' : '50' }}%;vertical-align:top;{{ $loop->first ? '' : 'padding-left:15px;border-left:1px solid #eee;' }}">
+                                                <div style="margin-bottom:12px; padding-bottom:8px; border-bottom:1px dashed #eee;">
+
                                                     <div><strong>Trip Type:</strong>
                                                         @switch($trip->trip_type)
-                                                            @case('one_way')
-                                                                One Way
-                                                            @break
-
-                                                            @case('dummy')
-                                                                Return (Dummy)
-                                                            @break
-
-                                                            @case('going')
-                                                                Return Ticket (Going)
-                                                            @break
-
-                                                            @case('return')
-                                                                Return Ticket (Return)
-                                                            @break
-
-                                                            @case('round_trip')
-                                                                Round Trip
-                                                            @break
-
-                                                            @default
-                                                                {{ ucfirst($trip->trip_type) }}
-                                                            @break
+                                                            @case('one_way') One Way @break
+                                                            @case('dummy') Return (Dummy) @break
+                                                            @case('going') Return Ticket (Going) @break
+                                                            @case('return') Return Ticket (Return) @break
+                                                            @case('round_trip') Round Trip @break
+                                                            @default {{ ucfirst($trip->trip_type) }}
                                                         @endswitch
                                                     </div>
 
                                                     <div><strong>Passenger:</strong>
                                                         @if ($trip->passport)
-                                                            {{ $trip->passport->first_name }}
-                                                            {{ $trip->passport->second_name }}
+                                                            {{ $trip->passport->first_name }} {{ $trip->passport->second_name }}
                                                         @else
                                                             -
                                                         @endif
                                                         ({{ $trip->passport_no ?? '-' }})
                                                     </div>
 
-                                
                                                     @php
                                                         // Decode from_country
                                                         $fromParts = explode('|', $trip->from_country ?? '');
-                                                        $fromCode = $fromParts[0] ?? null;
+                                                        $fromCode = trim($fromParts[0] ?? '');
                                                         $fromAirport = $airports[$fromCode] ?? null;
                                                         $fromDisplay = $fromAirport
-                                                            ? $fromAirport['code'] .
-                                                                ' (' .
-                                                                $fromAirport['name'] .
-                                                                ' | ' .
-                                                                $fromAirport['country'] .
-                                                                ')'
-                                                            : $fromCode ?? '-';
+                                                            ? $fromAirport['code'].' ('.$fromAirport['name'].' | '.$fromAirport['country'].')'
+                                                            : ($fromCode ?: '-');
 
                                                         // Decode to_country
                                                         $toParts = explode('|', $trip->to_country ?? '');
-                                                        $toCode = $toParts[0] ?? null;
+                                                        $toCode = trim($toParts[0] ?? '');
                                                         $toAirport = $airports[$toCode] ?? null;
                                                         $toDisplay = $toAirport
-                                                            ? $toAirport['code'] .
-                                                                ' (' .
-                                                                $toAirport['name'] .
-                                                                ' | ' .
-                                                                $toAirport['country'] .
-                                                                ')'
-                                                            : $toCode ?? '-';
+                                                            ? $toAirport['code'].' ('.$toAirport['name'].' | '.$toAirport['country'].')'
+                                                            : ($toCode ?: '-');
                                                     @endphp
 
-                                                    <div style="margin-bottom:0px;">
-                                                        <strong>From:</strong> {{ $fromDisplay }}
-                                                    </div>
-                                                    <div>
-                                                        <strong>To:</strong> {{ $toDisplay }}
-                                                    </div>
+                                                    <div><strong>From:</strong> {{ $fromDisplay }}</div>
+                                                    <div><strong>To Arrival:</strong> {{ $toDisplay }}</div>
 
-
-                                                    <div><strong>Airline / Flight:</strong> {{ $trip->airline ?? '-' }} /
-                                                        {{ $trip->airline_no ?? '-' }}</div>
-
+                                                    <div><strong>Airline / Flight:</strong> {{ $trip->airline ?? '-' }} / {{ $trip->airline_no ?? '-' }}</div>
                                                     <div><strong>PNR:</strong> {{ $trip->pnr ?? '-' }}</div>
 
                                                     <div><strong>Departure:</strong>
@@ -205,10 +190,11 @@
                                                         {{ $trip->arrival_datetime ? \Carbon\Carbon::parse($trip->arrival_datetime)->format('d/m/Y H:i') : '-' }}
                                                     </div>
 
-                                                    <div><strong>Baggage:</strong> {{ $trip->baggage_qty ?? 0 }} pcs |
-                                                        <strong>Hand Luggage:</strong> {{ $trip->handluggage_qty ?? 0 }}
-                                                        pcs
+                                                    <div>
+                                                        <strong>Baggage:</strong> {{ $trip->baggage_qty ?? 0 }} pcs |
+                                                        <strong>Hand Luggage:</strong> {{ $trip->handluggage_qty ?? 0 }} pcs
                                                     </div>
+
                                                 </div>
                                             </td>
                                         @endforeach
@@ -220,40 +206,144 @@
                         @endif
                     </div>
 
-                    {{-- PRICE TABLE --}}
-                    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:30px;">
-                        <thead>
-                            <tr style="background:#f9f9f9;border-top:1px solid #333;border-bottom:1px solid #333;">
-                                <th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;">
-                                    Description</th>
-                                <th style="padding:12px;text-align:right;font-size:11px;text-transform:uppercase;">Amount
-                                    ({{ $airline_booking->currency }})</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding:14px;border-bottom:1px solid #eee;">Base Price</td>
-                                <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">
-                                    {{ number_format($airline_booking->base_price, 2) }}</td>
-                            </tr>
+                 
 
-                            @if ($airline_booking->additional_price > 0)
-                                <tr>
-                                    <td style="padding:14px;border-bottom:1px solid #eee;">Additional Price</td>
-                                    <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;">
-                                        {{ number_format($airline_booking->additional_price, 2) }}</td>
-                                </tr>
+@php
+    $currency = $airline_booking->currency;
+
+    $descRaw = $airline_booking->desc_points ?? [];
+
+    if (is_string($descRaw)) {
+        $decoded = json_decode($descRaw, true);
+        $descRaw = is_array($decoded) ? $decoded : [];
+    }
+
+    $descItems = collect($descRaw)->values();
+
+    $basePrice = (float) ($airline_booking->base_price ?? 0);
+    $addChargesVal = (float) ($airline_booking->additional_price ?? 0);
+    $discountVal = (float) ($airline_booking->discount ?? 0);
+@endphp
+
+<table style="width:100%; border-collapse:collapse; margin-bottom:30px; font-size:14px;">
+    <thead>
+        <tr style="background:#f9f9f9; border-top:1px solid #333; border-bottom:1px solid #333;">
+            <th style="padding:12px; width:50px; text-align:center; font-size:11px; text-transform:uppercase;">
+                No
+            </th>
+            <th style="padding:12px; text-align:left; font-size:11px; text-transform:uppercase;">
+                Description
+            </th>
+            <th style="padding:12px; text-align:right; font-size:11px; text-transform:uppercase;">
+                Total ({{ $currency }})
+            </th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @php $rowNo = 1; @endphp
+
+        {{-- 🔹 FIRST ROW → MAIN TOTAL (Base Price Only) --}}
+        <tr>
+            <td style="padding:12px; border-bottom:1px solid #eee; text-align:center;">
+                {{ $rowNo++ }}
+            </td>
+
+            <td style="padding:12px; border-bottom:1px solid #eee;">
+                Base Price
+            </td>
+
+            <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; font-weight:600;">
+                {{ number_format($basePrice, 2) }}
+            </td>
+        </tr>
+
+        {{-- 🔹 DESCRIPTION POINTS --}}
+        @if ($descItems->count() > 0)
+            @foreach ($descItems as $item)
+                @php
+                    $title = '';
+                    $subs = collect();
+
+                    if (is_string($item)) {
+                        $subs = collect([$item]);
+                    }
+
+                    if (is_array($item)) {
+                        $title = trim($item['title'] ?? '');
+                        $subs = collect($item['subs'] ?? []);
+                        if (!$title && isset($item['value'])) {
+                            $subs = collect([$item['value']]);
+                        }
+                    }
+
+                    $subs = $subs->filter(fn($v) => trim((string)$v) !== '');
+                @endphp
+
+                @if ($title || $subs->count())
+                    <tr>
+                        <td style="padding:12px; border-bottom:1px solid #eee; text-align:center; vertical-align:top;">
+                            {{ $rowNo++ }}
+                        </td>
+
+                        <td style="padding:12px; border-bottom:1px solid #eee;">
+                            @if ($title)
+                                <div style="font-weight:600; margin-bottom:6px;">
+                                    {{ $title }}
+                                </div>
                             @endif
 
-                            @if ($airline_booking->discount > 0)
-                                <tr>
-                                    <td style="padding:14px;border-bottom:1px solid #eee;color:#888;">Discount</td>
-                                    <td style="padding:14px;text-align:right;border-bottom:1px solid #eee;color:#888;">
-                                        ({{ number_format($airline_booking->discount, 2) }})</td>
-                                </tr>
+                            @if ($subs->count())
+                                <ul style="margin:0; padding-left:18px; line-height:1.6;">
+                                    @foreach ($subs as $s)
+                                        <li>{{ $s }}</li>
+                                    @endforeach
+                                </ul>
                             @endif
-                        </tbody>
-                    </table>
+                        </td>
+
+                        <td style="padding:12px; border-bottom:1px solid #eee; text-align:right; color:#999;">
+                            -
+                        </td>
+                    </tr>
+                @endif
+            @endforeach
+        @endif
+
+        {{-- 🔹 ADDITIONAL CHARGES --}}
+        @if ($addChargesVal > 0)
+            <tr>
+                <td style="padding:12px; border-bottom:1px solid #eee; text-align:center;">
+                    {{ $rowNo++ }}
+                </td>
+                <td style="padding:12px; border-bottom:1px solid #eee;">
+                    Additional Services / Charges
+                </td>
+                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee;">
+                    {{ number_format($addChargesVal, 2) }}
+                </td>
+            </tr>
+        @endif
+
+        {{-- 🔹 DISCOUNT --}}
+        @if ($discountVal > 0)
+            <tr>
+                <td style="padding:12px; border-bottom:1px solid #eee; text-align:center; color:#888;">
+                    {{ $rowNo++ }}
+                </td>
+                <td style="padding:12px; border-bottom:1px solid #eee; color:#888; font-style:italic;">
+                    Discount Applied
+                </td>
+                <td style="padding:12px; text-align:right; border-bottom:1px solid #eee; color:#888;">
+                    ({{ number_format($discountVal, 2) }})
+                </td>
+            </tr>
+        @endif
+    </tbody>
+</table>
+
+
+                  
 
                     {{-- TOTAL --}}
                     <div style="width:40%;margin-left:auto;">
@@ -261,12 +351,14 @@
                             <tr>
                                 <td style="padding:8px 0;color:#888;">Total</td>
                                 <td style="padding:8px 0;text-align:right;">
-                                    {{ number_format($airline_booking->total_amount, 2) }}</td>
+                                    {{ number_format($airline_booking->total_amount, 2) }}
+                                </td>
                             </tr>
                             <tr>
                                 <td style="padding:8px 0;color:#198754;">Advanced Paid</td>
                                 <td style="padding:8px 0;text-align:right;color:#198754;">
-                                    {{ number_format($airline_booking->advanced_paid, 2) }}</td>
+                                    {{ number_format($airline_booking->advanced_paid, 2) }}
+                                </td>
                             </tr>
                             <tr style="border-top:1px solid #333;">
                                 <td style="padding:12px 0;font-weight:bold;font-size:16px;">Balance</td>
@@ -280,7 +372,7 @@
                     {{-- NOTE SECTION --}}
                     @if ($airline_booking->note)
                         <div style="margin-top:30px;">
-                            <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;">
+                            <h4 style="font-size:11px;color:#888;text-transform:uppercase;margin-bottom:8px;letter-spacing:1px;">
                                 Note
                             </h4>
                             <div style="font-size:14px; padding:12px; border:1px solid #eee; background:#f9f9f9;">
@@ -290,8 +382,7 @@
                     @endif
 
                     {{-- FOOTER --}}
-                    <div
-                        style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
+                    <div style="margin-top:60px;text-align:center;border-top:1px solid #eee;padding-top:20px;font-size:11px;color:#aaa;">
                         This is a system generated invoice. No signature required.<br>
                         <strong>Vacay Guider</strong> | www.vacayguider.com
                     </div>
@@ -299,17 +390,15 @@
                 </div>
             </div>
             {{-- End invoiceContent --}}
-
         </div>
     </div>
 
     {{-- PDF Generation Script --}}
     <script>
-        function generatePdf() {
+        function generatePdf(e) {
             const invoiceElement = document.getElementById('invoiceContent');
 
-            // Show loading state
-            const button = event.target;
+            const button = e.target;
             const originalText = button.innerText;
             button.innerText = 'Generating...';
             button.disabled = true;
@@ -325,9 +414,7 @@
                     })
                 })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error("PDF generation failed");
-                    }
+                    if (!response.ok) throw new Error("PDF generation failed");
                     return response.blob();
                 })
                 .then(blob => {
@@ -337,7 +424,6 @@
                     link.click();
                     URL.revokeObjectURL(link.href);
 
-                    // Reset button
                     button.innerText = originalText;
                     button.disabled = false;
                 })
@@ -345,7 +431,6 @@
                     console.error("Error generating PDF:", error);
                     alert("Failed to generate PDF. Please try again.");
 
-                    // Reset button
                     button.innerText = originalText;
                     button.disabled = false;
                 });

@@ -15,6 +15,7 @@ class VisaBooking extends Model
         'visa_id',
         'visa_category_id',
         'agent_id',
+        'desc_points',
         'currency',
         'base_price',
         'additional_price',
@@ -31,7 +32,7 @@ class VisaBooking extends Model
     ];
 
     protected $casts = [
-
+        'desc_points'  => 'array',
         'published_at'     => 'date',
 
     ];

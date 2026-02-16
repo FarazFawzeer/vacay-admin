@@ -12,6 +12,7 @@ use App\Models\Agent;
 use App\Models\VisaCategory;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class VisaBookingController extends Controller
 {
@@ -137,17 +138,22 @@ class VisaBookingController extends Controller
 
 
 
-    /**
-     * Store new booking
-     */
+
     public function store(Request $request)
     {
         $request->validate([
             'passport_id'        => 'required|exists:passports,id',
             'visa_id'            => 'required|exists:visas,id',
             'visa_category_id'   => 'required|exists:visa_categories,id',
-            'agent_id'           => 'required|exists:agents,id', // ✅ new
-            'note'               => 'nullable|string|max:1000', // ✅ new
+            'agent_id'           => 'required|exists:agents,id',
+
+            // ✅ Description points (same as airline booking)
+            'desc_points'              => 'nullable|array',
+            'desc_points.*.title'      => 'nullable|string|max:255',
+            'desc_points.*.subs'       => 'nullable|array',
+            'desc_points.*.subs.*'     => 'nullable|string|max:255',
+
+            'note'               => 'nullable|string|max:1000',
 
             'currency'           => 'required|string|max:10',
             'base_price'         => 'required|numeric|min:0',
@@ -159,53 +165,100 @@ class VisaBookingController extends Controller
 
             'status'             => 'required',
             'payment_status'     => 'required',
-                'published_at'     => 'nullable|date',
+            'published_at'       => 'nullable|date',
         ]);
 
-        // Ensure the selected category belongs to the selected visa
+        // ✅ Ensure selected category belongs to selected visa
         $category = VisaCategory::where('id', $request->visa_category_id)
             ->where('visa_id', $request->visa_id)
             ->firstOrFail();
 
-        // Generate Invoice No
-        $lastInvoice = VisaBooking::orderBy('id', 'desc')->first()?->invoice_no;
+        // ✅ Clean desc_points (remove empty titles/subs)
+        $descPoints = collect($request->input('desc_points', []))
+            ->map(function ($item) {
+                $title = trim((string)($item['title'] ?? ''));
+                $subs  = collect($item['subs'] ?? [])
+                    ->map(fn($s) => trim((string)$s))
+                    ->filter()
+                    ->values()
+                    ->all();
 
-        if ($lastInvoice && preg_match('/VB(\d+)/', $lastInvoice, $matches)) {
-            $nextNumber = intval($matches[1]) + 1;
-            $invoiceNo = 'VB' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-        } else {
-            $invoiceNo = 'VB0001';
+                // keep if title or subs exist
+                if ($title === '' && count($subs) === 0) {
+                    return null;
+                }
+
+                return [
+                    'title' => $title,
+                    'subs'  => $subs,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+
+        // ✅ Calculate totals server-side (more reliable)
+        $base     = (float) $request->base_price;
+        $add      = (float) ($request->additional_price ?? 0);
+        $disc     = (float) ($request->discount ?? 0);
+        $adv      = (float) ($request->advanced_paid ?? 0);
+
+        $total    = max(0, ($base + $add) - $disc);
+        $balance  = max(0, $total - $adv);
+
+        DB::beginTransaction();
+
+        try {
+            // ✅ Generate Invoice No
+            $lastInvoice = VisaBooking::orderBy('id', 'desc')->value('invoice_no');
+
+            if ($lastInvoice && preg_match('/VB(\d+)/', $lastInvoice, $matches)) {
+                $nextNumber = ((int)$matches[1]) + 1;
+                $invoiceNo  = 'VB' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            } else {
+                $invoiceNo = 'VB0001';
+            }
+
+            // ✅ Create Visa Booking
+            $booking = VisaBooking::create([
+                'invoice_no'         => $invoiceNo,
+                'passport_id'        => $request->passport_id,
+                'visa_id'            => $request->visa_id,
+                'visa_category_id'   => $request->visa_category_id,
+                'agent_id'           => $request->agent_id,
+
+                // ✅ save description points
+                'desc_points'        => $descPoints, // if cast=array in model, DB json column recommended
+
+                'note'               => $request->note,
+
+                'currency'           => $request->currency,
+                'base_price'         => $base,
+                'additional_price'   => $add,
+                'discount'           => $disc,
+
+                // ✅ use server-calculated values
+                'total_amount'       => $total,
+                'advanced_paid'      => $adv,
+                'balance'            => $balance,
+
+                'status'             => $request->status,
+                'payment_status'     => $request->payment_status,
+                'published_at'       => $request->published_at,
+
+                'created_by'         => Auth::id(),
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.visa-bookings.index')
+                ->with('success', "Visa booking created successfully! Invoice No: {$invoiceNo}");
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e; // or return back()->with('error', '...'); if you prefer
         }
-
-        // Create Visa Booking
-        $booking = VisaBooking::create([
-            'invoice_no'         => $invoiceNo,
-            'passport_id'        => $request->passport_id,
-            'visa_id'            => $request->visa_id,
-            'visa_category_id'   => $request->visa_category_id,
-            'agent_id'           => $request->agent_id, // ✅ save agent
-            'note'               => $request->note,     // ✅ save note
-
-            'currency'           => $request->currency,
-            'base_price'         => $request->base_price,
-            'additional_price'   => $request->additional_price ?? 0,
-            'discount'           => $request->discount ?? 0,
-            'total_amount'       => $request->total_amount,
-            'advanced_paid'      => $request->advanced_paid ?? 0,
-            'balance'            => $request->balance,
-
-            'status'             => $request->status,
-            'payment_status'     => $request->payment_status,
-            'published_at'       => $request->published_at,
-
-            'created_by'         => Auth::id(),
-        ]);
-
-        return redirect()
-            ->route('admin.visa-bookings.index')
-            ->with('success', "Visa booking created successfully! Invoice No: {$invoiceNo}");
     }
-
 
     /**
      * Show booking
@@ -249,17 +302,26 @@ class VisaBookingController extends Controller
         ));
     }
 
+
+
     /**
      * Update booking
      */
     public function update(Request $request, VisaBooking $booking)
     {
-        $request->validate([
+        $validated = $request->validate([
             'passport_id'        => 'required|exists:passports,id',
             'visa_id'            => 'required|exists:visas,id',
             'visa_category_id'   => 'required|exists:visa_categories,id',
-            'agent_id'           => 'nullable|exists:agents,id',
+            'agent_id'           => 'required|exists:agents,id', // ✅ same as store
             'note'               => 'nullable|string|max:1000',
+
+            // ✅ NEW: desc_points from create/edit UI
+            'desc_points'                 => 'nullable|array',
+            'desc_points.*.title'         => 'nullable|string|max:255',
+            'desc_points.*.subs'          => 'nullable|array',
+            'desc_points.*.subs.*'        => 'nullable|string|max:255',
+
             'currency'           => 'required|string|max:10',
             'base_price'         => 'required|numeric|min:0',
             'additional_price'   => 'nullable|numeric|min:0',
@@ -270,32 +332,68 @@ class VisaBookingController extends Controller
 
             'status'             => 'required',
             'payment_status'     => 'required',
-                'published_at'     => 'nullable|date',
+            'published_at'       => 'nullable|date',
         ]);
 
         // Ensure the selected category belongs to the selected visa
-        $category = VisaCategory::where('id', $request->visa_category_id)
-            ->where('visa_id', $request->visa_id)
+        VisaCategory::where('id', $validated['visa_category_id'])
+            ->where('visa_id', $validated['visa_id'])
             ->firstOrFail();
+
+        // ✅ Clean desc_points (remove empty titles + empty subs)
+        $descPoints = collect($validated['desc_points'] ?? [])
+            ->map(function ($item) {
+                $title = trim((string)($item['title'] ?? ''));
+                $subs  = collect($item['subs'] ?? [])
+                    ->map(fn($s) => trim((string)$s))
+                    ->filter()
+                    ->values()
+                    ->all();
+
+                // keep if title or subs exist
+                if ($title === '' && empty($subs)) {
+                    return null;
+                }
+
+                return [
+                    'title' => $title,
+                    'subs'  => $subs,
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
+
+        // ✅ Recalculate server-side (don’t trust FE totals 100%)
+        $base      = (float) ($validated['base_price'] ?? 0);
+        $add       = (float) ($validated['additional_price'] ?? 0);
+        $disc      = (float) ($validated['discount'] ?? 0);
+        $advanced  = (float) ($validated['advanced_paid'] ?? 0);
+
+        $total     = max(0, $base + $add - $disc);
+        $balance   = max(0, $total - $advanced);
 
         // Update Visa Booking
         $booking->update([
-            'passport_id'        => $request->passport_id,
-            'visa_id'            => $request->visa_id,
-            'visa_category_id'   => $request->visa_category_id,
-            'agent_id'           => $request->agent_id,  // new
-            'note'               => $request->note,      // new
-            'currency'           => $request->currency,
-            'base_price'         => $request->base_price,
-            'additional_price'   => $request->additional_price ?? 0,
-            'discount'           => $request->discount ?? 0,
-            'total_amount'       => $request->total_amount,
-            'advanced_paid'      => $request->advanced_paid ?? 0,
-            'balance'            => $request->balance,
+            'passport_id'        => $validated['passport_id'],
+            'visa_id'            => $validated['visa_id'],
+            'visa_category_id'   => $validated['visa_category_id'],
+            'agent_id'           => $validated['agent_id'],
+            'note'               => $validated['note'] ?? null,
 
-            'status'             => $request->status,
-            'payment_status'     => $request->payment_status,
-            'published_at'       => $request->published_at,
+            'desc_points'        => $descPoints, // ✅ save JSON/array (make sure cast exists)
+
+            'currency'           => $validated['currency'],
+            'base_price'         => $base,
+            'additional_price'   => $add,
+            'discount'           => $disc,
+            'total_amount'       => $total,
+            'advanced_paid'      => $advanced,
+            'balance'            => $balance,
+
+            'status'             => $validated['status'],
+            'payment_status'     => $validated['payment_status'],
+            'published_at'       => $validated['published_at'] ?? null,
 
             'updated_by'         => Auth::id(),
         ]);

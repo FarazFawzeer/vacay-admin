@@ -307,6 +307,9 @@
 
                         <tbody>
                             @forelse($vehicles as $vehicle)
+                                @php
+                                    $isLocked = in_array($vehicle->id, $protectedVehicleIds) && !$isSuper;
+                                @endphp
                                 <tr id="vehicle-{{ $vehicle->id }}">
                                     <td>
                                         @if ($vehicle->vehicle_image)
@@ -340,45 +343,66 @@
                                         </a>
 
                                         {{-- Edit Vehicle --}}
-                                        <button class="icon-btn text-primary editVehicleBtn"
-                                            data-id="{{ $vehicle->id }}" data-name="{{ $vehicle->name }}"
-                                            data-make="{{ $vehicle->make }}" data-model="{{ $vehicle->model }}"
-                                            data-vehicle_number="{{ $vehicle->vehicle_number }}"
-                                            data-seats="{{ $vehicle->seats }}" data-milage="{{ $vehicle->milage }}"
-                                            data-air_conditioned="{{ $vehicle->air_conditioned }}"
-                                            data-helmet="{{ $vehicle->helmet }}"
-                                            data-first_aid_kit="{{ $vehicle->first_aid_kit }}"
-                                            data-condition="{{ $vehicle->condition }}"
-                                            data-transmission="{{ $vehicle->transmission }}"
-                                            data-price="{{ $vehicle->price }}" data-currency="{{ $vehicle->currency }}"
-                                            data-type="{{ $vehicle->type }}" data-status="{{ $vehicle->status }}"
-                                            data-fuel_type="{{ $vehicle->fuel_type }}"
-                                            data-luggage_space="{{ $vehicle->luggage_space }}"
-                                            data-insurance_type="{{ $vehicle->insurance_type }}"
-                                            data-agent_id="{{ $vehicle->agent_id }}"
-                                            data-vehicle_image="{{ $vehicle->vehicle_image }}"
-                                            data-subimages='@json($vehicle->sub_image)' data-bs-toggle="modal"
-                                            data-bs-target="#editVehicleModal" title="Edit Vehicle">
-                                            <i class="bi bi-pencil-square fs-5"></i>
-                                        </button>
+                                        @if (!$isLocked)
+                                            <button class="icon-btn text-primary editVehicleBtn"
+                                                data-id="{{ $vehicle->id }}" data-name="{{ $vehicle->name }}"
+                                                data-make="{{ $vehicle->make }}" data-model="{{ $vehicle->model }}"
+                                                data-vehicle_number="{{ $vehicle->vehicle_number }}"
+                                                data-seats="{{ $vehicle->seats }}" data-milage="{{ $vehicle->milage }}"
+                                                data-air_conditioned="{{ $vehicle->air_conditioned }}"
+                                                data-helmet="{{ $vehicle->helmet }}"
+                                                data-first_aid_kit="{{ $vehicle->first_aid_kit }}"
+                                                data-condition="{{ $vehicle->condition }}"
+                                                data-transmission="{{ $vehicle->transmission }}"
+                                                data-price="{{ $vehicle->price }}"
+                                                data-currency="{{ $vehicle->currency }}"
+                                                data-type="{{ $vehicle->type }}" data-status="{{ $vehicle->status }}"
+                                                data-fuel_type="{{ $vehicle->fuel_type }}"
+                                                data-luggage_space="{{ $vehicle->luggage_space }}"
+                                                data-insurance_type="{{ $vehicle->insurance_type }}"
+                                                data-agent_id="{{ $vehicle->agent_id }}"
+                                                data-vehicle_image="{{ $vehicle->vehicle_image }}"
+                                                data-subimages='@json($vehicle->sub_image)' data-bs-toggle="modal"
+                                                data-bs-target="#editVehicleModal" title="Edit Vehicle">
+                                                <i class="bi bi-pencil-square fs-5"></i>
+                                            </button>
+                                        @else
+                                            <button type="button" class="icon-btn text-secondary" disabled
+                                                title="Locked (Super Admin only)">
+                                                <i class="bi bi-lock-fill fs-5"></i>
+                                            </button>
+                                        @endif
 
                                         {{-- Toggle Status --}}
-                                        <button type="button"
-                                            class="icon-btn toggle-status-btn {{ $vehicle->status ? 'text-success' : 'text-warning' }}"
-                                            data-id="{{ $vehicle->id }}" data-status="{{ $vehicle->status }}"
-                                            title="{{ $vehicle->status ? 'Set as Inactive' : 'Set as Active' }}">
-                                            @if ($vehicle->status)
-                                                <i class="bi bi-check-circle-fill fs-5"></i>
-                                            @else
-                                                <i class="bi bi-slash-circle fs-5"></i>
-                                            @endif
-                                        </button>
-
-                                        {{-- Delete Vehicle --}}
-                                        <button type="button" class="icon-btn text-danger delete-vehicle"
-                                            data-id="{{ $vehicle->id }}" title="Delete Vehicle">
-                                            <i class="bi bi-trash-fill fs-5"></i>
-                                        </button>
+                                        @if (!$isLocked)
+                                            <button type="button"
+                                                class="icon-btn toggle-status-btn {{ $vehicle->status ? 'text-success' : 'text-warning' }}"
+                                                data-id="{{ $vehicle->id }}" data-status="{{ $vehicle->status }}"
+                                                title="{{ $vehicle->status ? 'Set as Inactive' : 'Set as Active' }}">
+                                                @if ($vehicle->status)
+                                                    <i class="bi bi-check-circle-fill fs-5"></i>
+                                                @else
+                                                    <i class="bi bi-slash-circle fs-5"></i>
+                                                @endif
+                                            </button>
+                                        @else
+                                            <button type="button" class="icon-btn text-secondary" disabled
+                                                title="Locked (Super Admin only)">
+                                                <i class="bi bi-lock-fill fs-5"></i>
+                                            </button>
+                                        @endif
+                                        @if (!$isLocked)
+                                            {{-- Delete Vehicle --}}
+                                            <button type="button" class="icon-btn text-danger delete-vehicle"
+                                                data-id="{{ $vehicle->id }}" title="Delete Vehicle">
+                                                <i class="bi bi-trash-fill fs-5"></i>
+                                            </button>
+                                        @else
+                                            <button type="button" class="icon-btn text-secondary" disabled
+                                                title="Locked (Super Admin only)">
+                                                <i class="bi bi-lock-fill fs-5"></i>
+                                            </button>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -560,7 +584,7 @@
                                 {{-- Agent --}}
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Agent</label>
-                                    <select name="agent_id" id="edit_agent_id" class="form-select" >
+                                    <select name="agent_id" id="edit_agent_id" class="form-select">
                                         <option value="">Select Agent</option>
                                         @foreach ($agents as $agent)
                                             <option value="{{ $agent->id }}">{{ $agent->company_name }} -

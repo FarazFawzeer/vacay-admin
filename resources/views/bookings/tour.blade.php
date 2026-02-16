@@ -577,7 +577,7 @@
             if (!descHtml) {
                 descHtml = `
         <tr>
-            <td colspan="3" style="padding:12px; color:#888; text-align:center;">
+            <td colspan="3" style="padding:12px; color:#888; text-align:start;">
                 No description points added.
             </td>
         </tr>

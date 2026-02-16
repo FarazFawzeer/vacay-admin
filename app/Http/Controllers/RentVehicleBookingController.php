@@ -66,6 +66,8 @@ class RentVehicleBookingController extends Controller
     /**
      * Store new booking
      */
+
+
     public function store(Request $request)
     {
         $request->validate([
@@ -73,31 +75,73 @@ class RentVehicleBookingController extends Controller
             'vehicle_id'       => 'required|exists:vehicle_details,id',
             'start_datetime'   => 'required|date',
             'end_datetime'     => 'required|date|after_or_equal:start_datetime',
+
             'price'            => 'required|numeric|min:0',
             'additional_price' => 'nullable|numeric|min:0',
             'discount'         => 'nullable|numeric|min:0',
             'tax'              => 'nullable|numeric|min:0',
             'advance_paid'     => 'nullable|numeric|min:0',
+
             'currency'         => 'required|string|max:5',
-            'status'           => 'required',
-            'payment_status'   => 'required',
+            'status'           => 'required|string',
             'payment_method'   => 'nullable|string|max:50',
             'notes'            => 'nullable|string',
             'published_at'     => 'nullable|date',
+
+            // ✅ NEW: description points (like Tour)
+            'desc_points' => 'nullable|array',
+            'desc_points.*.title' => 'nullable|string|max:255',
+            'desc_points.*.subs' => 'nullable|array',
+            'desc_points.*.subs.*' => 'nullable|string|max:255',
         ]);
 
-        // ✅ Calculate total amount
-        $total = $request->price
-            + ($request->additional_price ?? 0)
-            + ($request->tax ?? 0)
-            - ($request->discount ?? 0);
+        // ✅ Normalize desc_points (same logic as Tour)
+        $descPoints = collect($request->input('desc_points', []))
+            ->map(function ($row) {
+                $title = trim((string)($row['title'] ?? ''));
 
-        // ✅ Generate Invoice Number (RV-0001 format)
+                $subs = collect($row['subs'] ?? [])
+                    ->map(fn($s) => trim((string)$s))
+                    ->filter(fn($s) => $s !== '')
+                    ->values()
+                    ->all();
+
+                return [
+                    'title' => $title,
+                    'subs'  => $subs,
+                ];
+            })
+            ->filter(function ($row) {
+                return ($row['title'] !== '') || (count($row['subs']) > 0);
+            })
+            ->values()
+            ->all();
+
+        // ✅ Calculate total
+        $price      = (float) $request->price;
+        $additional = (float) ($request->additional_price ?? 0);
+        $tax        = (float) ($request->tax ?? 0);
+        $discount   = (float) ($request->discount ?? 0);
+
+        $total = max(0, ($price + $additional + $tax) - $discount);
+
+        // ✅ Advance & payment status auto
+        $advancePaid = (float) ($request->advance_paid ?? 0);
+
+        if ($advancePaid <= 0) {
+            $paymentStatus = 'unpaid';
+        } elseif ($advancePaid < $total) {
+            $paymentStatus = 'partial';
+        } else {
+            $paymentStatus = 'paid';
+        }
+
+        // ✅ Generate Invoice Number (RV-0001)
         $lastBooking = RentVehicleBooking::latest()->first();
         $nextNumber = 1;
 
-        if ($lastBooking && preg_match('/RV-(\d+)/', $lastBooking->inv_no, $matches)) {
-            $nextNumber = (int) $matches[1] + 1;
+        if ($lastBooking && preg_match('/RV-(\d+)/', (string)$lastBooking->inv_no, $matches)) {
+            $nextNumber = ((int) $matches[1]) + 1;
         }
 
         $invNo = 'RV-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
@@ -109,27 +153,38 @@ class RentVehicleBookingController extends Controller
             'vehicle_id'       => $request->vehicle_id,
             'start_datetime'   => $request->start_datetime,
             'end_datetime'     => $request->end_datetime,
-            'price'            => $request->price,
-            'additional_price' => $request->additional_price ?? 0,
-            'discount'         => $request->discount ?? 0,
-            'tax'              => $request->tax ?? 0,
-            'advance_paid'     => $request->advance_paid ?? 0,
+
+            'price'            => $price,
+            'additional_price' => $additional,
+            'discount'         => $discount,
+            'tax'              => $tax,
+            'advance_paid'     => $advancePaid,
             'total_price'      => $total,
+
             'currency'         => $request->currency,
             'status'           => $request->status,
-            'payment_status'   => $request->payment_status,
+
+            // ✅ store computed payment status (ignore dropdown)
+            'payment_status'   => $paymentStatus,
+
             'payment_method'   => $request->payment_method,
             'notes'            => $request->notes,
-                        'published_at' => $request->published_at,
+
+            // ✅ NEW: desc points JSON
+            'desc_points'      => $descPoints,
+
+            // ✅ Published date default
+            'published_at'     => $request->published_at ?? now()->toDateString(),
+
             'auth_id'          => Auth::id(),
             'created_by'       => Auth::id(),
-
         ]);
 
         return redirect()
             ->back()
             ->with('success', 'Rent Vehicle Booking saved successfully!');
     }
+
 
     /**
      * Show booking
@@ -161,52 +216,100 @@ class RentVehicleBookingController extends Controller
             'vehicle_id'       => 'required|exists:vehicle_details,id',
             'start_datetime'   => 'required|date',
             'end_datetime'     => 'required|date|after_or_equal:start_datetime',
+
             'price'            => 'required|numeric|min:0',
             'additional_price' => 'nullable|numeric|min:0',
             'discount'         => 'nullable|numeric|min:0',
             'tax'              => 'nullable|numeric|min:0',
             'advance_paid'     => 'nullable|numeric|min:0',
+
             'currency'         => 'required|string|max:5',
-            'status'           => 'required',
-            'payment_status'   => 'required',
+            'status'           => 'required|string',
+            'payment_status'   => 'required', // keep field if you want it visible
             'payment_method'   => 'nullable|string|max:50',
             'notes'            => 'nullable|string',
             'published_at'     => 'nullable|date',
+
+            // ✅ NEW
+            'desc_points' => 'nullable|array',
+            'desc_points.*.title' => 'nullable|string|max:255',
+            'desc_points.*.subs' => 'nullable|array',
+            'desc_points.*.subs.*' => 'nullable|string|max:255',
         ]);
 
-        // ✅ Recalculate total
-        $total = $request->price
-            + ($request->additional_price ?? 0)
-            + ($request->tax ?? 0)
-            - ($request->discount ?? 0);
+        // ✅ Normalize desc_points
+        $descPoints = collect($request->input('desc_points', []))
+            ->map(function ($row) {
+                $title = trim((string)($row['title'] ?? ''));
 
-        // ✅ Update booking
+                $subs = collect($row['subs'] ?? [])
+                    ->map(fn($s) => trim((string)$s))
+                    ->filter(fn($s) => $s !== '')
+                    ->values()
+                    ->all();
+
+                return ['title' => $title, 'subs' => $subs];
+            })
+            ->filter(fn($row) => ($row['title'] !== '') || (count($row['subs']) > 0))
+            ->values()
+            ->all();
+
+        // ✅ Recalculate total
+        $price      = (float) $request->price;
+        $additional = (float) ($request->additional_price ?? 0);
+        $tax        = (float) ($request->tax ?? 0);
+        $discount   = (float) ($request->discount ?? 0);
+
+        $total = max(0, ($price + $additional + $tax) - $discount);
+
+        $advancePaid = (float) ($request->advance_paid ?? 0);
+
+        // ✅ If you want AUTO payment status (recommended)
+        if ($advancePaid <= 0) {
+            $paymentStatus = 'unpaid';
+        } elseif ($advancePaid < $total) {
+            $paymentStatus = 'partial';
+        } else {
+            $paymentStatus = 'paid';
+        }
+
+        // ✅ Update
         $booking->update([
             'customer_id'      => $request->customer_id,
             'vehicle_id'       => $request->vehicle_id,
             'start_datetime'   => $request->start_datetime,
             'end_datetime'     => $request->end_datetime,
-            'price'            => $request->price,
-            'additional_price' => $request->additional_price ?? 0,
-            'discount'         => $request->discount ?? 0,
-            'tax'              => $request->tax ?? 0,
-            'advance_paid'     => $request->advance_paid ?? 0,
+
+            'price'            => $price,
+            'additional_price' => $additional,
+            'discount'         => $discount,
+            'tax'              => $tax,
+            'advance_paid'     => $advancePaid,
             'total_price'      => $total,
+
             'currency'         => $request->currency,
             'status'           => $request->status,
-            'payment_status'   => $request->payment_status,
+
+            // 🔥 use auto (or change to $request->payment_status if you want manual)
+            'payment_status'   => $paymentStatus,
+
             'payment_method'   => $request->payment_method,
             'notes'            => $request->notes,
-             'published_at' => $request->published_at,
+
+            // ✅ NEW
+            'desc_points'      => $descPoints,
+
+            'published_at'     => $request->published_at ?? now()->toDateString(),
+
             'auth_id'          => Auth::id(),
             'updated_by'       => Auth::id(),
-           
         ]);
 
         return redirect()
             ->route('admin.rent-vehicle-bookings.edit', $booking->id)
             ->with('success', 'Rent Vehicle Booking updated successfully!');
     }
+
 
     /**
      * Delete booking

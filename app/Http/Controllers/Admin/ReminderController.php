@@ -269,4 +269,24 @@ class ReminderController extends Controller
 
         abort(403, 'Unauthorized access');
     }
+
+
+    /**
+ * Update reminder status (dropdown)
+ */
+public function updateStatus(Request $request, Reminder $reminder)
+{
+    $this->authorizeReminder($reminder);
+
+    $request->validate([
+        'status' => 'required|in:pending,completed',
+    ]);
+
+    $reminder->update([
+        'status' => $request->status,
+        'is_notified' => $request->status === 'completed' ? 1 : 0,
+    ]);
+
+    return back()->with('success', 'Status updated successfully.');
+}
 }

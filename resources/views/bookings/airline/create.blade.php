@@ -376,6 +376,25 @@
                             <textarea name="note" class="form-control" rows="3" placeholder="Enter any additional note"></textarea>
                         </div>
                     </div>
+
+                    {{-- Description Points (same style as Vehicle Booking) --}}
+<div class="col-md-12 mb-3">
+    <div class="card border-secondary">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <strong>Description Points</strong>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addAirDescBlockBtn">
+                + Add Point
+            </button>
+        </div>
+
+        <div class="card-body" id="airDescPointsWrapper"></div>
+
+        <div class="px-3 pb-3 text-muted" style="font-size:12px;">
+            Add main titles and optional sub points (bullets). This will show in preview/PDF.
+        </div>
+    </div>
+</div>
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <div class="card border-secondary">
@@ -451,8 +470,88 @@
 @endsection
 
 @section('scripts')
+
+
+<script>
+    // ---------- Airline Description UI helpers ----------
+    let airDescIndex = 0;
+
+    function addAirDescBlock() {
+        const wrapper = document.getElementById('airDescPointsWrapper');
+        if (!wrapper) return;
+
+        const idx = airDescIndex++;
+
+        const block = document.createElement('div');
+        block.className = 'border rounded p-3 mb-3';
+        block.setAttribute('data-index', idx);
+
+        block.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="fw-bold">Main Point</div>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeAirDescBlock(${idx})">
+                    Remove
+                </button>
+            </div>
+
+            <div class="mb-2">
+                <input type="text" class="form-control"
+                    name="desc_points[${idx}][title]"
+                    placeholder="Title (e.g., Ticket Includes / Fare Rules / Notes)">
+            </div>
+
+            <div class="subPoints"></div>
+
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-2"
+                onclick="addAirSubPoint(${idx})">
+                + Add Sub Point
+            </button>
+        `;
+
+        wrapper.appendChild(block);
+
+        // add at least one sub point input
+        addAirSubPoint(idx);
+    }
+
+    function removeAirDescBlock(idx) {
+        const block = document.querySelector(`#airDescPointsWrapper [data-index="${idx}"]`);
+        if (block) block.remove();
+    }
+
+    function addAirSubPoint(idx) {
+        const block = document.querySelector(`#airDescPointsWrapper [data-index="${idx}"]`);
+        if (!block) return;
+
+        const subWrap = block.querySelector('.subPoints');
+
+        const row = document.createElement('div');
+        row.className = 'd-flex gap-2 mb-2';
+
+        row.innerHTML = `
+            <input type="text" class="form-control"
+                name="desc_points[${idx}][subs][]"
+                placeholder="Sub point (e.g., 30kg baggage included)">
+            <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">✕</button>
+        `;
+
+        subWrap.appendChild(row);
+    }
+
+    // ✅ init on page load (NOT on submit)
+    document.addEventListener('DOMContentLoaded', function () {
+        const addAirDescBtn = document.getElementById('addAirDescBlockBtn');
+        if (addAirDescBtn) addAirDescBtn.addEventListener('click', addAirDescBlock);
+
+        // default one block
+        addAirDescBlock();
+    });
+</script>
+
     <script>
         document.getElementById('airlineBookingForm').addEventListener('submit', function() {
+
+
 
             // ONE WAY fields
             const oneWayCustomer = document.querySelector('[name="going_customer_id"]');

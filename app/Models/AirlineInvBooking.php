@@ -28,12 +28,14 @@ class AirlineInvBooking extends Model
         'balance',
         'created_by',
         'note',
+           'desc_points',  
         'published_at',
     ];
 
     protected $casts = [
 
         'published_at'     => 'date',
+        'desc_points'  => 'array', 
 
     ];
     /**
