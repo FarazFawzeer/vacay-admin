@@ -1287,7 +1287,7 @@
                                 <div class="day-number">{{ $loop->iteration }}</div>
                                 <div class="day-info">
                                     <div class="day-label">Day {{ $itinerary->day ?? '-' }}</div>
-                                    <h3>{{ $itinerary->title ?? 'Day Activity' }}</h3>
+                                    <h3>{{ $itinerary->place_name ?? 'Day Activity' }}</h3>
                                 </div>
                             </div>
 
@@ -1309,7 +1309,7 @@
 
                             @php $programs = explode('|', $itinerary->program); @endphp
                             <div class="program-section">
-                                <h4>Day {{ $itinerary->day ?? '-' }} Program</h4>
+                                <h4>Day {{ $itinerary->day ?? '-' }} Program - {{ $itinerary->place_name ?? 'Day Activity' }}</h4>
                                 <div class="program-box">
                                     @foreach (collect($itinerary->program_points)->take(4) as $point)
                                         <div class="program-point">{{ trim($point) }}</div>

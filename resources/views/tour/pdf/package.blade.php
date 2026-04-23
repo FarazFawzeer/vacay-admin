@@ -135,17 +135,17 @@
         }
 
         .route-path {
-            display: inline-block;
-            white-space: nowrap;
-            /* Keep the route on a single line if possible */
+            display: block;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.6;
         }
 
         .route-point {
             display: inline-block;
-            margin: 0 5px;
-            padding: 2px 8px;
+            margin: 4px 6px;
+            padding: 3px 10px;
             font-size: 9pt;
-            vertical-align: middle;
         }
 
         .route-point img {
@@ -156,7 +156,7 @@
             display: inline-block;
             color: #313b5e;
             font-weight: bold;
-            margin: 0 3px;
+            margin: 0 4px;
             vertical-align: middle;
         }
 
@@ -203,29 +203,28 @@
         }
 
         .tour-summary-card {
-            page-break-inside: avoid;
-            width: 90%;
+            width: 85%;
+            /* slightly reduce */
             margin: 0 auto;
-            padding: 30px;
+            /* center */
+            padding: 25px;
             border-radius: 16px;
-            /* Optional: for card look */
             background-color: #e8f4ff;
+            box-sizing: border-box;
+            /* IMPORTANT */
         }
 
         /* Force vertical centering in PDF */
         .pdf-full-page-wrapper {
-            display: table;
             width: 100%;
-            height: 100%;
-            /* This might need to be a fixed height like 900px if your PDF engine is older */
-            min-height: 100vh;
+            text-align: center;
+            /* handles horizontal centering */
         }
 
         .pdf-middle-content {
-            display: table-cell;
-            vertical-align: middle;
-            text-align: center;
-            /* Centers horizontal content */
+            display: block;
+            padding-top: 100px;
+            /* adjust instead of vertical-align */
         }
 
         /* Align the text back to left inside the centered card */
@@ -699,32 +698,47 @@
                         $cityList = array_values(array_unique($cityList));
                     @endphp
 
-                    <div style="text-align: center; width: 100%; margin-top: 20px; margin-bottom: 10px;">
+                    <div style="text-align: center; width: 100%; margin-top: 20px; ">
 
                         <div class="route-display"
                             style="display: inline-block; background-color: #f8f8f8; padding: 12px 25px; border-radius: 8px; ">
 
                             <div class="route-label"
                                 style="font-weight: bold; color: #64748b; font-size: 10pt; margin-bottom: 5px; text-transform: uppercase;">
-                                Route
+                                Tour Route
                             </div>
 
-                            <div class="route-path" style="font-size: 12pt; color: #313b5e;">
-                                <span class="route-point">Airport</span>
-                                <span class="route-arrow" style="color: #2563eb; margin: 0 5px;">→</span>
+                            @php
+                                $chunks = array_chunk($cityList, 4); // max 4 cities per row (safe for PDF)
+                            @endphp
 
-                                @foreach ($cityList as $index => $city)
-                                    <span class="route-point" style="font-weight: 500;">{{ $city }}</span>
-                                    @if ($index < count($cityList) - 1)
-                                        <span class="route-arrow" style="color: #2563eb; margin: 0 5px;">→</span>
-                                    @endif
+                            <div class="route-path" style="font-size: 12pt; color: #313b5e; text-align:center;">
+
+                                {{-- Start --}}
+                                <div style="">
+                                    <span class="route-point" style="font-weight: bold;">Airport</span>
+                                    {{-- <span class="route-arrow">→</span> --}}
+                                </div>
+
+                                {{-- Cities in rows --}}
+                                @foreach ($chunks as $chunkIndex => $chunk)
+                                    <div style="">
+                                        @foreach ($chunk as $index => $city)
+                                            <span class="route-point">{{ $city }}</span>
+
+                                            @if (!($chunkIndex === count($chunks) - 1 && $index === count($chunk) - 1))
+                                                <span class="route-arrow">→</span>
+                                            @endif
+                                        @endforeach
+                                    </div>
                                 @endforeach
 
-                                @if (!empty($cityList))
-                                    <span class="route-arrow" style="color: #2563eb; margin: 0 5px;">→</span>
-                                @endif
+                                {{-- End --}}
+                                <div>
+                                    {{-- <span class="route-arrow">→</span> --}}
+                                    <span class="route-point" style="font-weight: bold;">Airport</span>
+                                </div>
 
-                                <span class="route-point">Airport</span>
                             </div>
 
                         </div>
@@ -747,7 +761,8 @@
                     $imageUrl = "data:$mimeType;base64,$imageData";
                 @endphp
 
-                <img src="{{ $imageUrl }}" alt="{{ $package->place ?? 'Tour Destination' }}" class="hero-image">
+                <img src="{{ $imageUrl }}" alt="{{ $package->place ?? 'Tour Destination' }}" class="hero-image"
+                    style="margin-top: -30px !imporatnt;">
 
 
                 @if (!empty($package->description))
@@ -860,14 +875,14 @@
                         <table class="layout-table">
                             <tr>
                                 <td class="day-number-cell">
-                             {{ $loop->iteration }}
+                                    {{ $loop->iteration }}
                                 </td>
                                 <td style="padding-left: 15px;">
                                     <div style="font-size: 10pt; color: #555; text-transform: uppercase;">
                                         Day {{ $itinerary->day ?? $index + 1 }}
                                     </div>
                                     <h3 style="font-size: 16pt; color: #313b5e; margin: 0;">
-                                        {{ $itinerary->title ?? 'Day Activity' }}
+                                        {{ $itinerary->place_name ?? 'Day Activity' }}
                                     </h3>
                                 </td>
                             </tr>
@@ -896,7 +911,7 @@
 
                         <div class="program-section">
                             <h4 style="margin-bottom: 10px; color: #4a5568;">Day {{ $itinerary->day ?? $index + 1 }}
-                                Program</h4>
+                                Program - {{ $itinerary->place_name ?? 'Day Activity' }}</h4>
                             <div class="program-box" style="padding: 10px; border-radius: 4px;">
                                 <table style="width: 100%; border-collapse: collapse;">
                                     @foreach (collect($itinerary->program_points)->take(4) as $point)
@@ -1188,10 +1203,9 @@ $mapData = '';
 
 
                 @if ($packageInclusions->isNotEmpty())
-         <div style="page-break-before: always;"></div>
+                    <div style="page-break-before: always;"></div>
                     <div class="info-list-section ">
                         @foreach ($packageInclusions as $inclusion)
-                   
                             @php
                                 // Decode points safely
                                 $points = $inclusion->points;

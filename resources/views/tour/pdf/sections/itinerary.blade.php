@@ -134,19 +134,18 @@
             font-size: 10pt;
         }
 
-        .route-path {
-            display: inline-block;
-            white-space: nowrap;
-            /* Keep the route on a single line if possible */
-        }
-
-        .route-point {
-            display: inline-block;
-            margin: 0 5px;
-            padding: 2px 8px;
-            font-size: 9pt;
-            vertical-align: middle;
-        }
+.route-path {
+    display: block;
+    white-space: normal;
+    word-wrap: break-word;
+    line-height: 1.6;
+}
+      .route-point {
+    display: inline-block;
+    margin: 4px 6px;
+    padding: 3px 10px;
+    font-size: 9pt;
+}
 
         .route-point img {
             vertical-align: text-bottom;
@@ -156,7 +155,7 @@
             display: inline-block;
             color: #313b5e;
             font-weight: bold;
-            margin: 0 3px;
+           margin: 0 4px;
             vertical-align: middle;
         }
 
@@ -678,7 +677,7 @@
                                         Day {{ $itinerary->day ?? $index + 1 }}
                                     </div>
                                     <h3 style="font-size: 16pt; color: #313b5e; margin: 0;">
-                                        {{ $itinerary->title ?? 'Day Activity' }}
+                                        {{ $itinerary->place_name ?? 'Day Activity' }}
                                     </h3>
                                 </td>
                             </tr>
@@ -706,7 +705,7 @@
 
                         <div class="program-section">
                             <h4 style="margin-bottom: 10px; color: #4a5568;">Day {{ $itinerary->day ?? $index + 1 }}
-                                Program</h4>
+                                Program - {{ $itinerary->place_name ?? 'Day Activity' }}</h4>
                             <div class="program-box" style="padding: 10px; border-radius: 4px;">
                                 <table style="width: 100%; border-collapse: collapse;">
                                     @foreach (collect($itinerary->program_points)->take(4) as $point)
